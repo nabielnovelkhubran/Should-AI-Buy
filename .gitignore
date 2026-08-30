@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+.vercel/
+
+# Production
+dist/
+build/
+
+# Environment variables / secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Turbo / monorepo tooling
+.turbo/
+
+# Temporary files
+tmp/
+temp/
+
+# Generated files
+generated/
+
+# Local database / data
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets / credentials
+*.pem
+*.key
+*.crt
+
+# Misc
+*.swp
+*.swo
