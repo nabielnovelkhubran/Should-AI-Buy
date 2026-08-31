@@ -108,7 +108,7 @@ Conventional retail trading and existing AI financial tools suffer from systemic
 | **Multi-Currency Display** | Implemented | Currency switcher supporting USD, EUR, GBP, JPY, IDR, AUD, CAD, CHF, CNY, SGD. | Live foreign exchange rate feed integration. |
 | **Discovery Agent** | Implemented | Evaluates baseline opportunity score from momentum, volume acceleration, RVOL, and liquidity. | Autonomous background market scanner integration. |
 | **Quant Agent** | Implemented | Deterministic calculation of RSI-14, RVOL, realized volatility, spread, and returns. | Multi-factor quantitative scoring and statistical arbitrage models. |
-| **Intelligence Agent** | Implemented | Analyzes public news catalysts and sentiment with explicit failure handling. | Live RSS connectors, SEC EDGAR filing parser, and social sentiment ingestion. |
+| **Intelligence Agent** | Implemented | Analyzes live Alpaca news and social intelligence signals with deterministic demo fallback, spam filtering, and explicit failure handling. | Live RSS connectors, SEC EDGAR filing parser, and live streaming social feeds. |
 | **Risk Agent** | Implemented | Computes composite risk score, holder concentration %, and liquidity pool depth. | Deep on-chain contract audits and token unlock schedules. |
 | **Red Team Agent** | Implemented | Formulates refutation attacks, challenges assumptions, and flags vulnerabilities. | Multi-round adversarial debate and historical counterfactual simulation. |
 | **Decision Agent** | Implemented | Synthesizes council findings, links strongest support / counterargument, and sets consensus. | Dynamic confidence weighting based on historical agent accuracy. |
@@ -119,8 +119,12 @@ Conventional retail trading and existing AI financial tools suffer from systemic
 | **Monitoring / Re-evaluation** | Partially Implemented | `runMonitoringAgent` evaluates active positions against thesis conditions on demand. | Continuous background daemon with automated webhook alerts (Phase 6). |
 | **WATCH Command** | Partially Implemented | Command is parsed; returns asset analysis with watch criteria. | Persistent watchlist table and automatic alerts on threshold triggers (Phase 5). |
 | **WHY Command** | Partially Implemented | Command is parsed; explains rejection rationale and counterarguments. | Dedicated interactive deep-dive modal detailing agent disagreements. |
-| **Social Intelligence** | Planned | Architectural extension point identified; not implemented. | Twitter/X, Reddit, and Farcaster sentiment stream ingestion (Phase 4). |
-| **Opportunity Scanner** | Planned | Architectural extension point identified; not implemented. | Autonomous market screener detecting volume/momentum anomalies (Phase 5). |
+| **Social Intelligence** | Implemented | Provider-agnostic `SocialEvent` model, deterministic spam/quality filter (duplicates, scam patterns, repeated characters, link density), sentiment signal extraction, and demo provider with explicit MOCK provenance. | Live X API connector, production ML bot detection, and streaming social event feeds. |
+| **Opportunity Scanner & Discovery Dashboard** | Implemented (Phase 5A, 5B, 5C) | Bounded universe scanner (`scanOpportunities`), deterministic ranking, `CandidateQueue` validation/deduplication, sequential `CouncilDispatcher`, and operator `DiscoveryDashboard` with in-memory watchlist. | Persistent database queue/watchlist storage, continuous daemon/cron scheduler, and automated paper trade execution. |
+| **Paper Trading Execution Layer** | Implemented (Phase 6A) | Pure paper order intent generation, strict Risk Gate enforcement, Alpaca Paper Trading adapter (`paper-api.alpaca.markets/v2`), fail-closed live endpoint protection, deterministic position sizing reuse, and idempotency protection. | Live real-money trading, persistent portfolio database, automated stop-loss daemon, leverage, and multi-position portfolio optimization. |
+| **Paper Portfolio & Position Lifecycle** | Implemented (Phase 6B) | Real-time broker reconciliation, paper-only fail-closed safety, deterministic P&L, gross/net & crypto/equity exposure calculation, single-asset concentration detection, and proposed order risk assessment. | Live portfolio management, automated stop-loss daemon, leverage escalation, and autonomous position closing. |
+| **Autonomous Position Monitoring & Invalidation** | Implemented (Phase 6C) | Continuous thesis health tracking, deterministic invalidation rules (drawdown, momentum, liquidity, risk), broker-authoritative exit proposals, and idempotent paper-only protective exits. | Continuous cron daemon infrastructure, automated multi-broker exits, and dynamic trailing stop algorithms. |
+| **Scheduled Automation & Orchestration** | Implemented (Phase 6D) | Deployment-agnostic `AutomationScheduler` and `AutomationCoordinator`, concurrency locking against overlapping runs, failure isolation, deterministic job execution, and operator UI with live audit trail. | Persistent cloud worker daemons, external webhook alerts, and multi-broker failover. |
 | **Streaming Deliberation (SSE)** | Planned | Events model implemented; investigation returned synchronously. | Real-time Server-Sent Events for animated stage transitions. |
 
 ---
@@ -183,44 +187,112 @@ The Risk Gate (`src/lib/risk-gate/index.ts`) is a pure code boundary evaluated b
 
 ---
 
-## 11. Paper Trading & Thesis Model
+## 11. Paper Trading Execution, Portfolio & Position Monitoring (Completed Phase 6A, 6B & 6C)
 
-- **Order Submission:** When Council verdict is `BUY` and Risk Gate evaluates to `PASSED`, a paper order is dispatched to Alpaca via `alpacaService.submitPaperOrder`.
-- **Persistent Trade Thesis:** An approved trade creates a `TradeThesis` record containing:
-  - Entry price and timestamp
-  - Bull case rationale and supporting evidence IDs
-  - Key risk factors
-  - Explicit **invalidation conditions** (e.g. Momentum drops below 45, Liquidity drops below $1M, Stop-loss drawdown reaches -5.0%)
-- **Re-Evaluation:** `runMonitoringAgent` evaluates active positions against invalidation conditions, recommending `SELL` when original conditions break.
-
----
-
-## 12. Future Opportunity Discovery (Planned Phase 5)
-
-Transitioning from on-demand user commands toward an autonomous discovery scanner:
 ```text
-Market Data Stream ──> Opportunity Scanner ──> Volume/Momentum Anomaly ──> Candidate Queue ──> Council Investigation ──> Risk Gate ──> Trade / Watchlist
+Discovery ──> Deliberation ──> Risk Gate (PASS) ──> Paper Entry ──> Broker Position ──> Position Monitor ──> Thesis Health ──> Invalidation Detection ──> Protective Proposal ──> Paper Exit
 ```
 
+### Implemented (Phase 6A, 6B & 6C)
+- **Paper-Only Safety Boundary:** Enforces dedicated connection to Alpaca Paper Trading (`https://paper-api.alpaca.markets/v2`). Live trading endpoints are rejected with immediate fail-closed exceptions.
+- **Strict Risk Gate Enforcement:** Execution requires verified server-side `riskGateApproved === true` and executable recommendation (`BUY` or `SELL`). No bypass flags (`force`, `bypassRiskGate`) exist.
+- **Position Sizing Verification:** Reuses deterministic mathematical sizing formulas (`calculatePositionSize`) bounded by 25% portfolio cash exposure and stop-loss risk.
+- **Idempotency Protection:** Execution keyed by `EXEC-{investigationId}-{symbol}-{side}` and `MONITOR-EXIT-{symbol}-{category}-{bucket}` preventing redundant broker calls.
+- **Broker-Authoritative Reconciliation (6B):** Position states reflect ONLY broker-confirmed fills (`FILLED`, `PARTIALLY_FILLED`). Orders in `SUBMITTED`, `CANCELED`, `REJECTED`, or `FAILED` states do not create open holdings.
+- **Deterministic P&L & Exposure (6B):** Real-time calculations for `marketValue`, `costBasis`, `unrealizedPnl`, `unrealizedPnlPercent`, `grossExposureUsd`, `netExposureUsd`, `cryptoExposurePct`, `equityExposurePct`, and `allocationPct`.
+- **Portfolio Risk & Concentration Engine (6B):** Automatic detection of single-asset concentration ($> 25\%$ equity) and crypto exposure limits ($> 50\%$).
+- **Deterministic Thesis Health Engine (6C):** Evaluates ongoing position health (`HEALTHY`, `DEGRADED`, `INVALIDATED`, `THESIS_UNAVAILABLE`) with 0-100 deterministic scoring based on live price action, momentum, liquidity, and risk thresholds.
+- **Deterministic Invalidation Rules (6C):** Explicit triggers for Price Drawdown ($\le -5.0\%$), Momentum Reversal ($< 40$), Liquidity Collapse ($< \$200\text{k}$), Risk Surge ($> 75$), Volatility Surge ($> 55\%$), Data Unavailability (fail-closed), and Broker State Mismatches.
+- **Protective Exit Action Proposals (6C):** Separates proposal generation (`ProtectiveActionProposal`) from execution. Derives exit side (`sell` for long, `buy` for short) and quantity strictly from broker-confirmed positions.
+- **Paper Exit Order Execution (6C):** Authorized paper exits submit orders through `PaperTradingService` with complete idempotency and audit trail tracking.
+
+### Deferred to Future Phases
+- Live real-money trading execution.
+- Persistent SQL portfolio database.
+- Automated background cron daemon.
+- Margin/leverage management and multi-asset portfolio optimization.
+
 ---
 
-## 13. Future Social Intelligence (Planned Phase 4)
+## 12. Autonomous Opportunity Discovery, Queue & Operator Dashboard (Completed Phase 5A, 5B & 5C)
+
+End-to-end autonomous discovery, deliberation, and observability pipeline:
+```text
+Phase 5A: Opportunity Scanner ──> Ranked Candidates (Top N) ──> Phase 5B: Candidate Queue ──> Sequential Council Dispatcher ──> 7-Stage Council ──> Phase 5C: Discovery Dashboard & Watchlist
+```
+
+### Implemented (Phase 5A, 5B & 5C)
+- **Bounded Market Universe (5A):** Explicit deterministic universe (`DEFAULT_SCAN_UNIVERSE = ['BTC', 'ETH', 'SOL', 'AAPL', 'NVDA', 'MSFT']`) with asset class classification.
+- **Candidate Discovery & Signals (5A):** Computes quantitative signals (`momentum`, `rsi`, `rvol`, `volumeAcceleration`, `realizedVolatility`, `liquidityUsd`, `opportunityScore`, `riskScore`) reusing existing calculation engine without duplication.
+- **Deterministic Candidate Queue (5B):** Validates all candidate fields, rejects invalid objects explicitly, enforces deduplication against active queue items (`QUEUED`, `DISPATCHING`, `INVESTIGATING`), and orders deterministically by `opportunityScore` DESC, `rank` ASC, and `symbol` ASC.
+- **Sequential Council Dispatcher (5B):** Consumes next eligible candidate, attaches full scanner provenance (`source: 'autonomous-scanner'`, `candidateRank`, `opportunityScore`, `scanTimestamp`), passes immutable snapshot, and invokes the 7-stage Council.
+- **Autonomous Discovery Dashboard (5C):** Real-time visibility into scanner metrics (universe size, scanned count, success/failure counts, candidates found, last scan timestamp), ranked candidate cards, signals grid, deterministic selection rationale ("Why was this asset nominated?"), queue state, and deep investigation inspection.
+- **In-Memory Watchlist (5C):** Deterministic watchlist foundation (`add`, `remove`, `contains`, `list`) strictly decoupled from trade recommendations or broker orders.
+- **Strict Failure Isolation:** Individual asset or investigation failures update item to `FAILED` and record error details without halting subsequent candidates.
+- **Safety Boundary:** Discovery and Watchlist operations do NOT execute broker orders or alter live portfolio state (`skipOrderExecution: true`).
+
+---
+
+## 13. Scheduled Automation & Orchestration (Completed Phase 6D)
+
+The autonomous automation layer coordinates the execution of Discovery (Phases 5A–5C) and Thesis Monitoring (Phases 6B–6C) cycles on deterministic schedules without modifying underlying business rules:
+
+```text
+                  AutomationScheduler (State: STOPPED | RUNNING | IDLE)
+                                        │
+                                        ▼
+                  AutomationCoordinator (Concurrency Lock: activeRuns)
+                         ┌──────────────┴──────────────┐
+                         ▼                             ▼
+                 Discovery Cycle                Monitoring Cycle
+                 (Scan -> Queue -> Dispatch)    (Portfolio -> Thesis -> Exit)
+                         │                             │
+                         └──────────────┬──────────────┘
+                                        ▼
+                               Audit Trail & Metrics
+```
+
+### Implemented (Phase 6D)
+- **Separation of Scheduling and Execution:** `AutomationScheduler` dictates *when* jobs execute; `AutomationCoordinator` orchestrates *what* executes by reusing existing domain services without duplicating logic.
+- **Concurrency Locking & Overlap Prevention:** Prevents concurrent runs of the same job type. Overlapping triggers return explicit `SKIPPED` status with `skippedReason: 'JOB_ALREADY_RUNNING'`.
+- **Component Failure Isolation:** A failure in a discovery cycle does not stop monitoring cycles, and a failure in monitoring does not stop discovery. The scheduler remains operational.
+- **Idempotency & Lifecycle Controls:** Safe, idempotent `start()`, `stop()`, and `runNow(jobType)` operations.
+- **Audit Trail & Observability:** Real-time event logging capturing timestamps, triggers (`SCHEDULED` vs `MANUAL`), run IDs, cycle durations, and outcomes.
+- **Operator UI Dashboard:** Live `AutomationControl` component featuring real-time scheduler state badges, cycle triggers, and recent audit trail events.
+
+---
+
+## 14. Social Intelligence Architecture (Completed Phase 4C)
 
 Structured social sentiment ingestion pipeline:
 ```text
 Social Providers (X, Reddit, Farcaster) ──> SocialEvent Stream ──> Spam/Bot Filter ──> Extracted Sentiment ──> Evidence Object ──> Intelligence Agent
 ```
 
+### Implemented (Phase 4C Foundation)
+- **Domain Model:** Provider-agnostic `SocialEvent`, `SocialAuthor`, `SocialEngagement`, `SocialFilterStats`, and `SocialSignal`.
+- **Adapter Interface:** `SocialSourceAdapter` contract defining deterministic fetching and provenance tagging.
+- **Deterministic Quality/Spam Filtering:** Rejection of duplicates, promo patterns, repeated characters, excessive hashtag/link density, and engagement manipulation.
+- **Deterministic Sentiment Signal Extraction:** Directional classification, narrative clustering, and confidence scoring without LLM hallucinations.
+- **Evidence Conversion:** Normalization to `Evidence` domain objects with explicit `verificationStatus: 'MOCK'` and `adapterSource: 'social-demo-v1'`.
+
 ---
 
-## 14. Phased Roadmap
+## 15. Phased Roadmap
 
 - **Phase 1 — Foundation (Completed `v0.1.0`)**: Alpaca API integration, crypto/stock data adapter, multi-timeframe charts, and multi-currency conversion.
 - **Phase 2 — Council Runtime & Visible Deliberation (Completed `v0.2.0`)**: 7-stage council orchestrator, single immutable snapshot invariant, Red Team adversarial attack, deterministic Risk Gate, and DeliberationFeed UI.
-- **Phase 3 — Evidence Architecture & Verifiable Reasoning (Next)**: Claim-to-evidence citation graph, multi-source ingestion, contradiction matrix, and evidence verification badges.
-- **Phase 4 — Social Intelligence**: SocialEvent ingestion, bot detection, sentiment signal extraction, and Intelligence Agent expansion.
-- **Phase 5 — Opportunity Discovery & Watchlist**: Autonomous market scanner, opportunity ranking engine, and persistent watchlist table.
-- **Phase 6 — Autonomous Monitoring**: Continuous background monitoring daemon, automated thesis invalidation triggers, and exit safeguards.
-- **Phase 7 — Command Center / Workspace UX**: Conversational multi-turn workspace, contextual analysis panels, and draggable layouts.
+- **Phase 3 — Evidence Architecture & Verifiable Reasoning (Completed `v0.3.0`)**: Claim domain model, claim extraction per agent, contradiction matrix, and verification badges.
+- **Phase 4A — Alpaca News Intelligence Adapter (Completed)**: Real-time Alpaca Market Data News API connector with safe HTML normalization and deterministic failure handling.
+- **Phase 4B — Hybrid News Router (Completed)**: Hybrid news router dispatching live Alpaca news with deterministic, clearly labeled hackathon demo fallback.
+- **Phase 4C — Social Intelligence Foundation (Completed)**: Provider-agnostic social domain model, deterministic spam filter, sentiment signal extractor, demo provider, and Intelligence Agent integration.
+- **Phase 5A — Autonomous Opportunity Scanner (Completed)**: Bounded market universe scanner, deterministic candidate ranking, top-N limiting, and strict failure isolation.
+- **Phase 5B — Candidate Queue & Council Dispatcher (Completed)**: Deterministic in-memory queue, candidate validation, deduplication, sequential Council dispatching with scanner provenance, and non-bypassable Risk Gate.
+- **Phase 5C — Discovery Dashboard & Watchlist Foundation (Completed)**: Operator Discovery Dashboard, candidate cards with deterministic selection rationale, queue state observability, deep deliberation inspection, and in-memory watchlist.
+- **Phase 6A — Paper Trading Execution Layer (Completed)**: Pure paper order intent generation, strict Risk Gate enforcement, Alpaca Paper Trading adapter (`paper-api.alpaca.markets/v2`), fail-closed live endpoint protection, deterministic position sizing reuse, and idempotency protection.
+- **Phase 6B — Paper Portfolio & Position Lifecycle (Completed)**: Real-time broker reconciliation, paper-only fail-closed safety, deterministic P&L, gross/net & crypto/equity exposure calculation, single-asset concentration detection, and proposed order risk assessment.
+- **Phase 6C — Autonomous Position Monitoring & Protective Invalidation Daemon (Completed)**: Deterministic thesis health engine, invalidation rules (drawdown, momentum, liquidity, risk), broker-authoritative exit proposals, and idempotent paper-only protective exits.
+- **Phase 6D — Scheduled Background Daemon & Automation Scheduler (Completed)**: Autonomous automation coordinator, concurrency locking against overlapping runs, failure isolation, deterministic job execution, and operator UI with live audit trail.
+- **Phase 7 — Command Center / Workspace UX (Next)**: Conversational multi-turn workspace, contextual analysis panels, and draggable layouts.
 - **Phase 8 — Hackathon Hardening**: Reliability, error boundaries, rate-limiting resilience, and observability logging.
 - **Phase 9 — UI/UX 2.0 Polish**: Motion transitions, typography hierarchy, responsive design refinement, and theme polish.

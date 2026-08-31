@@ -60,6 +60,67 @@ export interface Claim {
   createdAt: string;
 }
 
+// ---------------------------------------------------------------------------
+// Phase 4C: Social Intelligence Domain Types
+// Provider-agnostic domain models for social media events, sentiment & filters.
+// ---------------------------------------------------------------------------
+
+export type SocialPlatform = 'X' | 'REDDIT' | 'FARCASTER' | 'TELEGRAM' | 'DISCORD' | 'GENERIC';
+
+export interface SocialAuthor {
+  username: string;
+  displayName?: string;
+  verified?: boolean;
+  followerCount?: number;
+  accountAgeDays?: number;
+}
+
+export interface SocialEngagement {
+  likes?: number;
+  reposts?: number;
+  replies?: number;
+  impressions?: number;
+}
+
+export interface SocialEvent {
+  id: string;
+  platform: SocialPlatform;
+  author: SocialAuthor;
+  text: string;
+  createdAt: string; // ISO 8601
+  symbols: string[];
+  engagement?: SocialEngagement;
+  sourceUrl?: string;
+  verificationStatus: VerificationStatus;
+  adapterSource: string;
+  sentiment?: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+  metadata?: Record<string, any>;
+}
+
+export interface SocialFilterStats {
+  totalReceived: number;
+  acceptedCount: number;
+  spamFilteredCount: number;
+  duplicateCount: number;
+  rejectionReasons: Record<string, number>;
+}
+
+export interface SocialSignal {
+  symbol: string;
+  totalEvents: number;
+  acceptedEvents: number;
+  bullishCount: number;
+  bearishCount: number;
+  neutralCount: number;
+  overallSentiment: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+  confidence: number;       // 0 - 100
+  signalStrength: number;   // 0 - 100
+  botSpamFilteredCount: number;
+  topNarratives: string[];
+  generatedAt: string;
+}
+
+
 
 export type CouncilStage =
   | 'DISCOVERY'
@@ -264,6 +325,12 @@ export interface Investigation {
   error?: string;
   /** Phase 3: All Claim objects produced during council deliberation */
   claims?: Claim[];
+  /** Phase 5B: Source of the investigation (e.g. 'user' or 'autonomous-scanner') */
+  source?: 'user' | 'autonomous-scanner' | string;
+  /** Phase 5B: Arbitrary provenance and runtime metadata */
+  metadata?: Record<string, any>;
+  /** Phase 6A: Traceable paper execution record */
+  execution?: PaperExecutionRecord;
 }
 
 export interface Position {
@@ -303,3 +370,533 @@ export interface AlpacaOrder {
   filledAvgPrice?: number;
   submittedAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 5A: Autonomous Opportunity Scanner & Candidate Discovery Types
+// ---------------------------------------------------------------------------
+
+export type AssetClass = 'CRYPTO' | 'EQUITY';
+
+export interface CandidateSignals {
+  momentum: number;
+  rsi: number;
+  rvol: number;
+  volumeAcceleration: number;
+  realizedVolatility: number;
+  liquidityUsd: number;
+  opportunityScore: number;
+  riskScore: number;
+}
+
+export interface OpportunityCandidate {
+  symbol: string;
+  assetClass: AssetClass;
+  score: number;       // Deterministic opportunityScore (0 - 100)
+  rank: number;        // 1-based rank within scan
+  snapshot: MarketSnapshot;
+  signals: CandidateSignals;
+  discoveredAt: string; // ISO 8601
+}
+
+export interface FailedScanTarget {
+  symbol: string;
+  error: string;
+  statusCode?: number;
+}
+
+export interface ScanOptions {
+  universe?: string[];
+  limit?: number;      // Maximum number of top candidates to return (default: 5)
+  minScore?: number;   // Optional minimum opportunity score threshold
+  fetchSnapshotFn?: (symbol: string) => Promise<MarketSnapshot>; // Dependency injection for test isolation
+}
+
+export interface ScanResult {
+  candidates: OpportunityCandidate[];
+  scannedCount: number;
+  successfulCount: number;
+  failedCount: number;
+  failedTargets: FailedScanTarget[];
+  timestamp: string;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5B: Candidate Queue & Council Dispatcher Domain Types
+// ---------------------------------------------------------------------------
+
+export type CandidateQueueStatus =
+  | 'QUEUED'
+  | 'DISPATCHING'
+  | 'INVESTIGATING'
+  | 'COMPLETED'
+  | 'REJECTED'
+  | 'FAILED';
+
+export interface CandidateQueueItem {
+  id: string;                    // Deterministic: QITEM-{symbol}-{rank}-{discoveredAt}
+  symbol: string;
+  candidate: OpportunityCandidate;
+  status: CandidateQueueStatus;
+  enqueuedAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  investigationId?: string;
+  error?: string;
+  priority: number;              // Opportunity score (0 - 100)
+}
+
+export interface CandidateQueueStats {
+  totalEnqueued: number;
+  queuedCount: number;
+  dispatchingCount: number;
+  investigatingCount: number;
+  completedCount: number;
+  rejectedCount: number;
+  failedCount: number;
+}
+
+export interface DispatchResult {
+  dispatched: boolean;
+  item?: CandidateQueueItem;
+  investigation?: Investigation;
+  error?: string;
+}
+
+export interface DispatchSummary {
+  totalDispatched: number;
+  completedCount: number;
+  failedCount: number;
+  results: DispatchResult[];
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5C: Watchlist & Discovery Dashboard Domain Types
+// ---------------------------------------------------------------------------
+
+export interface WatchlistItem {
+  symbol: string;
+  assetClass: AssetClass;
+  addedAt: string;               // ISO 8601 timestamp
+  notes?: string;
+  targetPrice?: number;
+  addedFromScan?: boolean;
+  lastOpportunityScore?: number;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6A: Paper Trading Execution Layer Domain Types
+// ---------------------------------------------------------------------------
+
+export type PaperOrderStatus =
+  | 'INTENT_CREATED'
+  | 'SUBMITTING'
+  | 'SUBMITTED'
+  | 'PARTIALLY_FILLED'
+  | 'FILLED'
+  | 'CANCELED'
+  | 'REJECTED'
+  | 'FAILED'
+  | 'BLOCKED';
+
+export interface PaperOrderIntent {
+  orderId: string;               // Deterministic: ORD-{symbol}-{investigationId}
+  investigationId: string;
+  symbol: string;
+  assetClass: AssetClass;
+  side: 'buy' | 'sell';
+  orderType: 'market' | 'limit';
+  quantity: number;
+  notional?: number;
+  timeInForce: 'day' | 'gtc' | 'ioc' | 'fok';
+  status: PaperOrderStatus;
+  riskGateStatus: 'PASS' | 'BLOCKED';
+  recommendation: DecisionState;
+  candidateRank?: number;
+  opportunityScore?: number;
+  createdAt: string;             // ISO 8601
+  submittedAt?: string;          // ISO 8601
+  brokerOrderId?: string;
+  adapterSource: string;
+  error?: string;
+}
+
+export interface PaperExecutionRecord {
+  mode: 'PAPER';
+  adapterSource: string;
+  orderId: string;
+  brokerOrderId?: string;
+  submittedAt: string;
+  status: PaperOrderStatus;
+  error?: string;
+}
+
+export interface PaperOrderRequest {
+  investigationId: string;
+  symbol: string;
+  assetClass: AssetClass;
+  side: 'buy' | 'sell';
+  qty: number;
+  price: number;
+  orderType?: 'market' | 'limit';
+  timeInForce?: 'day' | 'gtc' | 'ioc' | 'fok';
+  recommendation: DecisionState;
+  riskGatePassed: boolean;
+  opportunityScore?: number;
+  candidateRank?: number;
+}
+
+export interface PaperOrderResult {
+  orderId: string;
+  brokerOrderId?: string;
+  clientOrderId: string;
+  investigationId: string;
+  symbol: string;
+  assetClass: AssetClass;
+  side: 'buy' | 'sell';
+  qty: number;
+  orderType: 'market' | 'limit';
+  timeInForce: string;
+  status: PaperOrderStatus;
+  riskGateStatus: 'PASS' | 'BLOCKED';
+  recommendation: DecisionState;
+  candidateRank?: number;
+  opportunityScore?: number;
+  createdAt: string;
+  submittedAt?: string;
+  filledAvgPrice?: number;
+  adapterSource: string;
+  error?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6B: Paper Portfolio & Position Lifecycle Domain Types
+// ---------------------------------------------------------------------------
+
+export interface PaperAccountSnapshot {
+  id: string;
+  accountNumber: string;
+  status: string;
+  currency: string;
+  equity: number;
+  cash: number;
+  buyingPower: number;
+  portfolioValue: number;
+  isPaper: boolean;
+  retrievedAt: string;
+}
+
+export interface PaperPosition {
+  symbol: string;
+  assetClass: AssetClass;
+  quantity: number;
+  avgEntryPrice: number;
+  currentPrice: number;
+  marketValue: number;
+  costBasis: number;
+  unrealizedPnl: number;
+  unrealizedPnlPercent: number;
+  side: 'long' | 'short';
+  allocationPct: number;
+  retrievedAt: string;
+}
+
+export interface PaperOrderSnapshot {
+  orderId: string;
+  brokerOrderId?: string;
+  clientOrderId?: string;
+  investigationId?: string;
+  symbol: string;
+  assetClass: AssetClass;
+  side: 'buy' | 'sell';
+  qty: number;
+  filledQty: number;
+  remainingQty: number;
+  status: PaperOrderStatus;
+  orderType: string;
+  timeInForce: string;
+  filledAvgPrice?: number;
+  submittedAt: string;
+  updatedAt?: string;
+}
+
+export interface PortfolioExposure {
+  grossExposureUsd: number;
+  netExposureUsd: number;
+  grossExposurePct: number;
+  netExposurePct: number;
+  cryptoExposureUsd: number;
+  cryptoExposurePct: number;
+  equityExposureUsd: number;
+  equityExposurePct: number;
+  largestPositionSymbol?: string;
+  largestPositionAllocationPct: number;
+}
+
+export interface PortfolioRiskSummary {
+  totalExposureUsd: number;
+  availableBuyingPowerUsd: number;
+  openPositionCount: number;
+  openOrderCount: number;
+  pendingOrderExposureUsd: number;
+  concentrationWarnings: string[];
+  maxAllowedPositionPct: number;
+  isExposureSafe: boolean;
+}
+
+export interface PortfolioError {
+  source: 'account' | 'positions' | 'orders';
+  reason: string;
+}
+
+export interface PortfolioSnapshot {
+  account: PaperAccountSnapshot | null;
+  positions: PaperPosition[];
+  openOrders: PaperOrderSnapshot[];
+  exposure: PortfolioExposure;
+  risk: PortfolioRiskSummary;
+  errors?: PortfolioError[];
+  provider: string;
+  environment: 'PAPER';
+  retrievedAt: string;
+}
+
+export interface PortfolioLimits {
+  maxPositionAllocationPct: number;
+  maxGrossExposurePct: number;
+  maxCryptoExposurePct: number;
+  minAvailableCashPct: number;
+}
+
+export interface ProposedOrderAssessment {
+  allowed: boolean;
+  reason?: string;
+  currentExposureUsd: number;
+  projectedExposureUsd: number;
+  projectedAllocationPct: number;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6C: Position Monitoring & Protective Invalidation Domain Types
+// ---------------------------------------------------------------------------
+
+export type PositionMonitoringStatus =
+  | 'MONITORED'
+  | 'HEALTHY'
+  | 'DEGRADED'
+  | 'INVALIDATED'
+  | 'ACTION_PROPOSED'
+  | 'ACTION_BLOCKED'
+  | 'ACTION_SUBMITTED'
+  | 'ERROR';
+
+export type ThesisHealthState =
+  | 'HEALTHY'
+  | 'DEGRADED'
+  | 'INVALIDATED'
+  | 'THESIS_UNAVAILABLE'
+  | 'ERROR';
+
+export type InvalidationCategory =
+  | 'PRICE_DRAWDOWN'
+  | 'MOMENTUM_REVERSAL'
+  | 'LIQUIDITY_DETERIORATION'
+  | 'VOLATILITY_SURGE'
+  | 'RISK_GATE_VIOLATION'
+  | 'DATA_UNAVAILABLE'
+  | 'BROKER_STATE_MISMATCH'
+  | 'THESIS_EXPIRED';
+
+export interface InvalidationFinding {
+  category: InvalidationCategory;
+  metricKey: string;
+  currentValue: number | string;
+  thresholdValue: number | string;
+  message: string;
+  severity: 'CRITICAL' | 'WARNING';
+  detectedAt: string;
+}
+
+export interface InvalidationRule {
+  condition: string;
+  metricKey: string;
+  threshold: number | string;
+  operator: '<' | '<=' | '>' | '>=' | '==';
+}
+
+export interface ThesisProvenance {
+  investigationId?: string;
+  thesisId?: string;
+  originalVerdict?: DecisionState;
+  originalOpportunityScore?: number;
+  originalRiskScore?: number;
+  entryPrice: number;
+  entryTimestamp: string;
+  invalidationRules: InvalidationRule[];
+  status: 'FOUND' | 'UNAVAILABLE' | 'MISMATCH';
+}
+
+export interface ThesisHealth {
+  symbol: string;
+  status: ThesisHealthState;
+  score: number;
+  provenance: ThesisProvenance;
+  findings: InvalidationFinding[];
+  currentSnapshot?: MarketSnapshot;
+  pnlPercent: number;
+  evaluatedAt: string;
+  summary: string;
+}
+
+export interface ProtectiveActionProposal {
+  actionId: string;
+  positionId: string;
+  symbol: string;
+  assetClass: AssetClass;
+  proposedSide: 'buy' | 'sell';
+  quantity: number;
+  invalidationReason: InvalidationFinding;
+  thesisHealth: ThesisHealth;
+  portfolioRiskAssessment: {
+    allowed: boolean;
+    reason?: string;
+  };
+  status: 'PROPOSED' | 'BLOCKED' | 'EXECUTED' | 'FAILED';
+  cycleId: string;
+  idempotencyKey: string;
+  createdAt: string;
+  executionResult?: PaperOrderResult;
+  error?: string;
+}
+
+export interface MonitoredPositionRecord {
+  position: PaperPosition;
+  status: PositionMonitoringStatus;
+  health: ThesisHealth;
+  proposal?: ProtectiveActionProposal;
+  lastEvaluatedAt: string;
+  error?: string;
+}
+
+export interface AuditTrailEvent {
+  timestamp: string;
+  stage: string;
+  symbol?: string;
+  message: string;
+  details?: Record<string, any>;
+}
+
+export interface MonitoringCycleResult {
+  cycleId: string;
+  timestamp: string;
+  totalMonitored: number;
+  healthyCount: number;
+  degradedCount: number;
+  invalidatedCount: number;
+  errorCount: number;
+  monitoredPositions: MonitoredPositionRecord[];
+  proposedActions: ProtectiveActionProposal[];
+  executedActions: ProtectiveActionProposal[];
+  blockedActions: ProtectiveActionProposal[];
+  auditTrail: AuditTrailEvent[];
+  environment: 'PAPER';
+}
+
+export interface MonitoringOptions {
+  executeExits?: boolean;
+  invalidationPriceDrawdownPct?: number;
+  invalidationMomentumThreshold?: number;
+  invalidationLiquidityThresholdUsd?: number;
+  invalidationRiskScoreThreshold?: number;
+  fetchSnapshotFn?: (symbol: string) => Promise<MarketSnapshot>;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6D: Scheduled Automation & Orchestration Domain Types
+// ---------------------------------------------------------------------------
+
+export type AutomationJobType = 'DISCOVERY' | 'MONITORING';
+
+export type AutomationJobStatus =
+  | 'IDLE'
+  | 'QUEUED'
+  | 'RUNNING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'CANCELED'
+  | 'SKIPPED';
+
+export type AutomationSchedulerStatus = 'STOPPED' | 'IDLE' | 'RUNNING' | 'ERROR';
+
+export interface DiscoveryCycleConfig {
+  enabled: boolean;
+  intervalMs: number;
+  scanLimit?: number;
+  autoDispatch?: boolean;
+  executeTrades?: boolean;
+}
+
+export interface MonitoringCycleConfig {
+  enabled: boolean;
+  intervalMs: number;
+  executeExits?: boolean;
+}
+
+export interface AutomationConfig {
+  enabled: boolean;
+  discovery: DiscoveryCycleConfig;
+  monitoring: MonitoringCycleConfig;
+}
+
+export interface DiscoveryCycleResult {
+  scanResult: ScanResult;
+  queuedCount: number;
+  dispatchSummary?: DispatchSummary;
+  durationMs: number;
+  completedAt: string;
+}
+
+export interface AutomationRun {
+  runId: string;
+  jobType: AutomationJobType;
+  trigger: 'SCHEDULED' | 'MANUAL';
+  status: AutomationJobStatus;
+  startedAt: string;
+  completedAt?: string;
+  durationMs?: number;
+  discoveryResult?: DiscoveryCycleResult;
+  monitoringResult?: MonitoringCycleResult;
+  error?: string;
+  skippedReason?: string;
+}
+
+export interface AutomationAuditEvent {
+  timestamp: string;
+  event: string;
+  jobType?: AutomationJobType;
+  runId?: string;
+  message: string;
+  details?: Record<string, any>;
+}
+
+export interface AutomationMetrics {
+  totalRuns: number;
+  successfulRuns: number;
+  failedRuns: number;
+  skippedRuns: number;
+  lastDiscoveryDurationMs?: number;
+  lastMonitoringDurationMs?: number;
+}
+
+export interface AutomationStatus {
+  schedulerStatus: AutomationSchedulerStatus;
+  config: AutomationConfig;
+  activeJobs: Record<AutomationJobType, boolean>;
+  lastRun: Partial<Record<AutomationJobType, AutomationRun>>;
+  nextRun: Partial<Record<AutomationJobType, string>>;
+  recentRuns: AutomationRun[];
+  metrics: AutomationMetrics;
+  auditTrail: AutomationAuditEvent[];
+  environment: 'PAPER';
+}
+
+

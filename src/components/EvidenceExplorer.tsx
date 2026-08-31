@@ -33,8 +33,8 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
     }
   };
 
-  // Phase 3: Verification status badge
-  const getVerificationBadge = (status?: VerificationStatus) => {
+  // Phase 3 & 4: Verification status badge
+  const getVerificationBadge = (status?: VerificationStatus, adapterSource?: string) => {
     switch (status) {
       case 'VERIFIED':
         return (
@@ -45,7 +45,7 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
       case 'MOCK':
         return (
           <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-            <FlaskConical className="w-2.5 h-2.5" /> DEMO DATA
+            <FlaskConical className="w-2.5 h-2.5" /> {adapterSource === 'hackathon-demo-fallback' ? 'HACKATHON DEMO' : 'DEMO DATA'}
           </span>
         );
       case 'FAILED':
@@ -139,8 +139,8 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  {/* Phase 3: Verification badge before reliability */}
-                  {getVerificationBadge(item.verificationStatus)}
+                  {/* Phase 3 & 4: Verification badge before reliability */}
+                  {getVerificationBadge(item.verificationStatus, item.adapterSource)}
                   {getReliabilityBadge(item.reliability)}
                   {item.isContradictory && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center gap-1">

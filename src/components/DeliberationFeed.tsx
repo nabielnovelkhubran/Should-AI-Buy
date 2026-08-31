@@ -92,6 +92,35 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
   const { agentRuns, decision, timeline, stages } = investigation;
   const [selectedStage, setSelectedStage] = useState<CouncilStage | null>(null);
   const [showFullQuestions, setShowFullQuestions] = useState<boolean>(false);
+  const [isExecutingPaperOrder, setIsExecutingPaperOrder] = useState(false);
+  const [executionState, setExecutionState] = useState<any>(investigation.execution);
+
+  const handleExecutePaperOrder = async () => {
+    setIsExecutingPaperOrder(true);
+    try {
+      const res = await fetch('/api/trading/paper/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ investigationId: investigation.id })
+      });
+      const data = await res.json();
+      if (data.order) {
+        setExecutionState({
+          mode: 'PAPER',
+          adapterSource: data.order.adapterSource,
+          orderId: data.order.orderId,
+          brokerOrderId: data.order.brokerOrderId,
+          submittedAt: data.order.submittedAt,
+          status: data.order.status,
+          error: data.order.error
+        });
+      }
+    } catch (err) {
+      console.error('Failed to submit paper order', err);
+    } finally {
+      setIsExecutingPaperOrder(false);
+    }
+  };
 
   const getStageStatus = (stage: CouncilStage): CouncilStageStatus => {
     if (stages && stages[stage]) {
@@ -353,9 +382,34 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
                   Council Confidence: {decision.confidence}%
                 </span>
 
-                {decision.tradeExecuted && (
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 font-medium">
-                    <CheckCircle className="w-3 h-3" /> Alpaca Paper Order Filled
+                {executionState ? (
+                  <span className={`text-xs px-2.5 py-1 rounded-full border flex items-center gap-1 font-medium ${
+                    executionState.status === 'SUBMITTED' || executionState.status === 'FILLED'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                      : executionState.status === 'BLOCKED'
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                      : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                  }`}>
+                    {executionState.status === 'SUBMITTED' || executionState.status === 'FILLED' ? (
+                      <CheckCircle className="w-3 h-3" />
+                    ) : executionState.status === 'BLOCKED' ? (
+                      <Lock className="w-3 h-3" />
+                    ) : (
+                      <AlertTriangle className="w-3 h-3" />
+                    )}
+                    Paper Order: {executionState.status}
+                  </span>
+                ) : decision.conclusion === 'BUY' && decision.riskGateApproved ? (
+                  <button
+                    onClick={handleExecutePaperOrder}
+                    disabled={isExecutingPaperOrder}
+                    className="text-xs px-3 py-1 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition flex items-center gap-1 shadow-md shadow-indigo-600/20 active:scale-95"
+                  >
+                    {isExecutingPaperOrder ? 'Submitting Order...' : 'Authorize Paper Order →'}
+                  </button>
+                ) : (
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700 font-medium">
+                    Paper Execution: NOT SUBMITTED
                   </span>
                 )}
               </div>

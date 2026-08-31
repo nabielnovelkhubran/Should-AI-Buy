@@ -7,12 +7,14 @@ import { RedTeamSpotlight } from '@/components/RedTeamSpotlight';
 import { EvidenceExplorer } from '@/components/EvidenceExplorer';
 import { MarketChart } from '@/components/MarketChart';
 import { PortfolioView } from '@/components/PortfolioView';
+import { DiscoveryDashboard } from '@/components/DiscoveryDashboard';
+import { AutomationControl } from '@/components/AutomationControl';
 import { Investigation, MarketSnapshot, AlpacaAccount, Position, AlpacaOrder } from '@/lib/types';
 import { AlertCircle } from 'lucide-react';
 import { CurrencyProvider } from '@/components/CurrencyProvider';
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<'council' | 'portfolio' | 'evidence' | 'thesis'>('council');
+  const [activeTab, setActiveTab] = useState<'council' | 'discovery' | 'portfolio' | 'evidence' | 'thesis' | 'automation'>('council');
   const [selectedEvidenceCategory, setSelectedEvidenceCategory] = useState<string>('ALL');
   const [investigation, setInvestigation] = useState<Investigation | null>(null);
   const [snapshot, setSnapshot] = useState<MarketSnapshot | null>(null);
@@ -76,6 +78,14 @@ export default function DashboardPage() {
     setActiveTab('evidence');
   };
 
+  const handleSelectDiscoveredInvestigation = (inv: Investigation) => {
+    setInvestigation(inv);
+    if (inv.snapshot) {
+      setSnapshot(inv.snapshot);
+    }
+    setActiveTab('council');
+  };
+
   const handleReevaluate = async (symbol: string, executeSell: boolean) => {
     try {
       const res = await fetch('/api/re-evaluate', {
@@ -112,6 +122,10 @@ export default function DashboardPage() {
               <span>{errorMessage}</span>
             </div>
           </div>
+        )}
+
+        {activeTab === 'discovery' && (
+          <DiscoveryDashboard onSelectInvestigation={handleSelectDiscoveredInvestigation} />
         )}
 
         {activeTab === 'council' && investigation && investigation.status !== 'FAILED' && (
@@ -154,6 +168,10 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'automation' && (
+          <AutomationControl />
         )}
 
         {activeTab === 'evidence' && investigation && (

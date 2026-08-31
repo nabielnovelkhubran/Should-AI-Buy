@@ -6,8 +6,8 @@ import { useCurrency } from './CurrencyProvider';
 
 interface HeaderProps {
   account?: AlpacaAccount | null;
-  activeTab: 'council' | 'portfolio' | 'evidence' | 'thesis';
-  setActiveTab: (tab: 'council' | 'portfolio' | 'evidence' | 'thesis') => void;
+  activeTab: 'council' | 'discovery' | 'portfolio' | 'evidence' | 'thesis' | 'automation';
+  setActiveTab: (tab: 'council' | 'discovery' | 'portfolio' | 'evidence' | 'thesis' | 'automation') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ account, activeTab, setActiveTab }) => {
@@ -48,6 +48,26 @@ export const Header: React.FC<HeaderProps> = ({ account, activeTab, setActiveTab
             }`}
           >
             Council Deliberation
+          </button>
+          <button
+            onClick={() => setActiveTab('discovery')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+              activeTab === 'discovery'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Autonomous Discovery
+          </button>
+          <button
+            onClick={() => setActiveTab('automation')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+              activeTab === 'automation'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Automation Daemon
           </button>
           <button
             onClick={() => setActiveTab('evidence')}

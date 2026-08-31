@@ -11,9 +11,11 @@ import {
 } from '../types';
 import { fetchMarketSnapshot, getMarketEvidence } from '../market-data';
 import { getNewsEvidence } from '../news';
+import { getSocialEvidence } from '../social';
 import { calculatePositionSize } from '../quant';
 import { evaluateRiskGate } from '../risk-gate';
 import { alpacaService } from '../alpaca';
+import { paperTradingService } from '../trading';
 import { storage } from '../storage';
 import {
   runDiscoveryAgent,
@@ -34,12 +36,22 @@ import {
 } from '../claims';
 
 
+export interface CouncilExecutionOptions {
+  investigationId?: string;
+  source?: 'user' | 'autonomous-scanner' | string;
+  metadata?: Record<string, any>;
+  initialSnapshot?: MarketSnapshot;
+  skipOrderExecution?: boolean;
+  executionMode?: 'analysis-only' | 'paper-execution';
+}
+
 export async function orchestrateCouncilInvestigation(
   command: string,
   assetSymbol: string,
-  onTimelineUpdate?: (event: any) => void
+  onTimelineUpdate?: (event: any) => void,
+  options?: CouncilExecutionOptions
 ): Promise<Investigation> {
-  const id = `INV-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  const id = options?.investigationId || `INV-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
   const cleanAsset = assetSymbol.toUpperCase().replace('$', '').trim();
   const now = new Date().toISOString();
 
@@ -65,7 +77,9 @@ export async function orchestrateCouncilInvestigation(
     timeline: [],
     events: [],
     stages: initialStages,
-    claims: []   // Phase 3: populated as each agent runs
+    claims: [],   // Phase 3: populated as each agent runs
+    source: options?.source || 'user',
+    metadata: options?.metadata || {}
   };
 
 
@@ -127,16 +141,21 @@ export async function orchestrateCouncilInvestigation(
     emitCouncilEvent('DISCOVERY', 'RUNNING', `Connecting to Alpaca Market Data API for $${cleanAsset}...`);
 
     let snapshot: MarketSnapshot;
-    try {
-      snapshot = await fetchMarketSnapshot(cleanAsset);
-    } catch (err: any) {
-      const errMsg = err.message || 'Market data unavailable';
-      emitCouncilEvent('DISCOVERY', 'FAILED', `Market data fetch failed: ${errMsg}`, undefined, errMsg);
-      investigation.status = 'FAILED';
-      investigation.error = errMsg;
-      investigation.completedAt = new Date().toISOString();
-      storage.saveInvestigation(investigation);
-      return investigation;
+    if (options?.initialSnapshot) {
+      snapshot = options.initialSnapshot;
+      emitCouncilEvent('DISCOVERY', 'RUNNING', `Using candidate market snapshot for $${cleanAsset}...`);
+    } else {
+      try {
+        snapshot = await fetchMarketSnapshot(cleanAsset);
+      } catch (err: any) {
+        const errMsg = err.message || 'Market data unavailable';
+        emitCouncilEvent('DISCOVERY', 'FAILED', `Market data fetch failed: ${errMsg}`, undefined, errMsg);
+        investigation.status = 'FAILED';
+        investigation.error = errMsg;
+        investigation.completedAt = new Date().toISOString();
+        storage.saveInvestigation(investigation);
+        return investigation;
+      }
     }
 
     // Single immutable snapshot embedded for all subsequent council agents
@@ -144,7 +163,8 @@ export async function orchestrateCouncilInvestigation(
 
     const marketEvid = getMarketEvidence(id, snapshot);
     const newsEvid = await getNewsEvidence(id, cleanAsset);
-    investigation.evidence = [...marketEvid, ...newsEvid];
+    const socialEvid = await getSocialEvidence(id, cleanAsset);
+    investigation.evidence = [...marketEvid, ...newsEvid, ...socialEvid];
 
     const discoveryResult = runDiscoveryAgent(snapshot, investigation.evidence);
     investigation.agentRuns['discovery'] = discoveryResult;
@@ -335,16 +355,52 @@ export async function orchestrateCouncilInvestigation(
     let thesis: TradeThesis | undefined;
 
     if (decisionResult.conclusion === 'BUY' && riskGateEval.passed) {
-      emitCouncilEvent(
-        'RISK_GATE',
-        'COMPLETED',
-        'Deterministic Risk Gate: ALL SAFETY CHECKS PASSED. Order authorized for Alpaca paper execution.',
-        { riskGateApproved: true }
-      );
+      if (options?.skipOrderExecution || options?.executionMode === 'analysis-only') {
+        emitCouncilEvent(
+          'RISK_GATE',
+          'COMPLETED',
+          'Deterministic Risk Gate: ALL SAFETY CHECKS PASSED. (Analysis-only mode — order execution skipped).',
+          { riskGateApproved: true, skipOrderExecution: true }
+        );
+        tradeExecuted = false;
+      } else {
+        emitCouncilEvent(
+          'RISK_GATE',
+          'COMPLETED',
+          'Deterministic Risk Gate: ALL SAFETY CHECKS PASSED. Order authorized for Alpaca paper execution.',
+          { riskGateApproved: true }
+        );
 
-      const order = await alpacaService.submitPaperOrder(cleanAsset, positionSizing.qty, 'buy', snapshot.price);
-      tradeExecuted = true;
-      orderId = order.id;
+        const orderResult = await paperTradingService.submitPaperOrder({
+          investigationId: id,
+          symbol: cleanAsset,
+          assetClass: (['BTC', 'ETH', 'SOL'].includes(cleanAsset) ? 'CRYPTO' : 'EQUITY'),
+          side: 'buy',
+          qty: positionSizing.qty,
+          price: snapshot.price,
+          orderType: 'market',
+          timeInForce: 'gtc',
+          recommendation: 'BUY',
+          riskGatePassed: true,
+          opportunityScore: decisionResult.opportunityScore,
+          candidateRank: options?.metadata?.candidateRank
+        });
+
+        if (orderResult.status === 'SUBMITTED' || orderResult.status === 'FILLED') {
+          tradeExecuted = true;
+          orderId = orderResult.orderId;
+        }
+
+        investigation.execution = {
+          mode: 'PAPER',
+          adapterSource: orderResult.adapterSource,
+          orderId: orderResult.orderId,
+          brokerOrderId: orderResult.brokerOrderId,
+          submittedAt: orderResult.submittedAt || now,
+          status: orderResult.status,
+          error: orderResult.error
+        };
+      }
 
       // Create Persistent Trade Thesis
       thesis = {

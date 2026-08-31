@@ -117,8 +117,12 @@ export function runIntelligenceAgent(evidence: Evidence[]): AgentResult {
     };
   }
 
-  const positiveArticles = newsEvidence.filter(e => e.value?.sentiment === 'POSITIVE' && !e.isContradictory);
-  const negativeArticles = newsEvidence.filter(e => e.value?.sentiment === 'NEGATIVE' || e.isContradictory);
+  const positiveArticles = newsEvidence.filter(e => 
+    (e.value?.sentiment === 'POSITIVE' || e.value?.sentiment === 'BULLISH') && !e.isContradictory
+  );
+  const negativeArticles = newsEvidence.filter(e => 
+    e.value?.sentiment === 'NEGATIVE' || e.value?.sentiment === 'BEARISH' || e.isContradictory
+  );
 
   const hasStrongCatalyst = positiveArticles.length > 0;
   const hasNegativeFlags = negativeArticles.length > 0;

@@ -1,29 +1,49 @@
 import { Evidence } from '../types';
 import { alpacaNewsAdapter } from '../connectors/alpaca-news-adapter';
 import { mockNewsAdapter } from '../connectors/mock-news-adapter';
-import { fetchAndNormalize, normalizeToEvidence } from '../connectors/normalizer';
+import { hackathonDemoNewsAdapter } from '../connectors/hackathon-demo-news-adapter';
+import { hybridNewsRouter, fetchHybridNewsEvidence } from '../connectors/hybrid-news-router';
+import { normalizeToEvidence } from '../connectors/normalizer';
 
 // ---------------------------------------------------------------------------
-// Phase 4A: Alpaca News Intelligence Integration
-// getNewsEvidence delegates to AlpacaNewsAdapter via the EvidenceSourceAdapter
-// contract.
+// Phase 4B: Hybrid News Router Integration
+// getNewsEvidence delegates to hybridNewsRouter to provide live Alpaca news
+// with deterministic, clearly labeled hackathon demo fallback.
 //
 // Invariants:
 // - Primary external news source is Alpaca Market Data News REST API (v1beta1).
 // - Verification status for live Alpaca news is 'VERIFIED'.
+// - Fallback evidence is explicitly marked verificationStatus: 'MOCK' and
+//   adapterSource: 'hackathon-demo-fallback'.
 // - Timestamp separation: observedAt = article.publishedAt, retrievedAt = fetch time.
-// - No fabricated external data: network, auth, or API failures produce explicit
-//   'FAILED' evidence items rather than fabricated news.
-// - Empty news response ({ news: [] }) returns empty array [] without fabrication.
-// - MockNewsAdapter is retained for tests and fallback scenarios.
+// - No fabricated live news: all fallback scenarios are deterministically chosen
+//   and clearly identified in provenance metadata.
 // ---------------------------------------------------------------------------
 
 /**
- * Fetches and normalizes live market news for an investigation.
+ * Fetches and normalizes news for an investigation via the Hybrid News Router.
  */
 export async function getNewsEvidence(investigationId: string, symbol: string): Promise<Evidence[]> {
   const cleanSymbol = symbol.toUpperCase().replace('$', '').trim();
-  return fetchAndNormalize(alpacaNewsAdapter, cleanSymbol, investigationId, 'VERIFIED');
+  return fetchHybridNewsEvidence(investigationId, cleanSymbol);
+}
+
+/**
+ * Direct access to the live Alpaca adapter (bypassing fallback router).
+ */
+export async function getLiveAlpacaNewsEvidence(investigationId: string, symbol: string): Promise<Evidence[]> {
+  const cleanSymbol = symbol.toUpperCase().replace('$', '').trim();
+  const articles = await alpacaNewsAdapter.fetchForSymbol(cleanSymbol);
+  return normalizeToEvidence(articles, investigationId, alpacaNewsAdapter, 'VERIFIED');
+}
+
+/**
+ * Direct access to the hackathon demo fallback adapter.
+ */
+export async function getDemoFallbackNewsEvidence(investigationId: string, symbol: string): Promise<Evidence[]> {
+  const cleanSymbol = symbol.toUpperCase().replace('$', '').trim();
+  const articles = await hackathonDemoNewsAdapter.fetchForSymbol(cleanSymbol);
+  return normalizeToEvidence(articles, investigationId, hackathonDemoNewsAdapter, 'MOCK');
 }
 
 /**
