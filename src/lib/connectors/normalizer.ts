@@ -125,8 +125,12 @@ export async function fetchAndNormalize(
   try {
     const articles = await adapter.fetchForSymbol(symbol);
 
-    if (!articles || articles.length === 0) {
-      throw new SourceUnavailableError(adapter.adapterId, 'EMPTY_RESPONSE', `${adapter.adapterName} returned no articles for ${symbol}`);
+    if (!articles) {
+      throw new SourceUnavailableError(adapter.adapterId, 'EMPTY_RESPONSE', `${adapter.adapterName} returned no response for ${symbol}`);
+    }
+
+    if (articles.length === 0) {
+      return [];
     }
 
     return normalizeToEvidence(articles, investigationId, adapter, verificationOverride, seqOffset);

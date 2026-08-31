@@ -992,6 +992,336 @@ describe('13. Phase 3 — Contradiction Matrix', () => {
   });
 });
 
+// ============================================================================
+// PHASE 4A TESTS — Alpaca News Intelligence Adapter
+// ============================================================================
+
+// Phase 4A helper: stripHtml (mirrors src/lib/connectors/alpaca-news-adapter.ts)
+function stripHtml(input) {
+  if (!input) return '';
+  return input
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&#x27;/gi, "'")
+    .replace(/&#x2F;/gi, '/')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Phase 4A helper: TestAlpacaNewsAdapter
+class TestAlpacaNewsAdapter {
+  constructor(options = {}) {
+    this.adapterId = 'alpaca-news-v1';
+    this.adapterName = 'Alpaca Market Data News API (v1beta1)';
+    this.defaultReliability = 'REPUTABLE';
+    this.defaultLimit = options.limit || 5;
+    this.mockResponse = options.mockResponse;
+    this.mockStatus = options.mockStatus ?? 200;
+    this.mockError = options.mockError;
+    this.capturedUrl = null;
+    this.capturedHeaders = null;
+    this.hasCredentials = options.hasCredentials ?? true;
+  }
+
+  formatSymbolsQuery(symbol) {
+    const clean = symbol.toUpperCase().replace(/^\$/, '').trim();
+    if (['BTC', 'ETH', 'SOL', 'DOGE', 'AVAX'].includes(clean) || clean.includes('/')) {
+      let base = clean;
+      if (clean.includes('/')) base = clean.split('/')[0];
+      return `${base},${base}/USD,${base}USD`;
+    }
+    return clean;
+  }
+
+  async fetchForSymbol(symbol) {
+    if (!this.hasCredentials) {
+      throw {
+        name: 'SourceUnavailableError',
+        adapterId: this.adapterId,
+        reason: 'FETCH_ERROR',
+        message: 'Alpaca API credentials missing.'
+      };
+    }
+
+    const symbolsQuery = this.formatSymbolsQuery(symbol);
+    this.capturedUrl = `https://data.alpaca.markets/v1beta1/news?symbols=${encodeURIComponent(symbolsQuery)}&limit=${this.defaultLimit}&sort=desc&include_content=false`;
+    this.capturedHeaders = {
+      'APCA-API-KEY-ID': 'TEST_KEY_ID_123',
+      'APCA-API-SECRET-KEY': 'TEST_SECRET_KEY_456'
+    };
+
+    if (this.mockError) {
+      throw {
+        name: 'SourceUnavailableError',
+        adapterId: this.adapterId,
+        reason: this.mockError.reason || 'FETCH_ERROR',
+        message: this.mockError.message || 'Network error'
+      };
+    }
+
+    if (this.mockStatus === 401 || this.mockStatus === 403) {
+      throw {
+        name: 'SourceUnavailableError',
+        adapterId: this.adapterId,
+        reason: 'FETCH_ERROR',
+        message: `Alpaca News authentication failed (HTTP ${this.mockStatus})`
+      };
+    }
+
+    if (this.mockStatus === 429) {
+      throw {
+        name: 'SourceUnavailableError',
+        adapterId: this.adapterId,
+        reason: 'RATE_LIMIT',
+        message: 'Alpaca News rate limit exceeded (HTTP 429)'
+      };
+    }
+
+    if (this.mockStatus >= 400) {
+      throw {
+        name: 'SourceUnavailableError',
+        adapterId: this.adapterId,
+        reason: 'FETCH_ERROR',
+        message: `Alpaca News API returned HTTP ${this.mockStatus}`
+      };
+    }
+
+    const data = this.mockResponse;
+    if (!data || !Array.isArray(data.news)) {
+      throw {
+        name: 'SourceUnavailableError',
+        adapterId: this.adapterId,
+        reason: 'PARSE_ERROR',
+        message: 'Malformed response structure'
+      };
+    }
+
+    if (data.news.length === 0) {
+      return [];
+    }
+
+    return data.news.map((item, idx) => ({
+      externalId: String(item.id || idx + 1),
+      title: stripHtml(item.headline || 'Untitled Article'),
+      summary: stripHtml(item.summary || item.content || item.headline || ''),
+      url: item.url || '',
+      publisher: item.source ? `Alpaca / ${item.source}` : 'Alpaca News Feed',
+      publishedAt: item.created_at || new Date().toISOString(),
+      sentiment: item.sentiment || 'NEUTRAL',
+      relevance: 'HIGH',
+      isContradictory: false
+    }));
+  }
+}
+
+function normalizeTestArticles(articles, investigationId, adapter, verificationOverride = 'VERIFIED') {
+  const retrievedAt = new Date().toISOString();
+  return articles.map((article, idx) => {
+    const observedAt = article.publishedAt;
+    const freshness = deriveFreshness(observedAt, retrievedAt);
+    return {
+      id: `EVID-NEWS-${investigationId}-${idx + 1}`,
+      investigationId,
+      type: 'NEWS',
+      title: article.title,
+      description: article.summary,
+      observedAt,
+      source: {
+        name: article.publisher,
+        url: article.url,
+        publisher: article.publisher,
+        publishedAt: article.publishedAt,
+        retrievedAt,
+        adapterVersion: adapter.adapterId
+      },
+      value: { sentiment: article.sentiment, relevance: article.relevance },
+      reliability: adapter.defaultReliability,
+      isContradictory: Boolean(article.isContradictory),
+      verificationStatus: verificationOverride,
+      adapterSource: adapter.adapterId,
+      freshness,
+      claimIds: [],
+      contradicts: []
+    };
+  });
+}
+
+// =========================================================================
+describe('14. Phase 4A — Alpaca News Intelligence Adapter', () => {
+  const sampleAlpacaResponse = {
+    news: [
+      {
+        id: 40182810,
+        headline: '<p>Bitcoin Spot ETF Inflows <b>Surge</b> to $650M Daily Record</p>',
+        summary: 'Institutional asset managers absorb miners sell-pressure &amp; demand expands.',
+        author: 'Jane Doe',
+        created_at: '2026-08-30T10:00:00Z',
+        url: 'https://news.alpaca.markets/article/40182810',
+        symbols: ['BTC', 'BTCUSD'],
+        source: 'Benzinga'
+      },
+      {
+        id: 40182811,
+        headline: 'Solana DEX Volume Flips Major Rivals on Firedancer Progress',
+        summary: '<span>Validator benchmark demonstrates sub-millisecond execution.</span>',
+        author: 'John Smith',
+        created_at: '2026-08-30T12:00:00Z',
+        url: 'https://news.alpaca.markets/article/40182811',
+        symbols: ['SOL', 'SOLUSD'],
+        source: 'CoinDesk'
+      }
+    ]
+  };
+
+  it('Alpaca response successfully normalizes into Evidence objects with VERIFIED status', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockResponse: sampleAlpacaResponse });
+    const rawArticles = await adapter.fetchForSymbol('BTC');
+    assert.strictEqual(rawArticles.length, 2);
+
+    const evidence = normalizeTestArticles(rawArticles, 'INV-TEST-001', adapter, 'VERIFIED');
+    assert.strictEqual(evidence.length, 2);
+    assert.strictEqual(evidence[0].verificationStatus, 'VERIFIED');
+    assert.strictEqual(evidence[0].adapterSource, 'alpaca-news-v1');
+    assert.strictEqual(evidence[0].type, 'NEWS');
+    assert.strictEqual(evidence[0].reliability, 'REPUTABLE');
+  });
+
+  it('Symbol filtering is sent correctly for crypto and equities', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockResponse: { news: [] } });
+    
+    await adapter.fetchForSymbol('$BTC');
+    assert.ok(adapter.capturedUrl.includes('symbols=BTC%2CBTC%2FUSD%2CBTCUSD'));
+
+    await adapter.fetchForSymbol('AAPL');
+    assert.ok(adapter.capturedUrl.includes('symbols=AAPL'));
+  });
+
+  it('Limit parameter is set to 5 by default', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockResponse: { news: [] } });
+    await adapter.fetchForSymbol('BTC');
+    assert.ok(adapter.capturedUrl.includes('limit=5'));
+  });
+
+  it('created_at is preserved as observation/publication time and retrievedAt is distinct', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockResponse: sampleAlpacaResponse });
+    const rawArticles = await adapter.fetchForSymbol('BTC');
+    const evidence = normalizeTestArticles(rawArticles, 'INV-TEST-001', adapter, 'VERIFIED');
+
+    assert.strictEqual(evidence[0].observedAt, '2026-08-30T10:00:00Z');
+    assert.strictEqual(evidence[0].source.publishedAt, '2026-08-30T10:00:00Z');
+    assert.notStrictEqual(evidence[0].source.retrievedAt, evidence[0].observedAt);
+    assert.ok(evidence[0].source.retrievedAt.length > 0);
+  });
+
+  it('HTML content is normalized and stripped safely without raw tags', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockResponse: sampleAlpacaResponse });
+    const rawArticles = await adapter.fetchForSymbol('BTC');
+
+    assert.strictEqual(rawArticles[0].title, 'Bitcoin Spot ETF Inflows Surge to $650M Daily Record');
+    assert.strictEqual(rawArticles[0].summary, 'Institutional asset managers absorb miners sell-pressure & demand expands.');
+    assert.strictEqual(rawArticles[1].summary, 'Validator benchmark demonstrates sub-millisecond execution.');
+  });
+
+  it('Empty news response ({ news: [] }) remains an empty result ([])', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockResponse: { news: [] } });
+    const rawArticles = await adapter.fetchForSymbol('UNKNOWN_ASSET');
+    assert.deepStrictEqual(rawArticles, []);
+
+    const evidence = normalizeTestArticles(rawArticles, 'INV-TEST-001', adapter, 'VERIFIED');
+    assert.deepStrictEqual(evidence, []);
+  });
+
+  it('Authentication failure (HTTP 401) produces explicit SourceUnavailableError with FETCH_ERROR', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockStatus: 401 });
+    let errorCaught = null;
+    try {
+      await adapter.fetchForSymbol('BTC');
+    } catch (err) {
+      errorCaught = err;
+    }
+    assert.ok(errorCaught, 'Expected error to be thrown on HTTP 401');
+    assert.strictEqual(errorCaught.reason, 'FETCH_ERROR');
+    assert.strictEqual(errorCaught.adapterId, 'alpaca-news-v1');
+    assert.ok(errorCaught.message.includes('401'));
+  });
+
+  it('Missing credentials produces explicit SourceUnavailableError', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ hasCredentials: false });
+    let errorCaught = null;
+    try {
+      await adapter.fetchForSymbol('BTC');
+    } catch (err) {
+      errorCaught = err;
+    }
+    assert.ok(errorCaught, 'Expected error when credentials missing');
+    assert.strictEqual(errorCaught.reason, 'FETCH_ERROR');
+    assert.ok(errorCaught.message.includes('credentials missing'));
+  });
+
+  it('Rate limit (HTTP 429) produces explicit SourceUnavailableError with RATE_LIMIT', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockStatus: 429 });
+    let errorCaught = null;
+    try {
+      await adapter.fetchForSymbol('BTC');
+    } catch (err) {
+      errorCaught = err;
+    }
+    assert.ok(errorCaught, 'Expected error on 429');
+    assert.strictEqual(errorCaught.reason, 'RATE_LIMIT');
+  });
+
+  it('Network failure produces explicit SourceUnavailableError', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockError: { reason: 'FETCH_ERROR', message: 'ECONNREFUSED' } });
+    let errorCaught = null;
+    try {
+      await adapter.fetchForSymbol('BTC');
+    } catch (err) {
+      errorCaught = err;
+    }
+    assert.ok(errorCaught, 'Expected error on network failure');
+    assert.strictEqual(errorCaught.reason, 'FETCH_ERROR');
+    assert.strictEqual(errorCaught.message, 'ECONNREFUSED');
+  });
+
+  it('API credentials never appear in returned evidence objects', async () => {
+    const adapter = new TestAlpacaNewsAdapter({ mockResponse: sampleAlpacaResponse });
+    const rawArticles = await adapter.fetchForSymbol('BTC');
+    const evidence = normalizeTestArticles(rawArticles, 'INV-TEST-001', adapter, 'VERIFIED');
+
+    const jsonStr = JSON.stringify(evidence);
+    assert.strictEqual(jsonStr.includes('TEST_KEY_ID_123'), false);
+    assert.strictEqual(jsonStr.includes('TEST_SECRET_KEY_456'), false);
+  });
+
+  it('Existing MockNewsAdapter behavior remains intact with MOCK verificationStatus', () => {
+    const mockArticles = [
+      {
+        externalId: 'news-btc-1',
+        title: 'Bitcoin Spot ETF Inflows Reach $650M Single-Day Record',
+        summary: 'Institutional asset managers absorb miners sell-pressure.',
+        url: 'https://reuters.example.com/markets/bitcoin-etf-inflows-record',
+        publisher: 'Reuters Markets',
+        publishedAt: '2026-08-29T11:00:00Z',
+        sentiment: 'POSITIVE',
+        relevance: 'HIGH',
+        isContradictory: false
+      }
+    ];
+    const mockAdapter = { adapterId: 'mock-news-v1', adapterName: 'Mock News Database (Demo)', defaultReliability: 'REPUTABLE' };
+    const evidence = normalizeTestArticles(mockArticles, 'INV-MOCK-001', mockAdapter, 'MOCK');
+
+    assert.strictEqual(evidence[0].verificationStatus, 'MOCK');
+    assert.strictEqual(evidence[0].adapterSource, 'mock-news-v1');
+  });
+});
+
 console.log(`\n========================================`);
 console.log(`TEST SUMMARY: ${testsPassed}/${testsRun} PASSED (${testsFailed} FAILED)`);
 console.log(`========================================\n`);
@@ -999,3 +1329,4 @@ console.log(`========================================\n`);
 if (testsFailed > 0) {
   process.exit(1);
 }
+

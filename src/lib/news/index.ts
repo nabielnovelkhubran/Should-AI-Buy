@@ -1,38 +1,40 @@
 import { Evidence } from '../types';
+import { alpacaNewsAdapter } from '../connectors/alpaca-news-adapter';
 import { mockNewsAdapter } from '../connectors/mock-news-adapter';
-import { normalizeToEvidence } from '../connectors/normalizer';
+import { fetchAndNormalize, normalizeToEvidence } from '../connectors/normalizer';
 
 // ---------------------------------------------------------------------------
-// Phase 3: getNewsEvidence now delegates to the MockNewsAdapter via the
-// EvidenceSourceAdapter contract. Evidence is normalized with:
-//   - verificationStatus: 'MOCK'   (honest labeling — this is demo data)
-//   - adapterSource: 'mock-news-v1'
-//   - freshness: derived from publishedAt vs retrievedAt
-//   - observedAt: article.publishedAt (when published, not when fetched)
-//   - source.retrievedAt: fetch time (explicitly distinct from observedAt)
+// Phase 4A: Alpaca News Intelligence Integration
+// getNewsEvidence delegates to AlpacaNewsAdapter via the EvidenceSourceAdapter
+// contract.
 //
-// Note: This function is synchronous-compatible because MockNewsAdapter.fetchForSymbol
-// is deterministic and returns immediately. For live adapters (Phase 4), the
-// council orchestrator will call fetchAndNormalize() directly with await.
+// Invariants:
+// - Primary external news source is Alpaca Market Data News REST API (v1beta1).
+// - Verification status for live Alpaca news is 'VERIFIED'.
+// - Timestamp separation: observedAt = article.publishedAt, retrievedAt = fetch time.
+// - No fabricated external data: network, auth, or API failures produce explicit
+//   'FAILED' evidence items rather than fabricated news.
+// - Empty news response ({ news: [] }) returns empty array [] without fabrication.
+// - MockNewsAdapter is retained for tests and fallback scenarios.
 // ---------------------------------------------------------------------------
 
-export function getNewsEvidence(investigationId: string, symbol: string): Evidence[] {
-  const cleanSymbol = symbol.toUpperCase().replace('$', '');
-
-  // MockNewsAdapter is synchronous under the hood (no actual network call),
-  // so we resolve the Promise synchronously by using a local dataset reference.
-  // When live adapters arrive, council/index.ts switches to async fetchAndNormalize().
-  const articles = _getMockArticlesSync(cleanSymbol);
-
-  return normalizeToEvidence(articles, investigationId, mockNewsAdapter, 'MOCK', 0);
+/**
+ * Fetches and normalizes live market news for an investigation.
+ */
+export async function getNewsEvidence(investigationId: string, symbol: string): Promise<Evidence[]> {
+  const cleanSymbol = symbol.toUpperCase().replace('$', '').trim();
+  return fetchAndNormalize(alpacaNewsAdapter, cleanSymbol, investigationId, 'VERIFIED');
 }
 
 /**
- * Synchronous article resolution for the mock adapter.
- * Mirrors MockNewsAdapter.fetchForSymbol logic without the async wrapper.
- * This keeps getNewsEvidence() synchronous so the existing council orchestrator
- * does not need to be made async in Phase 3.
+ * Synchronous/mock helper retained for mock-testing and baseline reference.
  */
+export function getMockNewsEvidence(investigationId: string, symbol: string): Evidence[] {
+  const cleanSymbol = symbol.toUpperCase().replace('$', '').trim();
+  const articles = _getMockArticlesSync(cleanSymbol);
+  return normalizeToEvidence(articles, investigationId, mockNewsAdapter, 'MOCK', 0);
+}
+
 function _getMockArticlesSync(cleanSymbol: string) {
   const MOCK_DATABASE: Record<string, Parameters<typeof normalizeToEvidence>[0]> = {
     NOVA: [

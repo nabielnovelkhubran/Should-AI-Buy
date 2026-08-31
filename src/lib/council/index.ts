@@ -143,7 +143,7 @@ export async function orchestrateCouncilInvestigation(
     investigation.snapshot = snapshot;
 
     const marketEvid = getMarketEvidence(id, snapshot);
-    const newsEvid = getNewsEvidence(id, cleanAsset);
+    const newsEvid = await getNewsEvidence(id, cleanAsset);
     investigation.evidence = [...marketEvid, ...newsEvid];
 
     const discoveryResult = runDiscoveryAgent(snapshot, investigation.evidence);
