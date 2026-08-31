@@ -1,20 +1,34 @@
 'use client';
-import React from 'react';
-import { Flame, ShieldAlert, AlertOctagon, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
-import { AgentResult } from '../lib/types';
+import React, { useState } from 'react';
+import { Flame, ShieldAlert, AlertOctagon, CheckCircle2, XCircle, Link2, ChevronDown, ChevronUp } from 'lucide-react';
+import { AgentResult, Claim, Evidence } from '../lib/types';
+import { ClaimInspector } from './ClaimInspector';
 
 interface RedTeamSpotlightProps {
   redTeamResult?: AgentResult;
   asset: string;
+  /** Phase 3: all claims from the investigation — Red Team refutations extracted here */
+  claims?: Claim[];
+  evidence?: Evidence[];
 }
 
-export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({ redTeamResult, asset }) => {
+export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({
+  redTeamResult,
+  asset,
+  claims = [],
+  evidence = []
+}) => {
+  const [showRefutations, setShowRefutations] = useState(true);
+
   if (!redTeamResult) return null;
 
   const details = redTeamResult.redTeamAttackDetails;
   const isDisproved = details?.thesisStatus === 'DISPROVED';
   const isWeakened = details?.thesisStatus === 'WEAKENED';
-  const isIntact = details?.thesisStatus === 'INTACT';
+
+  // Phase 3: Extract REFUTATION claims from the claim graph
+  const refutationClaims = claims.filter(c => c.agent === 'red_team' && c.type === 'REFUTATION');
+  const hasRefutations = refutationClaims.length > 0;
 
   return (
     <div className={`p-6 rounded-2xl border relative overflow-hidden transition ${
@@ -25,7 +39,7 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({ redTeamResul
         : 'bg-gradient-to-b from-emerald-950/20 to-[#11141d] border-emerald-500/30'
     }`}>
       
-      {/* Decorative Badge */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-rose-600/20 border border-rose-500/40 flex items-center justify-center">
@@ -63,7 +77,7 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({ redTeamResul
       </div>
 
       {/* Attack Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {/* Assumptions Tested */}
         <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800">
           <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
@@ -84,7 +98,7 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({ redTeamResul
         <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800">
           <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
             <span className={`w-1.5 h-1.5 rounded-full ${isDisproved ? 'bg-rose-400' : 'bg-emerald-400'}`} />
-            Counter-Evidence & Vulnerabilities
+            Counter-Evidence &amp; Vulnerabilities
           </h4>
           <ul className="space-y-2 text-xs">
             {details?.vulnerabilitiesFound?.map((v, i) => (
@@ -96,6 +110,41 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({ redTeamResul
           </ul>
         </div>
       </div>
+
+      {/* Phase 3: REFUTATION Claims — structured adversarial assertions */}
+      {hasRefutations && (
+        <div className="border border-orange-500/20 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setShowRefutations(r => !r)}
+            className="w-full flex items-center justify-between px-4 py-3 bg-orange-950/20 hover:bg-orange-950/30 transition"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-orange-300 uppercase tracking-wider">
+              <Link2 className="w-3.5 h-3.5" />
+              <span>Structured Refutation Claims ({refutationClaims.length})</span>
+              <span className="text-[10px] text-orange-400/60 font-mono normal-case tracking-normal">
+                — traceable chain to prior claims &amp; evidence
+              </span>
+            </div>
+            {showRefutations
+              ? <ChevronUp className="w-4 h-4 text-orange-400" />
+              : <ChevronDown className="w-4 h-4 text-orange-400" />
+            }
+          </button>
+
+          {showRefutations && (
+            <div className="p-3 space-y-2 bg-slate-950/30">
+              {refutationClaims.map(claim => (
+                <ClaimInspector
+                  key={claim.id}
+                  claim={claim}
+                  evidence={evidence}
+                  allClaims={claims}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
     </div>
   );

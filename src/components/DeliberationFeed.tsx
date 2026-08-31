@@ -15,9 +15,12 @@ import {
   ArrowRight,
   ExternalLink,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  MessageSquare
 } from 'lucide-react';
-import { Investigation, CouncilStage, CouncilStageStatus, AgentResult } from '../lib/types';
+import { Investigation, CouncilStage, CouncilStageStatus, AgentResult, Claim } from '../lib/types';
+import { ClaimInspector } from './ClaimInspector';
+import { ContradictionMatrix } from './ContradictionMatrix';
 
 interface DeliberationFeedProps {
   investigation: Investigation;
@@ -278,10 +281,42 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
                 </button>
               )}
             </div>
+
+            {/* Phase 3: Claims for this stage */}
+            {(() => {
+              const stageClaims = (investigation.claims ?? []).filter(
+                c => c.stage === activeStageConfig.stage
+              );
+              if (stageClaims.length === 0) return null;
+              return (
+                <div className="space-y-2 pt-2 border-t border-slate-800/50">
+                  <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Claims ({stageClaims.length}) — Verifiable Assertions from this Stage</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {stageClaims.map(claim => (
+                      <ClaimInspector
+                        key={claim.id}
+                        claim={claim}
+                        evidence={investigation.evidence}
+                        allClaims={investigation.claims ?? []}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
+        {/* Phase 3: Contradiction Matrix — shown when investigation has claims and is complete */}
+        {(investigation.claims ?? []).length > 0 && investigation.status === 'COMPLETED' && (
+          <ContradictionMatrix claims={investigation.claims ?? []} />
+        )}
+
       </div>
+
 
       {/* 2. Council Final Verdict Banner */}
       {decision && (

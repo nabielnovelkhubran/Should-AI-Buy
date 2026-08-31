@@ -1,1057 +1,226 @@
-Should-AI Buy?
-An autonomous trading council that challenges every trade before capital is deployed.
-Hackathon: Alpaca AI Trading Agents Hackathon
-Organizer: lablab.ai × Alpaca
-Dates: August 28 – September 4, 2026
-Team: 3 people
-Product: Web application / autonomous AI trading agent
-Primary Market: Cryptocurrency
-
-1. Executive Summary
-Should-AI Buy? is an autonomous AI trading council designed to help users discover, investigate, and manage high-risk cryptocurrency opportunities.
-Instead of relying on a single AI model to make a trading recommendation, the system delegates analysis to multiple specialized agents.
-The council can:
-discover emerging crypto opportunities
-analyze market behavior
-investigate relevant news and narratives
-evaluate risk and potential rug-pull indicators
-construct an investment thesis
-actively attempt to disprove that thesis
-reach a final Buy / Hold / Sell / Reject decision
-execute approved paper trades through Alpaca
-continuously monitor existing positions
-reassess whether the original trade thesis remains valid
-The defining principle is:
-The AI doesn't just tell you what it thinks. It shows you the evidence behind its reasoning so you can verify it yourself.
-This makes the product useful to both inexperienced traders learning how markets work and experienced traders who want to compress hours of research into a faster decision-making workflow.
-
-2. Core Product Concept
-The product can be understood as:
-Claude Council for trading.
-Instead of multiple AI agents debating a programming decision, specialized trading agents debate whether an investment decision is justified.
-                        USER
-                          │
-                          ▼
-              "Should-AI buy $NOVA?"
-                          │
-                          ▼
-                 ┌────────────────┐
-                 │ TRADING COUNCIL│
-                 └───────┬────────┘
-                         │
-          ┌──────────────┼──────────────┐
-          ▼              ▼              ▼
-       📊 QUANT       📰 INTEL       🛡️ RISK
-          │              │              │
-          └──────────────┼──────────────┘
-                         ▼
-                    🔴 RED TEAM
-                 "Prove us wrong."
-                         │
-                         ▼
-                  ⚖️ DECISION AGENT
-                         │
-              ┌──────────┼──────────┐
-              ▼          ▼          ▼
-            BUY        HOLD       REJECT
-              │
-              ▼
-            ALPACA
-              │
-              ▼
-          MONITORING
-              │
-              ▼
-        THESIS RE-EVALUATION
-              │
-              ▼
-       "Should-AI sell $NOVA?"
-
-
-3. Product Philosophy
-3.1 Don't Just Give Answers
-The system should not simply output:
-BUY — 87% confidence
-Instead, it should provide:
-BUY — 87% confidence
-followed by:
-why the council reached that conclusion
-which agents agreed/disagreed
-the evidence supporting each claim
-contradictory evidence
-relevant news
-market history
-risk indicators
-Red-Team objections
-source links where applicable
-
-4. Core Insight
-Most trading systems attempt to answer:
-"Why should I buy this?"
-Should-AI Buy? asks an additional question:
-"What would prove that we're wrong?"
-Every trade therefore becomes a hypothesis.
-INVESTMENT THESIS
-       ↓
-SUPPORTING EVIDENCE
-       ↓
-ADVERSARIAL ATTACK
-       ↓
-CONTRADICTORY EVIDENCE
-       ↓
-COUNCIL DECISION
-       ↓
-TRADE / REJECT
-
-This adversarial architecture is the primary product differentiator.
-
-5. Target Users
-5.1 New / Rookie Traders
-Should-AI Buy? can function as a learning-by-doing environment.
-A new trader can ask:
-Should-AI buy $SOL?
-and then inspect:
-price history
-volume
-liquidity
-news
-market behavior
-risk indicators
-agent reasoning
-The system teaches users why a trade is being considered rather than simply telling them what to do.
-The goal is not to turn the application into a formal trading education platform.
-Instead:
-The learning happens through transparent decision-making.
-
-5.2 Experienced Traders
-Experienced traders can use the system as a research accelerator.
-Instead of manually:
-scanning assets
-reading news
-checking market behavior
-looking for anomalies
-comparing signals
-monitoring existing positions
-they can ask the council to perform the investigation and then inspect the evidence.
-The human remains the final decision-maker.
-
-6. Primary User Interaction
-The primary interface is a conversational command box.
-Example:
-Should-AI buy $BTC?
-Should-AI sell $ETH?
-Should-AI watch $SOL?
-Why did you reject $NOVA?
-The chat interface acts as the user's gateway to the council.
-It should not behave like a generic chatbot.
-Commands should map to structured trading workflows.
-
-7. Command System
-7.1 Buy
-Example
-Should-AI buy $NOVA?
-Triggers:
-opportunity investigation
-quantitative analysis
-intelligence analysis
-risk analysis
-Red-Team analysis
-final trading decision
-Possible outputs:
-BUY
-HOLD
-REJECT
-
-7.2 Sell
-Example
-Should-AI sell $NOVA?
-The system evaluates the current position and compares it against the original trade thesis.
-It should ask:
-Is the original thesis still valid?
-Which thesis conditions changed?
-Has momentum deteriorated?
-Has risk increased?
-Has the expected upside changed?
-Has new information invalidated the original reasoning?
-Possible outputs:
-SELL
-HOLD
-
-7.3 Watch
-Example
-Should-AI watch $NOVA?
-The system determines whether an asset is worth monitoring despite insufficient evidence for an immediate trade.
-The system can establish conditions under which it should reconsider the asset.
-Example:
-WATCHING $NOVA
-
-Current Opportunity: 74
-Current Risk: 43
-
-Reconsider if:
-
-✓ Liquidity improves
-✓ Volume remains elevated
-✓ Risk score falls
-✓ Momentum confirms
-
-
-7.4 Why
-Example
-Why did the council reject $NOVA?
-The system explains:
-final decision
-strongest supporting evidence
-strongest contradictory evidence
-Red-Team findings
-relevant sources
-which agents disagreed
-
-8. Command Autocomplete
-The command box should provide syntax assistance.
-Example:
-┌──────────────────────────────────────────────┐
-│ Should-AI buy $                              │
-└──────────────────────────────────────────────┘
-
-Suggestions
-
-→ Should-AI buy $BTC?
-→ Should-AI buy $ETH?
-→ Should-AI buy $SOL?
-
-Commands
-
-BUY      Analyze potential entry
-SELL     Analyze existing position
-WATCH    Monitor an asset
-WHY      Explain a previous decision
-
-Autocomplete should reduce friction without forcing users to memorize syntax.
-Natural-language variations should be supported where practical.
-
-9. Trading Council
-The council consists of specialized agents with clearly defined responsibilities.
-Core Agents
-Discovery Agent
-Quant Agent
-Intelligence Agent
-Risk Agent
-Red-Team Agent
-Decision Agent
-Monitoring Agent
-
-10. Discovery Agent
-Objective
-Find potentially interesting emerging assets.
-The Discovery Agent should not decide whether an asset is safe.
-Its job is:
-Find things worth investigating.
-Potential signals
-momentum
-volume acceleration
-market activity
-liquidity
-volatility
-price movement
-unusual activity
-Output
-Candidate: $NOVA
-
-Momentum: 92
-Volume Acceleration: 88
-Liquidity: 74
-Activity: 91
-
-Opportunity Score: 87
-
-
-11. Quant Agent
-Objective
-Analyze market structure using deterministic calculations and market data.
-Potential analysis
-price returns
-momentum
-volatility
-volume acceleration
-relative volume
-liquidity
-spread
-order-book imbalance
-recent price structure
-abnormal activity
-Output
-QUANT ANALYSIS
-
-Bullish:
-+ Strong volume acceleration
-+ Positive momentum
-+ Increasing market activity
-
-Bearish:
-- Elevated volatility
-
-Confidence: 76%
-
-Where possible, numerical calculations must be performed by deterministic software rather than generated by the LLM.
-
-12. Intelligence Agent
-Objective
-Analyze external information surrounding the asset.
-Potential sources
-latest news
-market announcements
-public information
-relevant narratives
-sentiment
-catalyst information
-Questions
-The agent should investigate:
-Why is this asset receiving attention?
-Is there a genuine catalyst?
-Is attention accelerating?
-Is the narrative supported by independent evidence?
-Is sentiment unusually one-sided?
-Are there signs of coordinated promotion?
-
-13. Risk Agent
-Objective
-Identify structural and behavioral risks.
-Potential signals
-holder concentration
-wallet concentration
-liquidity conditions
-suspicious transfers
-unusual wallet behavior
-developer-related activity
-token unlocks
-contract permissions where available
-abnormal transaction patterns
-manipulation indicators
-The Risk Agent should not claim certainty that an asset is a scam or rug pull.
-Instead:
-Identify observable risk indicators and explain their significance.
-
-14. Red-Team Agent
-The Defining Feature
-The Red-Team Agent exists to challenge the council.
-Its objective:
-Try to prove the trade is wrong.
-It receives the current bullish or bearish thesis and searches specifically for contradictory evidence.
-Questions
-What assumptions are we making?
-What evidence contradicts those assumptions?
-What risks have other agents overlooked?
-Could the apparent opportunity be manipulation?
-What would cause this trade to fail?
-Which signals are unreliable?
-What evidence would invalidate the thesis?
-Example
-BULL THESIS
-
-"NOVA is experiencing genuine demand."
-
-RED TEAM ATTACK
-
-Concern #1:
-Volume is concentrated among a small number
-of wallets.
-
-Concern #2:
-Liquidity has not increased proportionally
-with market activity.
-
-Concern #3:
-Recent social activity is unusually concentrated.
-
-THESIS STATUS
-
-WEAKENED
-
-
-15. Decision Agent
-The Decision Agent synthesizes the council's findings.
-It must consider:
-opportunity
-risk
-evidence quality
-contradictions
-Red-Team findings
-portfolio context
-user/account constraints
-The Decision Agent should not simply count votes.
-Five bullish agents versus one severe risk signal does not automatically mean BUY.
-
-16. Decision States
-BUY
-The opportunity survives adversarial review and satisfies the required conditions.
-HOLD
-The evidence is inconclusive or an existing position remains justified.
-REJECT
-The opportunity fails risk or adversarial validation.
-SELL
-The existing position's thesis has deteriorated sufficiently to justify exiting.
-
-17. Opportunity Score
-Opportunity should be represented separately from risk.
-Potential components:
-OPPORTUNITY
-├── Momentum
-├── Volume Acceleration
-├── Liquidity
-├── Market Activity
-├── Narrative Growth
-└── Flow Signals
-
-
-18. Risk Score
-Potential components:
-RISK
-├── Holder Concentration
-├── Liquidity Risk
-├── Wallet Behavior
-├── Structural / Contract Risk
-├── Unlock Risk
-└── Manipulation Indicators
-
-A single score must not hide this distinction.
-For example:
-Opportunity: 91 / 100
-Risk:        83 / 100
-
-is more informative than:
-AI Score: 74 / 100
-
-
-19. Evidence-First Explainability
-Core Requirement
-Every material AI claim should be traceable to inspectable evidence whenever technically available.
-The system must distinguish between:
-Raw Evidence
-What happened?
-24h price: +8.7%
-24h volume: +38%
-Liquidity: $X
-
-Analysis
-What does that evidence suggest?
-Momentum is strengthening.
-Volume acceleration supports the bullish thesis.
-
-Decision
-What should we do?
-BUY
-
-Users should be able to navigate:
-Decision → Analysis → Evidence
-
-20. Evidence Categories
-Market Evidence
-price history
-OHLCV
-volume
-volatility
-liquidity
-spreads
-order-book information
-News / Information Evidence
-latest headlines
-article timestamps
-publisher
-relevant catalyst
-sentiment classification
-Flow Evidence
-wallet activity
-concentration
-unusual transfers
-whale behavior
-Risk Evidence
-detected anomalies
-thresholds
-historical comparisons
-Agent Evidence
-agent responsible for claim
-confidence
-supporting evidence
-contradictory evidence
-Red-Team objections
-
-21. Interactive Market History
-Users should be able to inspect price behavior across multiple periods.
-Potential ranges:
-1 hour
-4 hours
-1 day
-7 days
-1 month
-longer periods where data availability permits
-The chart should allow users to visually verify claims such as:
-"Momentum accelerated during the last 24 hours."
-Rather than merely trusting the AI.
-
-22. News Evidence
-News should be directly inspectable.
-Each news item used materially by the council should display:
-📰 NEWS EVIDENCE
-
-Major catalyst drives NOVA activity
-
-Publisher: Example News
-Published: 2 hours ago
-
-Relevance: HIGH
-Sentiment: POSITIVE
-
-[ Read Original Article → ]
-
-Hard Requirement
-News items must be:
-clickable
-attributed to the publisher
-timestamped where available
-linked to the original source whenever technically possible
-The system must not present external news claims as unsupported AI-generated facts.
-
-23. Source Traceability Requirement
-EVID-01
-Every externally sourced factual claim that materially contributes to a council decision should expose:
-Source attribution
-Timestamp where available
-Original source link where available
-Relevant context
-This requirement is P0.
-
-24. Source Hierarchy
-The system should prefer:
-Original source
-Primary data provider
-Reputable secondary source
-Aggregator
-When multiple sources are available, the UI should make the provenance clear.
-
-25. Evidence Timeline
-Each investigation should maintain a chronological activity feed.
-Example:
-14:32:11  🔎 DISCOVERY
-          Candidate $NOVA identified.
-
-14:32:14  📊 QUANT
-          Volume acceleration confirmed.
-
-14:32:17  📰 INTELLIGENCE
-          Positive catalyst identified.
-
-14:32:20  🛡️ RISK
-          Wallet concentration anomaly detected.
-
-14:32:24  🔴 RED TEAM
-          Attempting to invalidate bullish thesis.
-
-14:32:29  🔴 RED TEAM
-          Two additional risk indicators found.
-
-14:32:31  ⚖️ DECISION
-          Trade rejected.
-
-The timeline allows users and judges to understand how the conclusion developed.
-
-26. Trade Thesis
-Every approved trade should create a persistent Trade Thesis.
-TRADE THESIS
-
-Asset
-Entry Price
-Timestamp
-
-Bull Case
-Supporting Evidence
-
-Risk Factors
-
-Invalidation Conditions
-
-Expected Horizon
-
-Position Size
-
-Council Confidence
-
-The thesis becomes the foundation for future sell decisions.
-
-27. Buy → Monitor → Sell Lifecycle
-The product should treat trading as a continuous process.
-DISCOVER
-   ↓
-BUY DECISION
-   ↓
-TRADE THESIS CREATED
-   ↓
-POSITION OPEN
-   ↓
-CONTINUOUS MONITORING
-   ↓
-THESIS RE-EVALUATION
-   ↓
-SELL / HOLD
-
-
-28. Sell Intelligence
-When evaluating:
-Should-AI sell $NOVA?
-the system should compare:
-Original Thesis
-✓ Strong momentum
-✓ Increasing liquidity
-✓ Positive narrative
-✓ Healthy distribution
-
-against:
-Current State
-✗ Momentum deteriorating
-✗ Liquidity declining
-✓ Narrative stable
-✗ Wallet flows becoming bearish
-
-The council can then conclude:
-SELL
-because:
-The original thesis is no longer intact.
-This is fundamentally different from simply predicting that price will fall.
-
-29. Monitoring Agent
-The Monitoring Agent continuously evaluates active positions.
-Potential triggers:
-thesis invalidation
-significant risk increase
-momentum reversal
-liquidity deterioration
-new adverse news
-abnormal wallet activity
-predefined portfolio risk limits
-When a significant change occurs, the council should be able to trigger a new investigation.
-
-30. Human Verification
-The system should never position itself as an infallible financial oracle.
-Its philosophy is:
-"We investigate faster. You can verify the work."
-Users retain the ability to:
-inspect evidence
-open source articles
-examine charts
-view agent reasoning
-compare conflicting evidence
-disagree with the council
-This is particularly important for financial decision-making.
-
-31. Main Dashboard
-The dashboard should emphasize active investigations rather than generic financial widgets.
-Example:
-┌──────────────────────────────────────────────┐
-│ SHOULD-AI BUY?                               │
-│                                              │
-│ Ask the Council...                           │
-│                                              │
-│ "Should-AI buy $NOVA?"                       │
-└──────────────────────────────────────────────┘
-
-AGENT STATUS
-
-● ACTIVE
-
-Candidates investigated: 37
-Opportunities detected: 4
-Trades approved: 1
-Trades rejected: 3
-Positions monitored: 2
-
-
-32. Investigation View
-$NOVA
-
-COUNCIL INVESTIGATION
-
-Opportunity     91 / 100
-Risk            31 / 100
-Confidence      84 / 100
-
-QUANT            🟢 BUY
-INTELLIGENCE     🟢 BUY
-RISK             🟡 HOLD
-FLOW             🟢 BUY
-RED TEAM         🟡 CAUTION
-
-────────────────────────────────
-
-FINAL VERDICT
-
-🟢 BUY
-
-[ Why? ] [ Evidence ] [ News ] [ Chart ]
-
-
-33. Agent Deliberation View
-Users should be able to inspect individual agent findings.
-Example:
-📊 QUANT AGENT
-
-Verdict: BUY
-Confidence: 84%
-
-Supporting Evidence:
-
-+ Volume acceleration: +38%
-+ Momentum: positive
-+ Liquidity: sufficient
-
-[View Market Data]
-
-
-34. Red-Team View
-The Red-Team should receive special visual treatment because it is the project's signature feature.
-🔴 RED TEAM
-
-Current Thesis:
-"NOVA presents a favorable opportunity."
-
-ATTACKING THESIS...
-
-✓ Tested liquidity
-✓ Checked concentration
-✓ Examined momentum
-✓ Searched contradictory evidence
-✓ Investigated abnormal activity
-
-RESULT:
-
-2 significant concerns found.
-
-[View Evidence]
-
-
-35. Final Verdict
-The final verdict should be impossible to miss.
-╔══════════════════════════════════════╗
-║             $NOVA                    ║
-║                                      ║
-║         🚫 TRADE REJECTED            ║
-║                                      ║
-║ Opportunity       91 / 100           ║
-║ Risk              83 / 100           ║
-║ Confidence        89 / 100           ║
-╚══════════════════════════════════════╝
-
-Then:
-Why?
-The opportunity showed strong momentum, but the bullish thesis failed adversarial validation due to significant concentration and liquidity concerns.
-[View Evidence]
-
-36. Alpaca Integration
-Alpaca should be a core part of the autonomous workflow rather than merely an order button.
-Potential integration:
-Market Data
-     ↓
-Council
-     ↓
-Decision
-     ↓
-Risk Validation
-     ↓
-Alpaca
-     ↓
-Paper Trade
-     ↓
-Portfolio
-     ↓
-Monitoring
-
-The implementation should use the Alpaca interfaces appropriate to the hackathon requirements, including available API/MCP/CLI functionality.
-
-37. Trading Safety
-The MVP should operate using paper trading for demonstration.
-Potential safeguards:
-maximum position size
-maximum portfolio exposure
-confidence threshold
-minimum liquidity requirement
-trade cooldown
-maximum concurrent positions
-predefined loss limits
-rejection on insufficient evidence
-The system should never imply guaranteed profitability.
-
-38. Technical Principle
-Deterministic Software Calculates.
-AI Interprets.
-Numerical calculations should be handled by code.
-Examples:
-percentage changes
-volatility
-volume acceleration
-liquidity calculations
-position sizing
-portfolio exposure
-thresholds
-risk limits
-LLMs should handle:
-evidence interpretation
-hypothesis generation
-contradiction analysis
-adversarial reasoning
-synthesis
-natural-language explanation
-This separation improves reliability and makes the system easier to audit.
-
-39. MVP
-The MVP must demonstrate the complete loop:
-1. User starts council
-2. Agent discovers candidate
-3. Market data is retrieved
-4. Opportunity analysis runs
-5. Risk analysis runs
-6. News/intelligence analysis runs
-7. Bull thesis is generated
-8. Red Team attacks thesis
-9. Decision is produced
-10. Evidence is displayed
-11. News sources are clickable
-12. Approved trade reaches Alpaca paper trading
-13. Position is monitored
-14. Thesis can be re-evaluated
-15. Sell/Hold decision can be produced
-
-If this works reliably, the MVP is considered complete.
-
-40. Feature Priority
-P0 — Must Have
-Alpaca integration
-Autonomous council orchestration
-Buy command
-Sell command
-Candidate discovery
-Quantitative analysis
-Risk analysis
-Red-Team Agent
-Decision Agent
-Evidence display
-Interactive price history
-Clickable news sources
-Trade thesis persistence
-Paper trading
-Position monitoring
-Explainable final verdict
-Deployed web application
-P1 — Strongly Desired
-Watch command
-Why command
-Agent activity timeline
-richer news intelligence
-wallet/flow analysis
-configurable risk thresholds
-trade history
-thesis invalidation visualization
-historical performance
-P2 — Stretch
-continuous autonomous market scanning
-sophisticated on-chain analytics
-advanced social intelligence
-adaptive strategies
-portfolio optimization
-advanced backtesting
-automated strategy evolution
-
-41. Explicit Non-Goals
-The team will not prioritize:
-mobile applications
-elaborate authentication
-complex account management
-generalized chatbot functionality
-every cryptocurrency/blockchain
-institutional-grade infrastructure
-perfect rug-pull prediction
-guaranteed profitability
-dozens of unrelated integrations
-unnecessary microservices
-The product should remain focused on its core loop.
-
-42. Hackathon Demo
-The demo should be designed around a 2–3 minute narrative.
-Scene 1 — Ask the Council
-User enters:
-Should-AI buy $NOVA?
-
-Scene 2 — Discovery
-The system identifies why $NOVA is interesting.
-Opportunity Score: 91
-
-
-Scene 3 — Council Investigation
-Agents investigate.
-📊 Quant          BUY
-📰 Intelligence   BUY
-🛡️ Risk          CAUTION
-
-
-Scene 4 — Red Team
-The screen changes:
-🔴 RED TEAM: ATTACKING THESIS
-The agent discovers evidence that was not obvious from the initial bullish signals.
-
-Scene 5 — Evidence
-Show:
-wallet concentration
-liquidity chart
-price history
-relevant news
-timestamps
-source links
-The judge can see that the AI's conclusion is grounded in observable information.
-
-Scene 6 — Verdict
-🚫 REJECT
-The bullish thesis failed adversarial validation.
-
-Scene 7 — Second Opportunity
-The council finds another asset.
-This time the thesis survives.
-🟢 BUY
-The system executes a paper trade through Alpaca.
-
-Scene 8 — Sell
-Later:
-Should-AI sell $NOVA?
-The system compares the original thesis against current evidence.
-Original Thesis
-✓ Momentum
-✓ Liquidity
-✓ Narrative
-
-Current State
-✗ Momentum deteriorating
-✗ Liquidity declining
-✗ Risk increasing
-
-The council concludes:
-🔴 SELL
-This demonstrates the entire product lifecycle.
-
-43. Judging Strategy
-The product should answer three questions immediately:
-What is it?
-An autonomous AI trading council.
-What's different?
-It actively tries to disprove every trade before executing it.
-Why should I trust it?
-You don't have to blindly trust it — you can inspect the evidence and original sources behind its reasoning.
-
-44. Core Differentiators
-1. Council Architecture
-Multiple specialized agents rather than one monolithic AI.
-2. Adversarial Validation
-A dedicated Red-Team Agent tries to invalidate the trade thesis.
-3. Evidence-First Design
-The AI exposes the evidence behind its reasoning.
-4. Source Traceability
-External claims can be traced back to original sources.
-5. Persistent Trade Thesis
-Buy decisions create a thesis that can later be tested during Sell decisions.
-6. Full Trading Lifecycle
-Discover → Buy → Monitor → Sell.
-7. Human-in-the-Loop Verification
-AI performs the investigation while the user retains visibility and judgment.
-
-45. Product Identity
-Should-AI Buy? should not be positioned primarily as:
-a crypto price predictor
-a chatbot
-a rug-pull detector
-a trading dashboard
-an AI stock screener
-Those are components.
-The product is:
-An autonomous adversarial trading council.
-
-46. Brand Language
-Product Name
-Should-AI Buy?
-Core Phrase
-Discover. Challenge. Decide.
-Alternative
-Don't just find the trade. Try to break it.
-Product Philosophy
-Don't take our word for it.
-Core Pitch
-Should-AI Buy? is an autonomous trading council that investigates potential trades, challenges its own thesis, and shows users the evidence before making a decision.
-
-47. One-Sentence Pitch
-Should-AI Buy? is a multi-agent trading council that finds emerging crypto opportunities, tries to prove each trade wrong, and only recommends trades that survive adversarial analysis.
-
-48. Extended Pitch
-Crypto markets are full of opportunities — and traps.
-Should-AI Buy? uses a council of specialized AI agents to investigate potential trades. Quant agents analyze market behavior, intelligence agents investigate news and narratives, risk agents search for structural threats, and a dedicated Red-Team Agent tries to prove the entire thesis wrong.
-The council then reaches a Buy, Hold, Sell, or Reject decision.
-But we don't ask users to blindly trust the AI.
-Every important conclusion is connected to inspectable evidence — from price history and market data to clickable original news sources.
-If a trade survives the council, the system can execute a paper trade through Alpaca and continue monitoring whether the original thesis remains valid.
-Discover. Challenge. Decide.
-
-49. Final Product Loop
-                        DISCOVER
-                            │
-                            ▼
-                    SHOULD-AI BUY?
-                            │
-                            ▼
-                       INVESTIGATE
-                            │
-              ┌─────────────┼─────────────┐
-              ▼             ▼             ▼
-            QUANT        INTEL          RISK
-              │             │             │
-              └─────────────┼─────────────┘
-                            ▼
-                       🔴 RED TEAM
-                            │
-                            ▼
-                         EVIDENCE
-                            │
-                            ▼
-                         COUNCIL
-                            │
-                   ┌────────┼────────┐
-                   ▼        ▼        ▼
-                  BUY      HOLD    REJECT
-                   │
-                   ▼
-                 ALPACA
-                   │
-                   ▼
-                MONITOR
-                   │
-                   ▼
-              THESIS CHECK
-                   │
-                   ▼
-             SHOULD-AI SELL?
-                   │
-                   ▼
-                COUNCIL
-                   │
-                SELL / HOLD
-
-
-50. Final Vision
-Should-AI Buy? aims to make autonomous trading more transparent, adversarial, and accessible.
-The system does not attempt to replace human judgment.
-Instead, it attempts to give users a tireless research team that:
-searches for opportunities
-investigates evidence
-challenges assumptions
-explains its reasoning
-links back to original sources
-executes when authorized
-and keeps checking whether it was wrong
-The fundamental question is simple:
-Should-AI Buy?
-But before answering:
-The council has to earn the right to say yes.
+# Product Requirements Document (PRD)
 
+**Product:** Should-AI Buy?  
+**Tag / Baseline:** `v0.3.0` (Phase 3: Evidence Architecture & Verifiable Reasoning)  
+**Core North Star:** An evidence-first autonomous trading council that discovers opportunities, investigates them from multiple specialized perspectives, challenges its own thesis through adversarial reasoning, enforces deterministic safety constraints, executes paper trades through Alpaca, and continuously monitors the resulting thesis.
+
+
+---
+
+## 1. Product Overview
+
+### What Should-AI Buy? Is
+**Should-AI Buy?** is a multi-agent trading investigation platform designed to replace opaque prediction models with a visible, evidence-backed deliberative process. Instead of a single model making an unverified financial prediction, Should-AI Buy? deploys a council of specialized agents (Discovery, Quant, Intelligence, Risk, Red Team, Decision) that systematically investigate an asset, attempt to disprove the bull thesis, verify claims against structured evidence, and enforce code-level safety boundaries before dispatching paper orders.
+
+### The Problem It Solves
+Retail traders frequently suffer from confirmation bias, fragmented information, and inability to rigorously stress-test investment ideas. Existing AI trading tools exacerbate this problem by acting as black-box predictors that output confidence scores without inspectable evidence or safety boundaries. Should-AI Buy? turns trading analysis into a transparent hypothesis-testing workflow where every claim is grounded in verifiable market and news evidence.
+
+### Why a Council Architecture Matters
+Financial markets involve orthogonal dimensions (technical structure, news catalysts, on-chain liquidity, holder concentration, downside tail risk). A monolithic prompt conflates these signals and easily falls prey to hype. A council architecture assigns strict, isolated responsibilities to dedicated agents, ensuring that quantitative metrics are calculated deterministically while adversarial agents actively look for reasons *not* to trade.
+
+### Supported Assets & Execution Model
+- **Supported Assets:** 24/7 Cryptocurrencies (e.g. `BTC/USD`, `ETH/USD`, `SOL/USD`) and US Equities (e.g. `AAPL`, `NVDA`, `TSLA`, `SPY`) with Friday market close handling during weekend sessions.
+- **Execution Model:** Paper trading via Alpaca API with deterministic portfolio allocation and position sizing.
+
+---
+
+## 2. Product Thesis & Loop
+
+The core operating loop of Should-AI Buy? is:
+
+```text
+OPPORTUNITY DISCOVERY
+        ↓
+CANDIDATE ASSET
+        ↓
+EVIDENCE COLLECTION (Single Snapshot)
+        ↓
+MULTI-PERSPECTIVE COUNCIL (Quant / Intelligence / Risk)
+        ↓
+RED TEAM CHALLENGE (Adversarial Refutation)
+        ↓
+COUNCIL DECISION (Consensus Synthesis)
+        ↓
+DETERMINISTIC RISK GATE (Hard Code Boundaries)
+        ↓
+PAPER EXECUTION (Alpaca Paper Trading)
+        ↓
+TRADE THESIS (Persistent Hypothesis)
+        ↓
+CONTINUOUS MONITORING & RE-EVALUATION
+```
+
+While the current version supports on-demand user commands (`Should-AI buy $BTC?`), the system architecture is designed to evolve toward autonomous background opportunity discovery and continuous thesis monitoring.
+
+---
+
+## 3. Problem Statement
+
+Conventional retail trading and existing AI financial tools suffer from systemic limitations:
+1. **Fragmented Information:** Traders must manually assemble price charts, technical indicators, news disclosures, and order book depth across disconnected platforms.
+2. **Confirmation Bias:** When a trader identifies an opportunity, they subconsciously search for validating news while ignoring red flags such as holder concentration or thin liquidity.
+3. **Opaque Black-Box AI:** Generic AI predictors generate trading recommendations without citing verifiable evidence, timestamps, or raw calculation sources.
+4. **Unsafe Direct AI Execution:** Allowing an AI model to directly submit financial orders without code-enforced safety checks creates catastrophic prompt injection and drift risks.
+5. **Thesis Drift:** Traders enter positions based on a specific catalyst (e.g. volume acceleration) but fail to exit when that specific catalyst deteriorates.
+
+---
+
+## 4. Product Principles
+
+1. **Evidence-First Explainability:** Every material claim made by an agent must link directly to an inspectable, structured evidence record with source attribution, timestamp, and verifiable URL.
+2. **Deterministic Where Determinism Matters:** Math, percentage returns, volatility, RSI, RVOL, position sizing, and safety boundaries must be calculated deterministically in code—never estimated by an AI model.
+3. **Adversarial Reasoning (Red-Team Core):** The system must not merely ask "Why should we buy this?"; it must actively ask "Why might this trade fail?" through a mandatory Red-Team refutation stage.
+4. **Single Immutable Market Snapshot:** All council reasoning for a given investigation operates over exactly one frozen market snapshot to eliminate race conditions and price hallucinations.
+5. **Explicit Failure Over Fake Data:** When external intelligence or news feeds are unavailable, agents must explicitly report failure rather than generating plausible synthetic news.
+6. **Separation of Reasoning & Safety:** AI council members can recommend an action, but the Deterministic Risk Gate possesses non-bypassable code authority over whether capital can be deployed.
+
+---
+
+## 5. Target Users
+
+- **Active Retail Traders:** Traders looking to compress hours of multi-source research into an instantaneous, structured investigation.
+- **High-Volatility & Crypto Market Participants:** Traders navigating meme tokens, emerging assets, and high-beta equities where rug-pull indicators, concentration risks, and liquidity depth are critical.
+- **Systematic & Evidence-Driven Investors:** Users who reject black-box financial advice and demand inspectable math, source links, and clear thesis invalidation rules.
+
+---
+
+## 6. Current User Experience (v0.2.0)
+
+1. **Command Input:** User inputs a command via the Command Center (e.g. `Should-AI buy $BTC?`, `Should-AI sell $ETH?`, `Should-AI watch $SOL?`, `Why did you reject $NOVA?`) or clicks a suggested prompt.
+2. **Command Parsing & Snapshot Fetch:** Intent and ticker are parsed; a single authoritative `MarketSnapshot` is fetched from Alpaca.
+3. **Visible Deliberation:** The 7-stage pipeline stepper renders live progression (`DISCOVERY` → `QUANT` / `INTELLIGENCE` / `RISK` → `RED_TEAM` → `DECISION` → `RISK_GATE`).
+4. **Perspective Inspection:** Users can click any stage to open an expandable details drawer or review individual perspective cards for each agent.
+5. **Red Team Spotlight:** Displays challenged assumptions, detected vulnerabilities, and the resulting thesis status (`INTACT`, `WEAKENED`, `DISPROVED`).
+6. **Verdict & Risk Gate Banner:** Highlights council consensus alongside the deterministic Risk Gate result (clearly marking when Risk Gate blocks a council BUY).
+7. **Evidence Explorer:** Users can filter evidence records by category (`ALL`, `MARKET`, `NEWS`, `FLOW`, `RISK`, `TECHNICAL`), review reliability tiers, and open external source links.
+8. **Interactive Chart & Portfolio:** Multi-timeframe candlestick chart (`1H`, `4H`, `1D`, `7D`, `30D`), multi-currency conversion, active paper positions, and on-demand thesis re-evaluation.
+
+---
+
+## 7. Current Feature Matrix
+
+| Capability | Status | Current Implementation (v0.2.0) | Future Expansion |
+| :--- | :---: | :--- | :--- |
+| **Command Center** | Implemented | Conversational input with regex parsing for `BUY`, `SELL`, `WATCH`, `WHY` and quick-suggestion pills. | Fuzzy intent matching, conversational follow-ups, and natural language filters. |
+| **Crypto Market Data** | Implemented | 24/7 Alpaca Crypto API integration (`v1beta3`) for spot prices and hourly/daily bars. | Multi-exchange order book depth and DEX liquidity pools. |
+| **US Equity Market Data** | Implemented | Alpaca Stock API (`v2`) snapshots with Friday market close handling during weekends. | Real-time quote streaming and extended hours / pre-market feeds. |
+| **Multi-Timeframe Charts** | Implemented | Canvas-based candle and volume chart supporting `1H`, `4H`, `1D`, `7D`, `30D` intervals. | Technical indicator overlays (MACD, Bollinger Bands, EMA ribbons). |
+| **Multi-Currency Display** | Implemented | Currency switcher supporting USD, EUR, GBP, JPY, IDR, AUD, CAD, CHF, CNY, SGD. | Live foreign exchange rate feed integration. |
+| **Discovery Agent** | Implemented | Evaluates baseline opportunity score from momentum, volume acceleration, RVOL, and liquidity. | Autonomous background market scanner integration. |
+| **Quant Agent** | Implemented | Deterministic calculation of RSI-14, RVOL, realized volatility, spread, and returns. | Multi-factor quantitative scoring and statistical arbitrage models. |
+| **Intelligence Agent** | Implemented | Analyzes public news catalysts and sentiment with explicit failure handling. | Live RSS connectors, SEC EDGAR filing parser, and social sentiment ingestion. |
+| **Risk Agent** | Implemented | Computes composite risk score, holder concentration %, and liquidity pool depth. | Deep on-chain contract audits and token unlock schedules. |
+| **Red Team Agent** | Implemented | Formulates refutation attacks, challenges assumptions, and flags vulnerabilities. | Multi-round adversarial debate and historical counterfactual simulation. |
+| **Decision Agent** | Implemented | Synthesizes council findings, links strongest support / counterargument, and sets consensus. | Dynamic confidence weighting based on historical agent accuracy. |
+| **Deterministic Risk Gate** | Implemented | Enforces hardcoded code safety limits ($250k liquidity, 70 max risk, 25% allocation). | User-configurable risk profiles (Conservative, Moderate, Aggressive). |
+| **Evidence Explorer** | Implemented | Category filtering, reliability badges (`PRIMARY`, `REPUTABLE`), timestamps, and external URLs. | Deep bidirectional citation graphs and contradiction matrices (Phase 3). |
+| **Paper Trading** | Implemented | Dispatches market orders to Alpaca Paper Trading API upon passed BUY decisions. | Limit orders, bracket orders (take-profit/stop-loss), and multi-broker support. |
+| **Trade Thesis** | Implemented | Creates persistent thesis with bull case, confidence, and invalidation conditions. | Dynamic thesis mutation and auto-adjusting trailing stop limits. |
+| **Monitoring / Re-evaluation** | Partially Implemented | `runMonitoringAgent` evaluates active positions against thesis conditions on demand. | Continuous background daemon with automated webhook alerts (Phase 6). |
+| **WATCH Command** | Partially Implemented | Command is parsed; returns asset analysis with watch criteria. | Persistent watchlist table and automatic alerts on threshold triggers (Phase 5). |
+| **WHY Command** | Partially Implemented | Command is parsed; explains rejection rationale and counterarguments. | Dedicated interactive deep-dive modal detailing agent disagreements. |
+| **Social Intelligence** | Planned | Architectural extension point identified; not implemented. | Twitter/X, Reddit, and Farcaster sentiment stream ingestion (Phase 4). |
+| **Opportunity Scanner** | Planned | Architectural extension point identified; not implemented. | Autonomous market screener detecting volume/momentum anomalies (Phase 5). |
+| **Streaming Deliberation (SSE)** | Planned | Events model implemented; investigation returned synchronously. | Real-time Server-Sent Events for animated stage transitions. |
+
+---
+
+## 8. Council Architecture
+
+The Council operates through a 7-stage visible lifecycle:
+
+```text
+1. DISCOVERY STAGE
+   └─ Question: "What is happening?"
+   └─ Action: Fetches authoritative single MarketSnapshot; establishes Opportunity Score.
+
+2. PARALLEL SPECIALIZED DELIBERATION
+   ├─ QUANT AGENT: "What do numbers say?" (RSI-14, RVOL, Realized Volatility, Spread)
+   ├─ INTELLIGENCE AGENT: "What news/catalysts exist?" (Disclosures, News, Sentiment)
+   └─ RISK AGENT: "What could go wrong?" (Holder concentration, Liquidity pool depth)
+
+3. RED TEAM ADVERSARIAL CHALLENGE (Core Differentiator)
+   └─ Question: "Why might the council be wrong?"
+   └─ Action: Attacks the preliminary bull thesis, identifies fatal vulnerabilities.
+   └─ Output: thesisStatus (INTACT | WEAKENED | DISPROVED).
+
+4. DECISION SYNTHESIS STAGE
+   └─ Question: "What is the council's verdict?"
+   └─ Action: Synthesizes multi-perspective findings into BUY, HOLD, SELL, or REJECT.
+
+5. DETERMINISTIC RISK GATE STAGE (Code Safety Boundary)
+   └─ Question: "Is capital deployment safe under hard code rules?"
+   └─ Action: Non-bypassable code validation over liquidity, risk, and allocation limits.
+```
+
+---
+
+## 9. Evidence-First Model
+
+### Current Implementation (v0.2.0)
+- **Data Model:** Structured `Evidence` objects containing `id`, `type`, `title`, `description`, `observedAt`, `source` (`name`, `url`, `publisher`, `retrievedAt`), `reliability` (`PRIMARY`, `REPUTABLE`, `SECONDARY`), and `isContradictory`.
+- **Deterministic Namespacing:** `EVID-MKT-<invId>-1`, `EVID-FLOW-<invId>-2`, `EVID-NEWS-<invId>-3`.
+- **Explorer UI:** Category-based filtering and clickable external URLs.
+
+### Planned Phase 3 Expansion (Evidence Architecture & Verifiable Reasoning)
+- **Bidirectional Claim-Evidence Resolution Graph:** Linking specific reasoning phrases directly to supporting/refuting evidence IDs.
+- **Multi-Source Aggregation:** Live connectors for regulatory disclosures (SEC EDGAR), on-chain verifiable events, and verified financial news feeds.
+- **Contradiction Matrix:** Visual interface contrasting bullish market signals against bearish risk flags.
+
+---
+
+## 10. Safety Model (Deterministic Risk Gate)
+
+The Risk Gate (`src/lib/risk-gate/index.ts`) is a pure code boundary evaluated before any order can reach the execution broker:
+1. **Minimum Liquidity:** `liquidityUsd >= $250,000`
+2. **Maximum Risk Score:** `riskScore <= 70 / 100`
+3. **Minimum Opportunity Score:** `opportunityScore >= 55 / 100`
+4. **Maximum Portfolio Exposure:** `positionValue <= 25% Available Cash`
+5. **Minimum Evidence Count:** `evidence.length >= 3`
+6. **Red-Team Fatal Flaw:** `thesisStatus !== 'DISPROVED'`
+
+**Architectural Rule:** AI reasoning may recommend; deterministic safety code decides whether execution is permitted.
+
+---
+
+## 11. Paper Trading & Thesis Model
+
+- **Order Submission:** When Council verdict is `BUY` and Risk Gate evaluates to `PASSED`, a paper order is dispatched to Alpaca via `alpacaService.submitPaperOrder`.
+- **Persistent Trade Thesis:** An approved trade creates a `TradeThesis` record containing:
+  - Entry price and timestamp
+  - Bull case rationale and supporting evidence IDs
+  - Key risk factors
+  - Explicit **invalidation conditions** (e.g. Momentum drops below 45, Liquidity drops below $1M, Stop-loss drawdown reaches -5.0%)
+- **Re-Evaluation:** `runMonitoringAgent` evaluates active positions against invalidation conditions, recommending `SELL` when original conditions break.
+
+---
+
+## 12. Future Opportunity Discovery (Planned Phase 5)
+
+Transitioning from on-demand user commands toward an autonomous discovery scanner:
+```text
+Market Data Stream ──> Opportunity Scanner ──> Volume/Momentum Anomaly ──> Candidate Queue ──> Council Investigation ──> Risk Gate ──> Trade / Watchlist
+```
+
+---
+
+## 13. Future Social Intelligence (Planned Phase 4)
+
+Structured social sentiment ingestion pipeline:
+```text
+Social Providers (X, Reddit, Farcaster) ──> SocialEvent Stream ──> Spam/Bot Filter ──> Extracted Sentiment ──> Evidence Object ──> Intelligence Agent
+```
+
+---
+
+## 14. Phased Roadmap
+
+- **Phase 1 — Foundation (Completed `v0.1.0`)**: Alpaca API integration, crypto/stock data adapter, multi-timeframe charts, and multi-currency conversion.
+- **Phase 2 — Council Runtime & Visible Deliberation (Completed `v0.2.0`)**: 7-stage council orchestrator, single immutable snapshot invariant, Red Team adversarial attack, deterministic Risk Gate, and DeliberationFeed UI.
+- **Phase 3 — Evidence Architecture & Verifiable Reasoning (Next)**: Claim-to-evidence citation graph, multi-source ingestion, contradiction matrix, and evidence verification badges.
+- **Phase 4 — Social Intelligence**: SocialEvent ingestion, bot detection, sentiment signal extraction, and Intelligence Agent expansion.
+- **Phase 5 — Opportunity Discovery & Watchlist**: Autonomous market scanner, opportunity ranking engine, and persistent watchlist table.
+- **Phase 6 — Autonomous Monitoring**: Continuous background monitoring daemon, automated thesis invalidation triggers, and exit safeguards.
+- **Phase 7 — Command Center / Workspace UX**: Conversational multi-turn workspace, contextual analysis panels, and draggable layouts.
+- **Phase 8 — Hackathon Hardening**: Reliability, error boundaries, rate-limiting resilience, and observability logging.
+- **Phase 9 — UI/UX 2.0 Polish**: Motion transitions, typography hierarchy, responsive design refinement, and theme polish.

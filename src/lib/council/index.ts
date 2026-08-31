@@ -6,7 +6,8 @@ import {
   CouncilStage,
   CouncilEvent,
   CouncilStageState,
-  AgentResult
+  AgentResult,
+  Claim
 } from '../types';
 import { fetchMarketSnapshot, getMarketEvidence } from '../market-data';
 import { getNewsEvidence } from '../news';
@@ -22,6 +23,16 @@ import {
   runRedTeamAgent,
   runDecisionAgent
 } from '../agents';
+import {
+  extractDiscoveryClaims,
+  extractQuantClaims,
+  extractIntelligenceClaims,
+  extractRiskClaims,
+  extractRedTeamClaims,
+  linkRefutations,
+  linkEvidenceToClaims
+} from '../claims';
+
 
 export async function orchestrateCouncilInvestigation(
   command: string,
@@ -53,8 +64,10 @@ export async function orchestrateCouncilInvestigation(
     evidence: [],
     timeline: [],
     events: [],
-    stages: initialStages
+    stages: initialStages,
+    claims: []   // Phase 3: populated as each agent runs
   };
+
 
   let eventCounter = 0;
   const emitCouncilEvent = (
@@ -135,12 +148,18 @@ export async function orchestrateCouncilInvestigation(
 
     const discoveryResult = runDiscoveryAgent(snapshot, investigation.evidence);
     investigation.agentRuns['discovery'] = discoveryResult;
+
+    // Phase 3: Extract Discovery claims
+    const discoveryClaims = extractDiscoveryClaims(id, snapshot, discoveryResult);
+    investigation.claims = [...(investigation.claims ?? []), ...discoveryClaims];
+
     emitCouncilEvent(
       'DISCOVERY',
       'COMPLETED',
       discoveryResult.summary,
       { opportunityScore: discoveryResult.metrics?.opportunityScore, price: snapshot.price }
     );
+
 
     // =========================================================================
     // 2. PARALLEL MULTI-PERSPECTIVE AGENT DELIBERATION (QUANT, INTEL, RISK)
@@ -156,6 +175,9 @@ export async function orchestrateCouncilInvestigation(
         try {
           const res = runQuantAgent(snapshot, investigation.evidence);
           investigation.agentRuns['quant'] = res;
+          // Phase 3: extract Quant claims
+          const claims = extractQuantClaims(id, snapshot, res);
+          investigation.claims = [...(investigation.claims ?? []), ...claims];
           emitCouncilEvent('QUANT', 'COMPLETED', res.summary, res.metrics);
           return res;
         } catch (err: any) {
@@ -182,6 +204,9 @@ export async function orchestrateCouncilInvestigation(
         try {
           const res = runIntelligenceAgent(investigation.evidence);
           investigation.agentRuns['intelligence'] = res;
+          // Phase 3: extract Intelligence claims
+          const claims = extractIntelligenceClaims(id, investigation.evidence, res);
+          investigation.claims = [...(investigation.claims ?? []), ...claims];
           emitCouncilEvent('INTELLIGENCE', 'COMPLETED', res.summary, res.metrics);
           return res;
         } catch (err: any) {
@@ -208,6 +233,9 @@ export async function orchestrateCouncilInvestigation(
         try {
           const res = runRiskAgent(snapshot, investigation.evidence);
           investigation.agentRuns['risk'] = res;
+          // Phase 3: extract Risk claims
+          const claims = extractRiskClaims(id, investigation.evidence, res);
+          investigation.claims = [...(investigation.claims ?? []), ...claims];
           emitCouncilEvent('RISK', 'COMPLETED', res.summary, res.metrics);
           return res;
         } catch (err: any) {
@@ -230,6 +258,8 @@ export async function orchestrateCouncilInvestigation(
       })()
     ]);
 
+
+
     // =========================================================================
     // 3. RED-TEAM ADVERSARIAL CHALLENGE STAGE
     // Core Differentiator: Actively attacks the bullish thesis
@@ -245,6 +275,14 @@ export async function orchestrateCouncilInvestigation(
       investigation.agentRuns
     );
     investigation.agentRuns['red_team'] = redTeamResult;
+
+    // Phase 3: Extract Red Team REFUTATION claims and link them to prior claims
+    const redTeamClaims = extractRedTeamClaims(id, investigation.evidence, redTeamResult, investigation.claims ?? []);
+    investigation.claims = [...(investigation.claims ?? []), ...redTeamClaims];
+    // Resolve refutations and recompute claim statuses across all claims
+    investigation.claims = linkRefutations(investigation.claims);
+    // Backfill evidence → claim references
+    linkEvidenceToClaims(investigation.evidence, investigation.claims);
 
     emitCouncilEvent(
       'RED_TEAM',

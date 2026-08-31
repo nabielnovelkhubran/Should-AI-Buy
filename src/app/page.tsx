@@ -120,6 +120,8 @@ export default function DashboardPage() {
               <RedTeamSpotlight
                 redTeamResult={investigation.agentRuns['red_team']}
                 asset={investigation.asset}
+                claims={investigation.claims ?? []}
+                evidence={investigation.evidence}
               />
               <DeliberationFeed
                 investigation={investigation}

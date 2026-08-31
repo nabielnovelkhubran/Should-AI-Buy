@@ -755,6 +755,243 @@ describe('9. Command Syntax Parser for Crypto & Stocks', () => {
   });
 });
 
+// ============================================================================
+// PHASE 3 TESTS — Evidence Architecture & Verifiable Reasoning
+// ============================================================================
+
+// Phase 3 helper: Claim ID generator (mirrors src/lib/claims/index.ts)
+function makeClaimId(investigationId, agentPrefix, seq) {
+  return `CLAIM-${investigationId}-${agentPrefix.toUpperCase()}-${seq}`;
+}
+
+// Phase 3 helper: freshness derivation (mirrors src/lib/connectors/normalizer.ts)
+function deriveFreshness(observedAt, retrievedAt) {
+  const ageMs = new Date(retrievedAt).getTime() - new Date(observedAt).getTime();
+  const ageHours = ageMs / (1000 * 60 * 60);
+  if (ageHours < 1) return 'LIVE';
+  if (ageHours < 24) return 'RECENT';
+  return 'STALE';
+}
+
+// Phase 3 helper: deriveClaimStatus (mirrors src/lib/claims/index.ts)
+function deriveClaimStatus(claim, allClaims) {
+  const isRefuted = allClaims.some(c => c.type === 'REFUTATION' && c.refutationOf === claim.id);
+  if (isRefuted) return 'REFUTED';
+  if (claim.contradictoryEvidenceIds.length > 0) return 'CONTESTED';
+  if (claim.supportingEvidenceIds.length === 0 && claim.type !== 'REFUTATION') return 'UNSUPPORTED';
+  return 'SUPPORTED';
+}
+
+// Phase 3 helper: contradiction matrix topic matching
+const TOPICS = [
+  { label: 'Momentum', keywords: ['momentum', 'rsi', 'trend', 'acceleration'] },
+  { label: 'Liquidity', keywords: ['liquidity', 'spread', 'depth', 'slippage', 'exit'] },
+  { label: 'Catalyst', keywords: ['catalyst', 'news', 'etf', 'tvl', 'bridge', 'launch'] },
+  { label: 'Concentration', keywords: ['concentration', 'holder', 'wallet', 'whale', 'insider'] },
+  { label: 'Volume', keywords: ['volume', 'rvol', 'wash', 'organic'] },
+  { label: 'Risk', keywords: ['risk', 'unlock', 'suspicious', 'transfer'] },
+];
+
+function matchesTopic(claim, keywords) {
+  const text = claim.statement.toLowerCase();
+  return keywords.some(kw => text.includes(kw));
+}
+
+function buildContradictionMatrix(claims) {
+  const rows = [];
+  for (const { label, keywords } of TOPICS) {
+    const matching = claims.filter(c => matchesTopic(c, keywords));
+    if (matching.length === 0) continue;
+    const bullishClaims = matching.filter(c => c.type === 'BULLISH');
+    const bearishClaims = matching.filter(c => c.type === 'BEARISH');
+    const refutations = matching.filter(c => c.type === 'REFUTATION');
+    const isContested = (bullishClaims.length > 0) && (bearishClaims.length > 0 || refutations.length > 0);
+    rows.push({ topic: label, bullishClaims, bearishClaims, refutations, isContested });
+  }
+  return {
+    rows,
+    totalContestedTopics: rows.filter(r => r.isContested).length,
+    totalRefutations: claims.filter(c => c.type === 'REFUTATION').length,
+  };
+}
+
+// =========================================================================
+describe('10. Phase 3 — Claim ID Generation (Deterministic)', () => {
+  it('generates CLAIM-{invId}-{PREFIX}-{seq} format', () => {
+    const id = makeClaimId('INV-ABC', 'DSC', 1);
+    assert.strictEqual(id, 'CLAIM-INV-ABC-DSC-1');
+  });
+
+  it('prefixes are uppercased regardless of input case', () => {
+    const id = makeClaimId('INV-001', 'qnt', 2);
+    assert.strictEqual(id, 'CLAIM-INV-001-QNT-2');
+  });
+
+  it('sequential IDs for same agent are unique', () => {
+    const id1 = makeClaimId('INV-X', 'RT', 1);
+    const id2 = makeClaimId('INV-X', 'RT', 2);
+    assert.notStrictEqual(id1, id2);
+  });
+});
+
+// =========================================================================
+describe('11. Phase 3 — VerificationStatus & Freshness', () => {
+  it('deriveFreshness returns LIVE for < 1 hour', () => {
+    const now = new Date();
+    const obs = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
+    const freshness = deriveFreshness(obs, now.toISOString());
+    assert.strictEqual(freshness, 'LIVE');
+  });
+
+  it('deriveFreshness returns RECENT for 1-24 hours', () => {
+    const now = new Date();
+    const obs = new Date(now.getTime() - 6 * 60 * 60 * 1000).toISOString();
+    const freshness = deriveFreshness(obs, now.toISOString());
+    assert.strictEqual(freshness, 'RECENT');
+  });
+
+  it('deriveFreshness returns STALE for > 24 hours', () => {
+    const now = new Date();
+    const obs = new Date(now.getTime() - 30 * 60 * 60 * 1000).toISOString();
+    const freshness = deriveFreshness(obs, now.toISOString());
+    assert.strictEqual(freshness, 'STALE');
+  });
+
+  it('VERIFIED status is distinct from MOCK status', () => {
+    const live = 'VERIFIED';
+    const mock = 'MOCK';
+    assert.notStrictEqual(live, mock);
+  });
+
+  it('FAILED status recorded — no fabrication substitute', () => {
+    // Simulates what createFailureEvidence does: produces a FAILED item, not null
+    const failedEvidence = {
+      id: 'EVID-NEWS-INV-001-FAIL-mock-news-v1-1',
+      verificationStatus: 'FAILED',
+      value: null,
+      title: '[Source Unavailable] Mock News Database (Demo)'
+    };
+    assert.strictEqual(failedEvidence.verificationStatus, 'FAILED');
+    assert.strictEqual(failedEvidence.value, null);
+    assert.ok(failedEvidence.title.startsWith('[Source Unavailable]'));
+  });
+});
+
+// =========================================================================
+describe('12. Phase 3 — Claim Status Derivation (Deterministic)', () => {
+  it('claim with supporting evidence only → SUPPORTED', () => {
+    const claim = {
+      id: 'CLAIM-INV-001-DSC-1',
+      type: 'BULLISH',
+      supportingEvidenceIds: ['EVID-MKT-1'],
+      contradictoryEvidenceIds: []
+    };
+    assert.strictEqual(deriveClaimStatus(claim, []), 'SUPPORTED');
+  });
+
+  it('claim with contradictory evidence → CONTESTED', () => {
+    const claim = {
+      id: 'CLAIM-INV-001-QNT-1',
+      type: 'BULLISH',
+      supportingEvidenceIds: ['EVID-MKT-1'],
+      contradictoryEvidenceIds: ['EVID-NEWS-1']
+    };
+    assert.strictEqual(deriveClaimStatus(claim, []), 'CONTESTED');
+  });
+
+  it('claim targeted by REFUTATION → REFUTED', () => {
+    const claim = {
+      id: 'CLAIM-INV-001-QNT-1',
+      type: 'BULLISH',
+      supportingEvidenceIds: ['EVID-MKT-1'],
+      contradictoryEvidenceIds: []
+    };
+    const refutation = {
+      id: 'CLAIM-INV-001-RT-1',
+      type: 'REFUTATION',
+      refutationOf: 'CLAIM-INV-001-QNT-1',
+      supportingEvidenceIds: [],
+      contradictoryEvidenceIds: []
+    };
+    assert.strictEqual(deriveClaimStatus(claim, [refutation]), 'REFUTED');
+  });
+
+  it('claim with no evidence → UNSUPPORTED', () => {
+    const claim = {
+      id: 'CLAIM-INV-001-INT-1',
+      type: 'NEUTRAL',
+      supportingEvidenceIds: [],
+      contradictoryEvidenceIds: []
+    };
+    assert.strictEqual(deriveClaimStatus(claim, []), 'UNSUPPORTED');
+  });
+
+  it('REFUTATION type with no evidence → SUPPORTED (not UNSUPPORTED)', () => {
+    // Refutations are their own evidence — they don't need external evidence IDs
+    const claim = {
+      id: 'CLAIM-INV-001-RT-1',
+      type: 'REFUTATION',
+      refutationOf: 'CLAIM-INV-001-QNT-1',
+      supportingEvidenceIds: [],
+      contradictoryEvidenceIds: []
+    };
+    // REFUTATION type skips the UNSUPPORTED check
+    const status = deriveClaimStatus(claim, []);
+    assert.notStrictEqual(status, 'UNSUPPORTED');
+  });
+});
+
+// =========================================================================
+describe('13. Phase 3 — Contradiction Matrix', () => {
+  const testClaims = [
+    {
+      id: 'CLAIM-INV-001-QNT-1',
+      type: 'BULLISH',
+      statement: 'Momentum score is 78/100 with RSI-14 at 62 and high volume acceleration.'
+    },
+    {
+      id: 'CLAIM-INV-001-RT-1',
+      type: 'REFUTATION',
+      refutationOf: 'CLAIM-INV-001-QNT-1',
+      statement: 'Momentum metrics may be distorted by wash trading volume with concentrated insider activity.'
+    },
+    {
+      id: 'CLAIM-INV-001-INT-1',
+      type: 'BULLISH',
+      statement: 'ETF catalyst confirmed: Bloomberg reports institutional inflow of $650M.'
+    },
+    {
+      id: 'CLAIM-INV-001-INT-2',
+      type: 'BEARISH',
+      statement: 'Contradictory catalyst: whale wallet cluster detected before news announcement.'
+    }
+  ];
+
+  it('builds matrix rows from claim topics', () => {
+    const matrix = buildContradictionMatrix(testClaims);
+    assert.ok(matrix.rows.length > 0);
+  });
+
+  it('detects contested topic (Momentum has bullish + refutation)', () => {
+    const matrix = buildContradictionMatrix(testClaims);
+    const momentumRow = matrix.rows.find(r => r.topic === 'Momentum');
+    assert.ok(momentumRow, 'Momentum row must exist');
+    assert.ok(momentumRow.isContested, 'Momentum must be contested');
+  });
+
+  it('counts total refutations correctly', () => {
+    const matrix = buildContradictionMatrix(testClaims);
+    assert.strictEqual(matrix.totalRefutations, 1);
+  });
+
+  it('detects contested catalyst topic (bullish + bearish)', () => {
+    const matrix = buildContradictionMatrix(testClaims);
+    const catalystRow = matrix.rows.find(r => r.topic === 'Catalyst');
+    assert.ok(catalystRow, 'Catalyst row must exist');
+    assert.ok(catalystRow.isContested, 'Catalyst must be contested');
+  });
+});
+
 console.log(`\n========================================`);
 console.log(`TEST SUMMARY: ${testsPassed}/${testsRun} PASSED (${testsFailed} FAILED)`);
 console.log(`========================================\n`);

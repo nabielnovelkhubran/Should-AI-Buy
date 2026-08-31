@@ -10,6 +10,57 @@ export type InvestigationStatus =
   | 'COMPLETED' 
   | 'FAILED';
 
+// ---------------------------------------------------------------------------
+// Phase 3: Verification Status
+// Separates source *quality* (reliability) from *retrieval outcome* for this
+// specific fetch. All adapters must set this — never leave it undefined.
+// ---------------------------------------------------------------------------
+export type VerificationStatus =
+  | 'VERIFIED'    // Source returned valid, parseable, structurally complete data
+  | 'UNVERIFIED'  // Data returned but not independently corroborated
+  | 'FAILED'      // Adapter threw SourceUnavailableError — failure recorded, nothing fabricated
+  | 'STALE'       // Retrieved successfully but beyond acceptable freshness window (>24h)
+  | 'MOCK';       // Explicitly labeled demo/development data (not production intelligence)
+
+// ---------------------------------------------------------------------------
+// Phase 3: Claim Domain Types
+// ---------------------------------------------------------------------------
+export type ClaimType =
+  | 'BULLISH'     // Assertion supporting the investment thesis
+  | 'BEARISH'     // Assertion opposing the investment thesis
+  | 'RISK'        // Risk-specific assertion
+  | 'REFUTATION'  // Red Team counterclaim explicitly attacking an existing Claim
+  | 'NEUTRAL';    // Contextual observation without directional bias
+
+export type ClaimStatus =
+  | 'SUPPORTED'    // Has at least one supporting evidence item, no fatal contradiction
+  | 'CONTESTED'    // Has contradictory evidence challenging the assertion
+  | 'REFUTED'      // A Red Team REFUTATION claim explicitly targets this claim
+  | 'UNSUPPORTED'; // No evidence ID references this claim
+
+/**
+ * A Claim is a structured, inspectable assertion made by a council agent.
+ * It connects agent reasoning (AgentResult.summary) to the underlying Evidence
+ * objects. Claims are IMMUTABLE once produced. Red Team creates REFUTATION
+ * claims that reference original Claim IDs — it does not modify existing claims.
+ */
+export interface Claim {
+  id: string;                          // Deterministic: CLAIM-{invId}-{agentPrefix}-{seq}
+  investigationId: string;
+  agent: 'discovery' | 'quant' | 'intelligence' | 'risk' | 'red_team' | 'decision';
+  stage: CouncilStage;
+  type: ClaimType;
+  statement: string;                   // Specific, falsifiable factual assertion
+  confidence: number;                  // 0–100, agent-declared
+  status: ClaimStatus;                 // Derived deterministically from evidence relationships
+  supportingEvidenceIds: string[];
+  contradictoryEvidenceIds: string[];
+  refutedByClaimId?: string;           // Set if a REFUTATION claim targets this claim
+  refutationOf?: string;               // If type=REFUTATION: the Claim.id being refuted
+  createdAt: string;
+}
+
+
 export type CouncilStage =
   | 'DISCOVERY'
   | 'QUANT'
@@ -55,6 +106,8 @@ export interface SourceProvenance {
   publisher?: string;
   publishedAt?: string;
   retrievedAt: string;
+  // Phase 3: stable adapter identifier for full provenance tracing
+  adapterVersion?: string;
 }
 
 export interface Evidence {
@@ -63,12 +116,26 @@ export interface Evidence {
   type: EvidenceType;
   title: string;
   description: string;
+  /** When the underlying fact was observed/published (NOT when the system retrieved it) */
   observedAt: string;
   source: SourceProvenance;
   value: any;
   metadata?: Record<string, any>;
+  /** Describes the source tier: PRIMARY = authoritative data feed, REPUTABLE = major publisher, etc. */
   reliability: ReliabilityRating;
   isContradictory?: boolean;
+
+  // Phase 3 additions -------------------------------------------------------
+  /** Outcome of the retrieval attempt for THIS specific fetch — separate from source tier */
+  verificationStatus?: VerificationStatus;
+  /** Stable adapter ID that produced this evidence item, e.g. 'alpaca-market-v2' */
+  adapterSource?: string;
+  /** Derived from observedAt vs source.retrievedAt delta */
+  freshness?: 'LIVE' | 'RECENT' | 'STALE';
+  /** Claim IDs this evidence item participates in (supporting or contradicting) */
+  claimIds?: string[];
+  /** Evidence IDs that this item directly contradicts (bidirectional graph edge) */
+  contradicts?: string[];
 }
 
 export interface AgentResult {
@@ -91,9 +158,12 @@ export interface AgentResult {
     thesisStatus: 'INTACT' | 'WEAKENED' | 'DISPROVED';
     counterEvidenceIds: string[];
   };
+  /** Phase 3: IDs of Claim objects this agent produced for this investigation */
+  claimIds?: string[];
 }
 
 export interface InvalidationCondition {
+
   id: string;
   condition: string;
   metricKey: string;
@@ -192,6 +262,8 @@ export interface Investigation {
   decision?: FinalDecision;
   thesis?: TradeThesis;
   error?: string;
+  /** Phase 3: All Claim objects produced during council deliberation */
+  claims?: Claim[];
 }
 
 export interface Position {

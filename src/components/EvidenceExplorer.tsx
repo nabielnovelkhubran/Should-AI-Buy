@@ -1,16 +1,19 @@
 'use client';
 import React, { useState } from 'react';
-import { ExternalLink, AlertTriangle, Globe, Database, ShieldCheck } from 'lucide-react';
-import { Evidence, ReliabilityRating } from '../lib/types';
+import { ExternalLink, AlertTriangle, Globe, Database, ShieldCheck, Wifi, WifiOff, Clock, FlaskConical } from 'lucide-react';
+import { Evidence, ReliabilityRating, VerificationStatus } from '../lib/types';
 
 interface EvidenceExplorerProps {
   evidence: Evidence[];
   initialCategory?: string;
+  /** If provided, renders claim reference chips on evidence cards */
+  claimsById?: Map<string, { id: string; type: string; agent: string }>;
 }
 
 export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
   evidence,
-  initialCategory = 'ALL'
+  initialCategory = 'ALL',
+  claimsById
 }) => {
   const [filter, setFilter] = useState<string>(initialCategory.toUpperCase());
 
@@ -30,9 +33,56 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
     }
   };
 
+  // Phase 3: Verification status badge
+  const getVerificationBadge = (status?: VerificationStatus) => {
+    switch (status) {
+      case 'VERIFIED':
+        return (
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <Wifi className="w-2.5 h-2.5" /> LIVE
+          </span>
+        );
+      case 'MOCK':
+        return (
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <FlaskConical className="w-2.5 h-2.5" /> DEMO DATA
+          </span>
+        );
+      case 'FAILED':
+        return (
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+            <WifiOff className="w-2.5 h-2.5" /> SOURCE FAILED
+          </span>
+        );
+      case 'STALE':
+        return (
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <Clock className="w-2.5 h-2.5" /> STALE
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Phase 3: Freshness indicator
+  const getFreshnessChip = (freshness?: Evidence['freshness']) => {
+    if (!freshness) return null;
+    const colors: Record<string, string> = {
+      LIVE:   'text-emerald-400',
+      RECENT: 'text-cyan-400',
+      STALE:  'text-amber-400'
+    };
+    return (
+      <span className={`text-[10px] font-mono ${colors[freshness] ?? 'text-slate-500'}`}>
+        {freshness}
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-4">
-      
+
       {/* Category Filter & Provenance Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[#11141d] p-3.5 rounded-2xl border border-slate-800">
         <div className="flex flex-wrap items-center gap-2">
@@ -58,7 +108,7 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
 
         <div className="text-xs text-slate-400 flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-indigo-400" />
-          <span>Source Provenance: <strong className="text-white">100% Traceable</strong></span>
+          <span>Source Provenance: <strong className="text-white">Full Traceability</strong></span>
         </div>
       </div>
 
@@ -74,12 +124,13 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
             }`}
           >
             <div>
-              <div className="flex items-center justify-between gap-2 mb-2">
+              {/* Row 1: Type + ID + Reliability + Verification */}
+              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase ${
-                    item.type === 'NEWS' ? 'bg-cyan-500/20 text-cyan-400' :
+                    item.type === 'NEWS'    ? 'bg-cyan-500/20 text-cyan-400' :
                     item.type === 'MARKET' ? 'bg-emerald-500/20 text-emerald-400' :
-                    item.type === 'FLOW' ? 'bg-purple-500/20 text-purple-400' :
+                    item.type === 'FLOW'   ? 'bg-purple-500/20 text-purple-400' :
                     'bg-amber-500/20 text-amber-400'
                   }`}>
                     {item.type}
@@ -87,7 +138,9 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
                   <span className="text-[10px] font-mono text-slate-500">{item.id}</span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Phase 3: Verification badge before reliability */}
+                  {getVerificationBadge(item.verificationStatus)}
                   {getReliabilityBadge(item.reliability)}
                   {item.isContradictory && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center gap-1">
@@ -97,33 +150,84 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({
                 </div>
               </div>
 
+              {/* Row 2: Title + Description */}
               <h4 className="text-sm font-bold text-white mb-1.5 leading-snug">{item.title}</h4>
               <p className="text-xs text-slate-300 leading-relaxed mb-3">{item.description}</p>
+
+              {/* Phase 3: Claim reference chips */}
+              {item.claimIds && item.claimIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {item.claimIds.map(cid => {
+                    const claim = claimsById?.get(cid);
+                    return (
+                      <span
+                        key={cid}
+                        title={`Referenced by ${claim ? `${claim.agent} (${claim.type})` : cid}`}
+                        className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-indigo-500/30 bg-indigo-500/10 text-indigo-400"
+                      >
+                        {cid.split('-').slice(-2).join('-')}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Phase 3: Level-1 contradiction chips */}
+              {item.contradicts && item.contradicts.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {item.contradicts.map(eid => (
+                    <span
+                      key={eid}
+                      title={`This item contradicts ${eid}`}
+                      className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-rose-500/30 bg-rose-500/10 text-rose-400"
+                    >
+                      ↯ {eid.split('-').slice(-2).join('-')}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Source Provenance Footer */}
-            <div className="pt-3 border-t border-slate-800/70 flex flex-wrap items-center justify-between gap-2 text-xs">
-              <div className="text-slate-400 flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span className="font-medium text-slate-300">{item.source.publisher || item.source.name}</span>
-                <span className="text-[10px] text-slate-600 font-mono">({new Date(item.observedAt).toLocaleTimeString()})</span>
+            {/* Source Provenance Footer — Phase 3: shows observedAt + retrievedAt separately */}
+            <div className="pt-3 border-t border-slate-800/70 space-y-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="text-slate-400 flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <span className="font-medium text-slate-300">{item.source.publisher || item.source.name}</span>
+                </div>
+
+                {item.source.url ? (
+                  <a
+                    href={item.source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 hover:underline"
+                  >
+                    Inspect Source
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1">
+                    <Database className="w-3 h-3 text-slate-600" /> Internal Adapter
+                  </span>
+                )}
               </div>
 
-              {item.source.url ? (
-                <a
-                  href={item.source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 hover:underline"
-                >
-                  Inspect Source
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              ) : (
-                <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1">
-                  <Database className="w-3 h-3 text-slate-600" /> Internal Adapter
+              {/* Phase 3: Timestamp separation — observedAt vs retrievedAt */}
+              <div className="flex flex-wrap gap-3 text-[10px] text-slate-600 font-mono">
+                <span>
+                  <span className="text-slate-500">observed: </span>
+                  {new Date(item.observedAt).toLocaleTimeString()}
                 </span>
-              )}
+                <span>
+                  <span className="text-slate-500">fetched: </span>
+                  {new Date(item.source.retrievedAt).toLocaleTimeString()}
+                </span>
+                {getFreshnessChip(item.freshness)}
+                {item.adapterSource && (
+                  <span className="text-slate-600">via {item.adapterSource}</span>
+                )}
+              </div>
             </div>
 
           </div>
