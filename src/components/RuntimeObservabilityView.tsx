@@ -89,6 +89,9 @@ export function getThresholdsForPercentage(pct: number) {
     minRiskRewardRatio: Number((2.0 - factor * 1.0).toFixed(2)),
     minLiquidityUsd: Math.round(500000 - factor * 400000),
     maxSpreadBps: Math.round(50 + factor * 50),
+    maxOpenPositions: Math.round(5 + factor * 11), // Scales from 5 to 16 positions!
+    maxPortfolioExposurePct: Math.round(50 + factor * 50), // Scales from 50% to 100%!
+    maxPositionSizeUsd: Math.round(5000 + factor * 20000), // Scales from $5k to $25k!
   };
 }
 

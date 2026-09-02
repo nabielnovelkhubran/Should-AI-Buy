@@ -110,6 +110,9 @@ export async function POST(req: NextRequest) {
         maxOptionSpreadDollars:[0.05, 5],
         candidateEvaluationFloor: [30, 100],
         highConvictionScore:   [30, 100],
+        maxOpenPositions:      [1, 30],
+        maxPositionSizeUsd:    [1000, 100_000],
+        maxPortfolioExposurePct: [10, 100],
       };
       for (const [key, [min, max]] of Object.entries(allowedKeys)) {
         if (typeof body?.[key] === 'number') {

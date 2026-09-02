@@ -28,19 +28,19 @@ export const STANDARD_AGENT_CONFIG: AgentStrategyConfig = {
 
 export const HIGH_RISK_AGENT_CONFIG: AgentStrategyConfig = {
   riskProfile: 'HIGH_RISK',
-  maxPositionSizeUsd: 15000.00,        // $15k max per position (15% on $100k)
-  maxPortfolioExposurePct: 80.0,       // 80% max gross exposure
-  maxConcentrationPct: 35.0,           // 35% single-asset cap
-  minConfidenceScore: 55,              // 55% minimum AI confidence
-  minOpportunityScore: 50,             // 50 execution threshold (The Hackathon Mapping)
-  candidateEvaluationFloor: 50,        // 50 investigation floor
-  highConvictionScore: 55,             // 55 high-conviction cutoff
-  minRiskRewardRatio: 1.25,            // 1.25R min R:R (Captures 1.35R - 1.79R day/swing setups)
-  minLiquidityUsd: 250000.00,          // $250k liquidity floor
-  maxSpreadBps: 50,                    // 50 bps max spread for spot
-  maxOptionSpreadDollars: 0.20,        // $0.20 max spread for options
+  maxPositionSizeUsd: 25000.00,        // $25k max per position (25% on $100k)
+  maxPortfolioExposurePct: 100.0,      // 100% max gross exposure (Full deployment)
+  maxConcentrationPct: 40.0,           // 40% single-asset cap
+  minConfidenceScore: 45,              // 45% minimum AI confidence
+  minOpportunityScore: 40,             // 40 execution threshold
+  candidateEvaluationFloor: 40,        // 40 investigation floor
+  highConvictionScore: 50,             // 50 high-conviction cutoff
+  minRiskRewardRatio: 1.0,             // 1.0R min R:R
+  minLiquidityUsd: 100000.00,          // $100k liquidity floor
+  maxSpreadBps: 100,                   // 100 bps max spread for spot
+  maxOptionSpreadDollars: 0.50,        // $0.50 max spread for options
   staleDataThresholdMs: 15 * 60 * 1000,
-  maxOpenPositions: 8,
+  maxOpenPositions: 16,                // Up to 16 concurrent positions
   reconciliationWindowDays: 3,
   circuitBreakerMaxConsecutiveFailures: 3
 };
