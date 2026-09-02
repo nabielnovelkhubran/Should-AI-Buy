@@ -261,7 +261,23 @@ The test suite in `tests/run-tests.js` executes 20 automated tests:
   - **Failure Isolation:** Discovery and Monitoring run in isolated try/catch boundaries; an error in one subsystem does not prevent or corrupt execution in the other.
   - **Automation API & Operator Control:** `GET/POST /api/automation` supporting `start`, `stop`, `runNow`, and `updateConfig` operations.
   - **Operator UI & Audit Trail:** Interactive `AutomationControl` component displaying scheduler state, live metrics, job cards, manual triggers, and real-time audit logs.
-- **Phase 7 (Command Center / Workspace UX - Next):** Conversational multi-turn workspace, contextual analysis panels, and draggable layouts.
-- **Future Social Expansion:** Live X (Twitter) API v2 connector, real-time WebSocket ingestion, and production ML bot detection models.
-- **Streaming (SSE):** Upgrading `/api/investigations` to stream `CouncilEvent` objects via Server-Sent Events for real-time frontend animation.
+- **Phase 7 (Command Center & Workspace UX - Completed):**
+  - **Unified Operator Command Center:** `CommandCenterView` synthesizes real-time vitals, high-level HUD indicators (Environment, Automation, Discovery, Thesis Health, Risk Gate, Portfolio Equity), prioritized alerts, active deliberation spotlight, paper holdings with inline thesis health progress bars, and automation telemetry.
+  - **Prioritized Attention & Alert Center:** Real-time alert classification (`CRITICAL`, `WARNING`, `INFO`) ranking invalidations, concentration risks, scheduler failures, and high-score discovery candidates with direct one-click action buttons.
+  - **8-Stage Reasoning & Execution Lifecycle Pipeline:** Visualizes the full continuous workflow (`DISCOVERY` $\rightarrow$ `QUEUED` $\rightarrow$ `COUNCIL` $\rightarrow$ `RED TEAM` $\rightarrow$ `VERDICT` $\rightarrow$ `RISK GATE` $\rightarrow$ `PAPER ORDER` $\rightarrow$ `THESIS MONITOR`) with deep-link navigation.
+  - **Workspace Information Architecture:** Multi-tab operator navigation (`Command Center`, `Discovery Queue`, `Council Deliberation`, `Portfolio & Risk`, `Evidence & Claims`, `Automation Daemon`).
+  - **Centralized State Polling:** 8-second interval polling preventing runaway requests or uncoordinated multiple fetches.
+- **Phase 8 (Hackathon Hardening & System Freeze - Completed):**
+  - **Error Containment & Credential Sanitization:** `sanitizeErrorMessage()` and `formatSanitizedError()` scrub Alpaca API keys, secret keys, Bearer/Basic headers, file paths, and stack traces across logs and responses.
+  - **System Health & Degraded State Engine:** Explicit health states (`ONLINE`, `DEGRADED`, `OFFLINE`, `STALE`) with stale data tagging (`wrapWithStaleCheck`) and non-blocking notification banners.
+  - **Request Resilience & Polling Lifecycle:** Centralized `AbortController` cancellation, concurrency locks against overlapping fetches, tab visibility pause/resume (`document.visibilityState`), and bounded exponential backoff (8s $\rightarrow$ 16s $\rightarrow$ 30s).
+  - **Server-Side API Hardening:** Strict schema and enum validation across all 11 API endpoints; rejection of malformed IDs, invalid symbols, and bad payloads with standard 400/404/405 codes.
+  - **Broker & Rate-Limit Isolation:** 429 `Retry-After` parsing, 401 fail-closed protection, and absolute isolation between analytical truth (Council verdict) and execution truth.
+  - **Operator Safety Guarantees:** Clear, unambiguous phrasing on all consequential actions ("Protective exit — generated from thesis invalidation", `PAPER ONLY`).
+  - **Deterministic Hackathon Demo Support:** Purely deterministic 10-step fixture scenario (`src/lib/demo/index.ts`) modeling full lifecycle from scanner to protective exit with zero stochastic logic.
+  - **System Freeze:** Domain and trading engine functionally frozen for Phase 9 UI/UX canvas workspace redesign.
+- **Future Expansion (Phase 9+):**
+  - **Command-Driven Blank-Canvas Workspace:** Floating desktop windows, movable/resizable tool surfaces, and modern typography.
+  - **Live X (Twitter) Connector:** Production WebSocket ingestion and machine-learning bot scoring.
+
 

@@ -56,7 +56,7 @@ const EvidenceMini: React.FC<{ ev: Evidence; isContradicting?: boolean }> = ({ e
   <div className={`flex items-start gap-2 p-2 rounded-lg border text-xs ${
     isContradicting
       ? 'bg-rose-950/20 border-rose-500/20'
-      : 'bg-slate-900/50 border-slate-700/50'
+      : 'bg-[#1f1e23] border-slate-700/50'
   }`}>
     <span className={`font-mono text-[10px] shrink-0 mt-0.5 ${isContradicting ? 'text-rose-400' : 'text-indigo-400'}`}>
       {ev.id}

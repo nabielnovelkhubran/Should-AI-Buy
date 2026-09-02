@@ -8,8 +8,10 @@ import {
   calculateMomentumScore
 } from '../quant';
 import { alpacaDataAdapter, AlpacaDataError, AlpacaRawSnapshot } from './alpaca-adapter';
+import { marketDataRateLimiter } from './rate-limiter';
 
 export { AlpacaDataError } from './alpaca-adapter';
+export { marketDataRateLimiter, MarketDataRateLimiter } from './rate-limiter';
 
 /**
  * Fetches real market snapshot and bars from Alpaca Market Data API.
@@ -20,7 +22,8 @@ export { AlpacaDataError } from './alpaca-adapter';
  */
 export async function fetchMarketSnapshot(symbol: string): Promise<MarketSnapshot> {
   const cleanSymbol = symbol.toUpperCase().replace(/^\$/, '').trim();
-  const isCrypto = alpacaDataAdapter.isCryptoSymbol(cleanSymbol);
+  return marketDataRateLimiter.execute(`snapshot-${cleanSymbol}`, async () => {
+    const isCrypto = alpacaDataAdapter.isCryptoSymbol(cleanSymbol);
 
   let symbolDisplay: string;
   let candles1H: Candle[] = [];
@@ -112,11 +115,21 @@ export async function fetchMarketSnapshot(symbol: string): Promise<MarketSnapsho
   // 4. Deterministic volume & technical metrics
   const activeCandles = candles1H.length > 0 ? candles1H : candles1D;
   const volumes = activeCandles.map(c => c.volume);
-  const latestVolume = volumes.length > 0 ? volumes[volumes.length - 1] : (rawSnapshot?.dailyBar?.v || 1000000);
+  const latestVolume = volumes.length > 0 ? volumes[volumes.length - 1] : (rawSnapshot?.dailyBar?.v || 0);
   const prevVolume = volumes.length > 1 ? volumes[volumes.length - 2] : latestVolume;
   const rvol = calculateRVOL(latestVolume, volumes.slice(-15));
   const volumeAccel = calculateVolumeAcceleration(latestVolume, prevVolume);
-  const volume24h = rawSnapshot?.dailyBar?.v ?? (volumes.length > 0 ? volumes.slice(-24).reduce((a, b) => a + b, 0) : latestVolume);
+  
+  // Rolling 24-hour volume normalized across hourly candles and daily bar
+  const hourly24hVolume = candles1H.length >= 24
+    ? candles1H.slice(-24).reduce((a, b) => a + b.volume, 0)
+    : (candles1H.length > 0 ? (candles1H.reduce((a, b) => a + b.volume, 0) * (24 / candles1H.length)) : 0);
+  const volume24h = Math.max(
+    rawSnapshot?.dailyBar?.v ?? 0,
+    rawSnapshot?.prevDailyBar?.v ?? 0,
+    hourly24hVolume
+  );
+  
   const realizedVol = calculateRealizedVolatility(activeCandles);
   const rsi = calculateRSI(activeCandles);
   const momentum = calculateMomentumScore(activeCandles);
@@ -127,8 +140,12 @@ export async function fetchMarketSnapshot(symbol: string): Promise<MarketSnapsho
     spreadBps = Number((((ask - bid) / bid) * 10000).toFixed(1));
   }
 
-  // 6. Approximate order book depth / volume capitalization from 24h volume
-  const liquidityUsd = Math.round(volume24h * latestPrice * 0.15) || 5000000;
+  // 6. Dollar Liquidity (Total 24h Notional USD Volume)
+  // For crypto: baseVolume * price/vwap; For equities: shareVolume * price/vwap
+  const priceForLiquidity = rawSnapshot?.dailyBar?.vw || rawSnapshot?.prevDailyBar?.vw || latestPrice;
+  const liquidityUsd = (volume24h > 0 && priceForLiquidity > 0)
+    ? Math.round(volume24h * priceForLiquidity)
+    : 0;
 
   // 7. Partition candles into intervals for interactive timeline views
   const candles4H: Candle[] = [];
@@ -178,7 +195,8 @@ export async function fetchMarketSnapshot(symbol: string): Promise<MarketSnapsho
     timestamp: new Date().toISOString()
   };
 
-  return snapshot;
+    return snapshot;
+  });
 }
 
 /**

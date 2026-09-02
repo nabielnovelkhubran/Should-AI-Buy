@@ -27,29 +27,29 @@ export const MarketChart: React.FC<MarketChartProps> = ({ snapshot }) => {
   const chartWidth = 550;
 
   return (
-    <div className="p-4 rounded-2xl bg-[#11141d] border border-slate-800">
+    <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e]">
       
       {/* Header & Timeframe selector */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <div className="text-xs text-slate-400 font-mono uppercase">Interactive Market History</div>
+          <div className="text-xs text-[#848388] font-mono uppercase">Interactive Market History</div>
           <div className="text-lg font-bold text-white flex items-center gap-2">
             {formatCurrency(snapshot.price, true)}
             <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
-              snapshot.change24h >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+              snapshot.change24h >= 0 ? 'bg-[#00ff84]/10 text-[#00ff84]' : 'bg-rose-500/20 text-[#ff3b5c]'
             }`}>
               {snapshot.change24h >= 0 ? '+' : ''}{snapshot.change24h}%
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+        <div className="flex items-center gap-1 bg-[#1f1e23] p-1 rounded-lg border border-[#28272e]">
           {(['1H', '4H', '1D', '7D', '30D'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setInterval(t)}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                interval === t ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                interval === t ? 'bg-[#00ff84] text-black font-bold' : 'text-[#8b8a91] hover:text-white'
               }`}
             >
               {t}
@@ -107,7 +107,7 @@ export const MarketChart: React.FC<MarketChartProps> = ({ snapshot }) => {
         </svg>
       </div>
 
-      <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono mt-2 pt-2 border-t border-slate-800/80">
+      <div className="flex items-center justify-between text-[11px] text-[#2d3748] font-mono mt-2 pt-2 border-t border-[#28272e]/80">
         <span>Low: {formatCurrency(minPrice, true)}</span>
         <span>
           {interval} ({candles.length} bars{firstDate && lastDate ? ` • ${firstDate} - ${lastDate}` : ''}) · {currency}

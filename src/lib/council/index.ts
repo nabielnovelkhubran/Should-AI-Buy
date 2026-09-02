@@ -14,7 +14,7 @@ import { getNewsEvidence } from '../news';
 import { getSocialEvidence } from '../social';
 import { calculatePositionSize } from '../quant';
 import { evaluateRiskGate } from '../risk-gate';
-import { alpacaService } from '../alpaca';
+import { PaperPortfolioService } from '../portfolio';
 import { paperTradingService } from '../trading';
 import { storage } from '../storage';
 import {
@@ -51,8 +51,8 @@ export async function orchestrateCouncilInvestigation(
   onTimelineUpdate?: (event: any) => void,
   options?: CouncilExecutionOptions
 ): Promise<Investigation> {
-  const id = options?.investigationId || `INV-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
   const cleanAsset = assetSymbol.toUpperCase().replace('$', '').trim();
+  const id = options?.investigationId || `INV-${cleanAsset}-${Date.now().toString(36).toUpperCase()}`;
   const now = new Date().toISOString();
 
   // Initial stage states for all 7 council stages
@@ -335,8 +335,9 @@ export async function orchestrateCouncilInvestigation(
     // =========================================================================
     emitCouncilEvent('RISK_GATE', 'RUNNING', 'Evaluating deterministic risk limits and portfolio exposure...');
 
-    const account = await alpacaService.getAccount();
-    const positionSizing = calculatePositionSize(account.cash, 2.5, snapshot.price, 5.0);
+    const portfolioSnapshot = await new PaperPortfolioService().getPortfolioSnapshot();
+    const availableCash = portfolioSnapshot.account?.cash ?? 100000;
+    const positionSizing = calculatePositionSize(availableCash, 2.5, snapshot.price, 5.0);
 
     const hasRedTeamFatal = redTeamResult.redTeamAttackDetails?.thesisStatus === 'DISPROVED';
     const riskGateEval = evaluateRiskGate({
@@ -345,7 +346,7 @@ export async function orchestrateCouncilInvestigation(
       riskScore: decisionResult.riskScore,
       liquidityUsd: snapshot.liquidityUsd,
       positionValueUsd: positionSizing.positionValueUsd,
-      availableCash: account.cash,
+      availableCash,
       hasRedTeamFatalFlaw: hasRedTeamFatal,
       evidence: investigation.evidence
     });
@@ -371,15 +372,16 @@ export async function orchestrateCouncilInvestigation(
           { riskGateApproved: true }
         );
 
+        const assetClass = (['BTC', 'ETH', 'SOL'].includes(cleanAsset) ? 'CRYPTO' : 'EQUITY');
         const orderResult = await paperTradingService.submitPaperOrder({
           investigationId: id,
           symbol: cleanAsset,
-          assetClass: (['BTC', 'ETH', 'SOL'].includes(cleanAsset) ? 'CRYPTO' : 'EQUITY'),
+          assetClass,
           side: 'buy',
           qty: positionSizing.qty,
           price: snapshot.price,
           orderType: 'market',
-          timeInForce: 'gtc',
+          timeInForce: assetClass === 'CRYPTO' ? 'gtc' : 'day',
           recommendation: 'BUY',
           riskGatePassed: true,
           opportunityScore: decisionResult.opportunityScore,

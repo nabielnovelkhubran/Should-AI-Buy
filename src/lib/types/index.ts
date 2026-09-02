@@ -375,7 +375,7 @@ export interface AlpacaOrder {
 // Phase 5A: Autonomous Opportunity Scanner & Candidate Discovery Types
 // ---------------------------------------------------------------------------
 
-export type AssetClass = 'CRYPTO' | 'EQUITY';
+export type AssetClass = 'CRYPTO' | 'EQUITY' | 'OPTION';
 
 export interface CandidateSignals {
   momentum: number;
@@ -417,6 +417,8 @@ export interface ScanResult {
   successfulCount: number;
   failedCount: number;
   failedTargets: FailedScanTarget[];
+  discoveryStatus?: 'DISCOVERY_COMPLETE' | 'DISCOVERY_PARTIAL' | 'DISCOVERY_EMPTY';
+  partialReason?: 'RATE_LIMIT' | 'NETWORK_ERROR' | 'NONE';
   timestamp: string;
 }
 
@@ -543,6 +545,7 @@ export interface PaperOrderRequest {
   riskGatePassed: boolean;
   opportunityScore?: number;
   candidateRank?: number;
+  positionIntent?: "buy_to_open" | "buy_to_close" | "sell_to_open" | "sell_to_close";
 }
 
 export interface PaperOrderResult {
@@ -898,5 +901,13 @@ export interface AutomationStatus {
   auditTrail: AutomationAuditEvent[];
   environment: 'PAPER';
 }
+
+export * from './system';
+export * from '../errors';
+export * from '../demo';
+export * from '../trading/precision';
+export * from '../environment';
+export * from '../agent';
+
 
 

@@ -51,27 +51,28 @@ export function calculateRealizedVolatility(candles: Candle[]): number {
  * Calculates 14-period RSI (Relative Strength Index).
  */
 export function calculateRSI(candles: Candle[], period: number = 14): number {
-  if (!candles || candles.length <= period) return 50.0;
+  if (!candles || candles.length < 4) return 50.0;
+  const p = Math.min(period, Math.max(3, Math.floor(candles.length / 2)));
   let gains = 0;
   let losses = 0;
 
-  for (let i = 1; i <= period; i++) {
+  for (let i = 1; i <= p && i < candles.length; i++) {
     const change = candles[i].close - candles[i - 1].close;
     if (change >= 0) gains += change;
     else losses += Math.abs(change);
   }
 
-  let avgGain = gains / period;
-  let avgLoss = losses / period;
+  let avgGain = gains / p;
+  let avgLoss = losses / p;
 
-  for (let i = period + 1; i < candles.length; i++) {
+  for (let i = p + 1; i < candles.length; i++) {
     const change = candles[i].close - candles[i - 1].close;
     if (change >= 0) {
-      avgGain = (avgGain * (period - 1) + change) / period;
-      avgLoss = (avgLoss * (period - 1)) / period;
+      avgGain = (avgGain * (p - 1) + change) / p;
+      avgLoss = (avgLoss * (p - 1)) / p;
     } else {
-      avgGain = (avgGain * (period - 1)) / period;
-      avgLoss = (avgLoss * (period - 1) + Math.abs(change)) / period;
+      avgGain = (avgGain * (p - 1)) / p;
+      avgLoss = (avgLoss * (p - 1) + Math.abs(change)) / p;
     }
   }
 
@@ -81,24 +82,37 @@ export function calculateRSI(candles: Candle[], period: number = 14): number {
 }
 
 /**
- * Calculates Momentum Score based on EMA crossover and RSI.
+ * Calculates Momentum Score based on multi-timeframe SMA ratio, Rate-of-Change, and RSI.
  */
 export function calculateMomentumScore(candles: Candle[]): number {
-  if (!candles || candles.length < 10) return 50;
-  const rsi = calculateRSI(candles);
+  if (!candles || candles.length < 4) return 50;
+  const rsi = calculateRSI(candles, 14);
   const closes = candles.map(c => c.close);
-  const smaShort = closes.slice(-5).reduce((a, b) => a + b, 0) / 5;
-  const smaLong = closes.slice(-15).reduce((a, b) => a + b, 0) / Math.min(15, closes.length);
+  const n = closes.length;
+  const smaShort = closes.slice(-Math.min(5, n)).reduce((a, b) => a + b, 0) / Math.min(5, n);
+  const smaLong = closes.slice(-Math.min(15, n)).reduce((a, b) => a + b, 0) / Math.min(15, n);
 
+  // 1. Multi-Timeframe Trend component
+  const smaPctDiff = smaLong > 0 ? ((smaShort - smaLong) / smaLong) * 100 : 0;
+
+  // 2. Short-term Rate of Change (ROC-3)
+  const roc3 = n >= 4 ? ((closes[n - 1] - closes[n - 4]) / closes[n - 4]) * 100 : 0;
+
+  // 3. Composite score synthesis
   let score = 50;
-  if (smaShort > smaLong) score += 20;
-  else score -= 20;
+  score += Math.max(-25, Math.min(25, smaPctDiff * 8));
+  score += Math.max(-20, Math.min(20, roc3 * 6));
 
-  if (rsi > 50 && rsi < 75) score += 20;
-  else if (rsi >= 75) score += 10; // Overbought warning
-  else if (rsi < 40) score -= 20;
+  // RSI Factor: Reward bullish continuation (50-70) or oversold bounce (RSI < 40 and ROC >= -0.2%)
+  if (rsi >= 50 && rsi <= 70) {
+    score += 15;
+  } else if (rsi < 40 && roc3 > -0.2) {
+    score += 10; // Mean-reversion dip-buy setup
+  } else if (rsi > 75) {
+    score -= 10; // Overbought exhaustion risk
+  }
 
-  return Math.max(0, Math.min(100, Math.round(score)));
+  return Math.max(10, Math.min(95, Math.round(score)));
 }
 
 /**

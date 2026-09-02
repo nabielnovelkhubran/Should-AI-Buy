@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { automationScheduler } from '@/lib/automation';
+import { sanitizeErrorMessage } from '@/lib/errors';
+
+export const dynamic = 'force-dynamic';
 
 // ---------------------------------------------------------------------------
 // GET /api/automation
@@ -11,7 +14,7 @@ export async function GET() {
     return NextResponse.json(status);
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || 'Internal server error while retrieving automation status' },
+      { error: sanitizeErrorMessage(err.message) || 'Internal server error while retrieving automation status.' },
       { status: 500 }
     );
   }
@@ -25,8 +28,17 @@ export async function GET() {
 // ---------------------------------------------------------------------------
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}));
-    const action = body?.action;
+    let body: any = {};
+    try {
+      const text = await req.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch {
+      return NextResponse.json({ error: 'MALFORMED_JSON: Request body must be valid JSON.' }, { status: 400 });
+    }
+
+    const action = typeof body?.action === 'string' ? body.action.toLowerCase() : '';
 
     if (action === 'start') {
       automationScheduler.start();
@@ -46,16 +58,16 @@ export async function POST(req: Request) {
       });
     }
 
-    if (action === 'runNow') {
-      const jobType = body?.jobType;
-      if (jobType !== 'DISCOVERY' && jobType !== 'MONITORING') {
+    if (action === 'runnow') {
+      const rawJobType = typeof body?.jobType === 'string' ? body.jobType.toUpperCase() : '';
+      if (rawJobType !== 'DISCOVERY' && rawJobType !== 'MONITORING') {
         return NextResponse.json(
           { error: 'INVALID_JOB_TYPE: Must specify jobType as DISCOVERY or MONITORING' },
           { status: 400 }
         );
       }
 
-      const run = await automationScheduler.runNow(jobType);
+      const run = await automationScheduler.runNow(rawJobType as any);
       return NextResponse.json({
         success: true,
         run,
@@ -63,9 +75,9 @@ export async function POST(req: Request) {
       });
     }
 
-    if (action === 'updateConfig') {
+    if (action === 'updateconfig') {
       const newConfig = body?.config;
-      if (!newConfig || typeof newConfig !== 'object') {
+      if (!newConfig || typeof newConfig !== 'object' || Array.isArray(newConfig)) {
         return NextResponse.json(
           { error: 'INVALID_CONFIG: Missing or malformed config object' },
           { status: 400 }
@@ -86,8 +98,20 @@ export async function POST(req: Request) {
     );
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || 'Internal server error executing automation command' },
+      { error: sanitizeErrorMessage(err.message) || 'Internal server error executing automation command.' },
       { status: 500 }
     );
   }
+}
+
+export async function PUT() {
+  return NextResponse.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 });
+}
+
+export async function DELETE() {
+  return NextResponse.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 });
+}
+
+export async function PATCH() {
+  return NextResponse.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 });
 }

@@ -70,22 +70,22 @@ export function parseCommand(input: string): ParsedCommand {
     return { intent: 'UNKNOWN', asset: '', raw: input, valid: false, explanation: 'Empty command.' };
   }
 
-  const buyMatch = trimmed.match(/^(?:should-ai\s+buy|buy)\s+\$?([a-zA-Z0-9_-]+)/i);
+  const buyMatch = trimmed.match(/^(?:should[\s-]ai\s+buy|buy)\s+\$?([a-zA-Z0-9_-]+)\??$/i);
   if (buyMatch) {
     return { intent: 'BUY', asset: buyMatch[1].toUpperCase(), raw: trimmed, valid: true };
   }
 
-  const sellMatch = trimmed.match(/^(?:should-ai\s+sell|sell)\s+\$?([a-zA-Z0-9_-]+)/i);
+  const sellMatch = trimmed.match(/^(?:should[\s-]ai\s+sell|sell)\s+\$?([a-zA-Z0-9_-]+)\??$/i);
   if (sellMatch) {
     return { intent: 'SELL', asset: sellMatch[1].toUpperCase(), raw: trimmed, valid: true };
   }
 
-  const watchMatch = trimmed.match(/^(?:should-ai\s+watch|watch)\s+\$?([a-zA-Z0-9_-]+)/i);
+  const watchMatch = trimmed.match(/^(?:should[\s-]ai\s+watch|watch)\s+\$?([a-zA-Z0-9_-]+)\??$/i);
   if (watchMatch) {
     return { intent: 'WATCH', asset: watchMatch[1].toUpperCase(), raw: trimmed, valid: true };
   }
 
-  const whyMatch = trimmed.match(/^(?:why(?:\s+did\s+you\s+reject|\s+rejected)?|explain)\s+\$?([a-zA-Z0-9_-]+)/i);
+  const whyMatch = trimmed.match(/^(?:why(?:\s+did\s+you\s+reject|\s+rejected)?|explain)\s+\$?([a-zA-Z0-9_-]+)\??$/i);
   if (whyMatch) {
     return { intent: 'WHY', asset: whyMatch[1].toUpperCase(), raw: trimmed, valid: true };
   }

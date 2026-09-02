@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { paperPortfolioService } from '@/lib/portfolio';
 
+export const dynamic = 'force-dynamic';
+
 // ---------------------------------------------------------------------------
 // Phase 6B: Paper Portfolio API Route
 // GET /api/trading/paper/portfolio

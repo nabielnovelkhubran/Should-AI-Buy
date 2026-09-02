@@ -56,7 +56,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onExecuteCommand, 
             }}
             onFocus={() => setShowSuggestions(true)}
             placeholder="Ask the council... (e.g. Should-AI buy $BTC?)"
-            className="w-full bg-[#11141d] text-white pl-12 pr-32 py-4 rounded-2xl border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-base font-medium shadow-xl transition"
+            className="w-full bg-[#1f1e23] text-white pl-12 pr-32 py-4 rounded-2xl border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-base font-medium shadow-xl transition"
           />
 
           <button
@@ -80,8 +80,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ onExecuteCommand, 
 
         {/* Autocomplete Dropdown */}
         {showSuggestions && filteredSuggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-[#11141d] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 divide-y divide-slate-800/60">
-            <div className="px-4 py-2 bg-slate-900/60 text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-[#1f1e23] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 divide-y divide-slate-800/60">
+            <div className="px-4 py-2 bg-[#1f1e23] text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-between">
               <span>Command Autocomplete & Live Alpaca Crypto Assets</span>
               <span>Select to run</span>
             </div>

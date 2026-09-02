@@ -2,49 +2,193 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================
+   PHANTOM TYPOGRAPHY & DESIGN SYSTEM
+   Base: #121117 | Panels/Cards: #1f1e23
+   Brand: #00ff84 | Sell: #ff3b5c
+   ========================================= */
+
+@font-face {
+  font-family: 'Phantom';
+  src: url('/fonts/Phantom-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Phantom';
+  src: url('/fonts/Phantom-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Phantom';
+  src: url('/fonts/Phantom-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Phantom';
+  src: url('/fonts/Phantom-Book.woff2') format('woff2');
+  font-weight: 350;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PhantomCash';
+  src: url('/fonts/PhantomCash-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #090b10;
-  --foreground: #f1f5f9;
+  --bg-base: #121117;
+  --bg-panel: #1f1e23;
+  --bg-card: #1f1e23;
+  --bg-hover: #2a2930;
+  --border: #28272e;
+  --border-bright: #34333b;
+  --text-primary: #e2e8f0;
+  --text-muted: #848388;
+  --text-dim: #5a5960;
+  --brand: #00ff84;
+  --brand-dim: rgba(0,255,132,0.08);
+  --brand-glow: rgba(0,255,132,0.15);
+  --sell: #ff3b5c;
+  --sell-dim: rgba(255,59,92,0.08);
+  --sell-glow: rgba(255,59,92,0.15);
+  --background: #121117;
+  --foreground: #e2e8f0;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+html, body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Phantom', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
+/* ---- Scrollbars: ultra-minimal terminal style ---- */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #44434c; }
+
+/* ---- Base utility classes ---- */
+.terminal-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+}
+
+.terminal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.terminal-card-hover:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-bright);
+}
+
+/* ---- Brand accent utilities ---- */
+.brand-text { color: var(--brand); }
+.sell-text { color: var(--sell); }
+
+.brand-border-l { border-left: 2px solid var(--brand); }
+.sell-border-l { border-left: 2px solid var(--sell); }
+
+.brand-bg { background: var(--brand-dim); }
+.sell-bg { background: var(--sell-dim); }
+
+.brand-glow-box { box-shadow: 0 0 20px -4px var(--brand-glow); }
+.sell-glow-box { box-shadow: 0 0 20px -4px var(--sell-glow); }
+
+/* ---- Clean Monospace number utility ---- */
+.mono-num {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Optional phantom cash icon font */
+.phantom-ghost-font {
+  font-family: 'PhantomCash', monospace;
+}
+
+/* ---- Section label (terminal style) ---- */
+.terminal-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---- Brand pulse dot ---- */
+.brand-dot {
   width: 6px;
   height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #0d1117;
-}
-::-webkit-scrollbar-thumb {
-  background: #21262d;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #30363d;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 6px var(--brand);
+  animation: brandPulse 2s ease-in-out infinite;
 }
 
-/* Glassmorphism & Cyber Glows */
-.glass-panel {
-  background: rgba(17, 20, 29, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+@keyframes brandPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--brand); }
+  50% { opacity: 0.4; box-shadow: 0 0 2px var(--brand); }
 }
 
-.glow-redteam {
-  box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.35);
+/* ---- Progress bar fill ---- */
+.brand-bar { background: var(--brand); }
+.sell-bar { background: var(--sell); }
+
+/* ---- Active tab indicator ---- */
+.tab-active-indicator {
+  position: relative;
+}
+.tab-active-indicator::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--brand);
+  border-radius: 1px 1px 0 0;
 }
 
-.glow-bullish {
-  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.35);
+/* ---- No-scrollbar utility ---- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ---- Terminal selection ---- */
+::selection {
+  background: rgba(0, 255, 132, 0.15);
+  color: #00ff84;
 }
 
-.glow-accent {
-  box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.35);
+/* ---- Ensure all slate background variations are pure #1f1e23 ---- */
+.bg-slate-900,
+.bg-slate-950,
+[class*="bg-slate-900"],
+[class*="bg-slate-950"] {
+  background-color: #1f1e23 !important;
+}
+
+/* ---- 0.65rem top & bottom padding for divs within space-y-2 containers ---- */
+.space-y-2 > div,
+.space-y-2 > section {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
 }

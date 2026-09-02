@@ -113,7 +113,7 @@ export const ContradictionMatrix: React.FC<ContradictionMatrixProps> = ({ claims
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 pt-1 text-[10px] text-slate-500 border-t border-slate-800/50">
+      <div className="flex flex-wrap gap-2 pt-1 text-[10px] text-slate-500 border-t border-slate-800/50">
         <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Bullish claim with evidence</span>
         <span className="flex items-center gap-1"><XCircle className="w-3 h-3 text-rose-500" /> Bearish/adverse claim</span>
         <span className="flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-orange-500" /> Red Team refutation</span>

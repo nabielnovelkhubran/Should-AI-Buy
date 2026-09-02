@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { positionMonitoringService } from '@/lib/monitoring';
+import { sanitizeErrorMessage } from '@/lib/errors';
+
+export const dynamic = 'force-dynamic';
 
 // ---------------------------------------------------------------------------
 // GET /api/monitoring
@@ -14,7 +17,7 @@ export async function GET() {
     return NextResponse.json(result);
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || 'Internal server error while retrieving monitoring state' },
+      { error: sanitizeErrorMessage(err.message) || 'Internal server error while retrieving monitoring state.' },
       { status: 500 }
     );
   }
@@ -28,7 +31,16 @@ export async function GET() {
 // ---------------------------------------------------------------------------
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}));
+    let body: any = {};
+    try {
+      const text = await req.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch {
+      return NextResponse.json({ error: 'MALFORMED_JSON: Request body must be valid JSON.' }, { status: 400 });
+    }
+
     const executeExits = body?.executeExits === true;
 
     const result = await positionMonitoringService.runMonitoringCycle({
@@ -38,8 +50,20 @@ export async function POST(req: Request) {
     return NextResponse.json(result);
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || 'Internal server error while executing monitoring cycle' },
+      { error: sanitizeErrorMessage(err.message) || 'Internal server error while executing monitoring cycle.' },
       { status: 500 }
     );
   }
+}
+
+export async function PUT() {
+  return NextResponse.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 });
+}
+
+export async function DELETE() {
+  return NextResponse.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 });
+}
+
+export async function PATCH() {
+  return NextResponse.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 });
 }

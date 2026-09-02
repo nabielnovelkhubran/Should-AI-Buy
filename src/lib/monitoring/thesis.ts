@@ -9,7 +9,7 @@ import {
   InvalidationRule
 } from './types';
 import { storage } from '../storage';
-import { normalizeScanSymbol } from '../scanner/universe';
+import { normalizeScanSymbol, detectAssetClass } from '../scanner/universe';
 import { calculateRiskMetrics } from '../risk';
 
 // ---------------------------------------------------------------------------
@@ -29,6 +29,8 @@ export function resolveThesisProvenance(
   position: PaperPosition
 ): ThesisProvenance {
   const cleanSymbol = normalizeScanSymbol(position.symbol);
+  const isCrypto = position.assetClass === 'CRYPTO' || cleanSymbol.includes('/') || detectAssetClass(cleanSymbol) === 'CRYPTO';
+  const defaultMinLiq = isCrypto ? 100 : DEFAULT_LIQUIDITY_MIN_USD;
   const allInvestigations = storage.getAllInvestigations();
 
   // Find most recent completed investigation for this symbol
@@ -39,7 +41,7 @@ export function resolveThesisProvenance(
   const defaultRules: InvalidationRule[] = [
     { condition: 'Price drawdown reaches -5.0%', metricKey: 'price_drawdown', threshold: DEFAULT_DRAWDOWN_LIMIT_PCT, operator: '<=' },
     { condition: 'Momentum score falls below 40', metricKey: 'momentum', threshold: DEFAULT_MOMENTUM_MIN, operator: '<' },
-    { condition: 'Liquidity pool drops below $200k', metricKey: 'liquidity', threshold: DEFAULT_LIQUIDITY_MIN_USD, operator: '<' },
+    { condition: isCrypto ? 'Liquidity pool drops below $100' : 'Liquidity pool drops below $200k', metricKey: 'liquidity', threshold: defaultMinLiq, operator: '<' },
     { condition: 'Composite risk score exceeds 75', metricKey: 'risk_score', threshold: DEFAULT_RISK_SCORE_MAX, operator: '>' }
   ];
 
@@ -168,8 +170,28 @@ export function evaluateThesisHealth(
     });
   }
 
+  // 4b. Dynamic Profit-Taking & Live Momentum Exhaustion
+  // Evaluates live post-entry momentum to lock in gains when targets are hit or momentum stalls
+  const isCryptoAsset = position.assetClass === 'CRYPTO' || position.symbol.includes('/') || detectAssetClass(position.symbol) === 'CRYPTO';
+  const targetProfitPct = isCryptoAsset ? 5.0 : 4.0;
+  if (pnlPercent >= targetProfitPct) {
+    if (momScore < 50 || currentSnapshot.rsi14 > 78) {
+      findings.push({
+        category: 'PROFIT_TARGET_HIT',
+        metricKey: 'profit_target',
+        currentValue: pnlPercent,
+        thresholdValue: targetProfitPct,
+        message: `Dynamic profit target achieved (+${pnlPercent.toFixed(2)}%) with momentum exhaustion (Mom: ${momScore}/100, RSI: ${currentSnapshot.rsi14.toFixed(1)}). Recommending orderly profit realization.`,
+        severity: 'CRITICAL',
+        detectedAt: now
+      });
+    }
+  }
+
   // 5. Liquidity Deterioration Invalidation
-  const liquidityLimit = options?.invalidationLiquidityThresholdUsd ?? DEFAULT_LIQUIDITY_MIN_USD;
+  const isCrypto = position.assetClass === 'CRYPTO' || position.symbol.includes('/') || detectAssetClass(position.symbol) === 'CRYPTO';
+  const defaultMinLiq = isCrypto ? 100 : DEFAULT_LIQUIDITY_MIN_USD;
+  const liquidityLimit = options?.invalidationLiquidityThresholdUsd ?? defaultMinLiq;
   const liqUsd = currentSnapshot.liquidityUsd;
   if (liqUsd < liquidityLimit) {
     findings.push({

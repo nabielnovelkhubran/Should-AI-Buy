@@ -1,118 +1,114 @@
 'use client';
 import React from 'react';
-import { ShieldAlert, Cpu, Sparkles, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Award } from 'lucide-react';
 import { AlpacaAccount } from '../lib/types';
 import { useCurrency } from './CurrencyProvider';
 
+export type DashboardTab = 'command' | 'council' | 'discovery' | 'portfolio' | 'evidence' | 'automation' | 'observability' | 'broker_diagnostics' | 'execution_lab' | 'workflow_auditor';
+
 interface HeaderProps {
   account?: AlpacaAccount | null;
-  activeTab: 'council' | 'discovery' | 'portfolio' | 'evidence' | 'thesis' | 'automation';
-  setActiveTab: (tab: 'council' | 'discovery' | 'portfolio' | 'evidence' | 'thesis' | 'automation') => void;
+  activeTab: DashboardTab;
+  setActiveTab: (tab: DashboardTab) => void;
 }
+
+const NAV_TABS: { id: DashboardTab; label: string }[] = [
+  { id: 'observability', label: 'Live Alpha' },
+  { id: 'command', label: 'Command Lab' },
+  { id: 'council', label: 'Council' },
+  { id: 'discovery', label: 'Discovery' },
+  { id: 'portfolio', label: 'Portfolio' },
+  { id: 'workflow_auditor', label: 'Strategy Audit' },
+  { id: 'broker_diagnostics', label: 'Broker Diag' },
+  { id: 'evidence', label: 'Evidence' },
+  { id: 'automation', label: 'Automation' },
+];
 
 export const Header: React.FC<HeaderProps> = ({ account, activeTab, setActiveTab }) => {
   const { currency, setCurrency, formatCurrency } = useCurrency();
+  const isCompetition = process.env.NEXT_PUBLIC_TRADING_ENVIRONMENT === 'competition';
+  const equity = (account as any)?.equity ?? (account as any)?.portfolioValue ?? null;
 
   return (
-    <header className="border-b border-slate-800 bg-[#0d111a]/90 backdrop-blur sticky top-0 z-40 px-4 lg:px-8 py-3">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-        
-        {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-rose-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/20">
-            <ShieldAlert className="w-5 h-5 text-white" />
+    <header
+      style={{ background: '#121117', borderBottom: '1px solid #28272e' }}
+      className="sticky top-0 z-40 px-4 lg:px-6"
+    >
+      <div className="flex items-center justify-between h-11 gap-2">
+        {/* Left: Brand Logo + Nav Tabs in the same container */}
+        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+          {/* Brand — blinking dot removed */}
+          <div className="flex items-center shrink-0">
+            <span
+              className="text-sm font-bold tracking-tight font-phantom"
+              style={{ color: '#00ff84', letterSpacing: '-0.03em' }}
+            >
+              SHOULD-AI BUY?
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
-                Should-AI Buy?
-                <span className="text-xs px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-medium">
-                  Adversarial Council
-                </span>
-              </h1>
-            </div>
-            <p className="text-xs text-slate-400">
-              Discover. <span className="text-rose-400 font-semibold">Challenge.</span> Decide.
-            </p>
-          </div>
+
+          {/* Nav Tabs — Sim Lab removed */}
+          <nav className="flex items-center gap-0 overflow-x-auto no-scrollbar h-11">
+            {NAV_TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="relative shrink-0 px-3.5 h-11 text-[11px] font-semibold uppercase tracking-wider transition-colors"
+                  style={{
+                    color: isActive ? '#00ff84' : '#8b8a91',
+                    borderBottom: isActive ? '2px solid #00ff84' : '2px solid transparent',
+                    background: 'transparent',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Navigation Tabs */}
-        <nav className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
-          <button
-            onClick={() => setActiveTab('council')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'council'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Council Deliberation
-          </button>
-          <button
-            onClick={() => setActiveTab('discovery')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'discovery'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Autonomous Discovery
-          </button>
-          <button
-            onClick={() => setActiveTab('automation')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'automation'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Automation Daemon
-          </button>
-          <button
-            onClick={() => setActiveTab('evidence')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'evidence'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Evidence Explorer
-          </button>
-          <button
-            onClick={() => setActiveTab('portfolio')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'portfolio'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Alpaca Portfolio & Thesis
-          </button>
-        </nav>
+        {/* Right: Account Equity + Mode + Currency */}
+        <div className="flex items-center gap-3 shrink-0">
+          {isCompetition && (
+            <div
+              className="flex items-center gap-1.5 text-[10px] font-bold mono-num px-2 py-1 rounded"
+              style={{ color: '#f59e0b', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}
+            >
+              <Award className="w-3 h-3" />
+              <span>COMPETITION $100K</span>
+            </div>
+          )}
 
-        {/* Alpaca Paper Status Badge & Currency */}
-        <div className="flex items-center gap-3">
-          <select 
-            value={currency} 
+          {equity != null && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] uppercase tracking-widest" style={{ color: '#8b8a91' }}>Equity</span>
+              <span className="text-sm font-bold mono-num" style={{ color: '#00ff84' }}>
+                {formatCurrency(Number(equity))}
+              </span>
+            </div>
+          )}
+
+          <select
+            value={currency}
             onChange={(e) => setCurrency(e.target.value as any)}
-            className="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
+            className="text-[11px] rounded px-1.5 py-1 focus:outline-none cursor-pointer mono-num"
+            style={{
+              background: '#1f1e23',
+              border: '1px solid #28272e',
+              color: '#8b8a91'
+            }}
           >
             <option value="USD">USD</option>
+            <option value="IDR">IDR</option>
             <option value="EUR">EUR</option>
             <option value="GBP">GBP</option>
             <option value="JPY">JPY</option>
-            <option value="IDR">IDR</option>
+            <option value="SGD">SGD</option>
+            <option value="AUD">AUD</option>
           </select>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-medium">Alpaca Paper Trading</span>
-            <span className="text-emerald-500 font-bold ml-1">
-              {formatCurrency(account?.cash || 98450)}
-            </span>
-          </div>
         </div>
-
       </div>
     </header>
   );

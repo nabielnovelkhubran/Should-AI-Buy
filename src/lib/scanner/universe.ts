@@ -7,9 +7,9 @@ import { alpacaDataAdapter } from '../market-data/alpaca-adapter';
 // ---------------------------------------------------------------------------
 
 /**
- * Default bounded scan universe covering major crypto assets and liquid US equities.
+ * Bounded scan universe covering major crypto assets and liquid US equities.
  */
-export const DEFAULT_SCAN_UNIVERSE: readonly string[] = [
+export const BENCHMARK_SCAN_UNIVERSE: readonly string[] = [
   'BTC',
   'ETH',
   'SOL',
@@ -18,8 +18,59 @@ export const DEFAULT_SCAN_UNIVERSE: readonly string[] = [
   'MSFT'
 ];
 
-export const DEFAULT_CRYPTO_UNIVERSE: readonly string[] = ['BTC', 'ETH', 'SOL'];
-export const DEFAULT_EQUITY_UNIVERSE: readonly string[] = ['AAPL', 'NVDA', 'MSFT'];
+export const DEFAULT_CRYPTO_UNIVERSE: readonly string[] = [
+  // Core Large-Caps
+  'BTC',
+  'ETH',
+  'SOL',
+  'AVAX',
+  'LINK',
+  'XRP',
+  'ADA',
+  'LTC',
+  'DOT',
+  'BCH',
+  // High-Growth DeFi & Layer-2
+  'UNI',
+  'AAVE',
+  'ARB',
+  'LDO',
+  'POL',
+  'CRV',
+  'SUSHI',
+  // AI, Compute, RWA & Infrastructure
+  'RENDER',
+  'HYPE',
+  'ONDO',
+  'GRT',
+  'FIL',
+  'BAT',
+  // Meme & High-Vol Volatility
+  'DOGE',
+  'SHIB',
+  'PEPE',
+  'BONK',
+  'WIF',
+  'TRUMP'
+];
+
+export const DEFAULT_EQUITY_UNIVERSE: readonly string[] = [
+  'AAPL',
+  'NVDA',
+  'MSFT',
+  'AMZN',
+  'GOOGL',
+  'META',
+  'TSLA',
+  'AMD',
+  'COIN',
+  'RL'
+];
+
+export const DEFAULT_SCAN_UNIVERSE: readonly string[] = [
+  ...DEFAULT_CRYPTO_UNIVERSE,
+  ...DEFAULT_EQUITY_UNIVERSE
+];
 
 /**
  * Normalizes a scan target symbol (removes $, uppercase, trims whitespace).

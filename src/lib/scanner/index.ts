@@ -113,12 +113,28 @@ export async function scanOpportunities(options?: ScanOptions): Promise<ScanResu
       rank: idx + 1
     }));
 
+  let discoveryStatus: 'DISCOVERY_COMPLETE' | 'DISCOVERY_PARTIAL' | 'DISCOVERY_EMPTY' = 'DISCOVERY_COMPLETE';
+  let partialReason: 'RATE_LIMIT' | 'NETWORK_ERROR' | 'NONE' = 'NONE';
+
+  if (failedTargets.length > 0) {
+    if (unrankedCandidates.length > 0) {
+      discoveryStatus = 'DISCOVERY_PARTIAL';
+    } else {
+      discoveryStatus = 'DISCOVERY_EMPTY';
+    }
+
+    const hasRateLimit = failedTargets.some(f => f.statusCode === 429 || f.error.toLowerCase().includes('rate limit') || f.error.includes('429'));
+    partialReason = hasRateLimit ? 'RATE_LIMIT' : 'NETWORK_ERROR';
+  }
+
   return {
     candidates: rankedCandidates,
     scannedCount: universe.length,
     successfulCount: unrankedCandidates.length,
     failedCount: failedTargets.length,
     failedTargets,
+    discoveryStatus,
+    partialReason,
     timestamp: now
   };
 }

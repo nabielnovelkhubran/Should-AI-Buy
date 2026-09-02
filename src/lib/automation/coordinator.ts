@@ -12,9 +12,10 @@ import { PositionMonitoringService, positionMonitoringService } from '../monitor
 import { MonitoringCycleResult } from '../monitoring/types';
 
 // ---------------------------------------------------------------------------
-// Phase 6D: Automation Coordinator
+// Phase 6D & 8.5B: Automation Coordinator & Autonomous Safety Engine
 // Orchestrates existing Discovery (5A-5C) and Monitoring (6B-6C) subsystems.
 // INVARIANT: Concurrency locks prevent overlapping runs of the same job type.
+// INVARIANT: Emergency Circuit Breaker / Kill-Switch blocks autonomous executions on demand.
 // INVARIANT: Paper trading only. Live broker execution is strictly prohibited.
 // ---------------------------------------------------------------------------
 
@@ -23,6 +24,8 @@ export class AutomationCoordinator {
   private dispatcher: CouncilDispatcher;
   private monitoringService: PositionMonitoringService;
   private activeRuns: Map<AutomationJobType, boolean> = new Map();
+  private circuitBreakerTripped: boolean = false;
+  private circuitBreakerReason: string | null = null;
 
   constructor(
     queue: CandidateQueue = candidateQueue,
@@ -41,6 +44,33 @@ export class AutomationCoordinator {
   }
 
   /**
+   * Checks whether the Emergency Circuit Breaker is active.
+   */
+  isCircuitBreakerActive(): boolean {
+    return this.circuitBreakerTripped;
+  }
+
+  getCircuitBreakerReason(): string | null {
+    return this.circuitBreakerReason;
+  }
+
+  /**
+   * Trips the Emergency Circuit Breaker to halt autonomous execution.
+   */
+  tripCircuitBreaker(reason: string = 'EMERGENCY_KILL_SWITCH_ACTIVATED'): void {
+    this.circuitBreakerTripped = true;
+    this.circuitBreakerReason = reason;
+  }
+
+  /**
+   * Resets the Emergency Circuit Breaker.
+   */
+  resetCircuitBreaker(): void {
+    this.circuitBreakerTripped = false;
+    this.circuitBreakerReason = null;
+  }
+
+  /**
    * Executes one complete discovery cycle (Scan -> Queue -> Dispatch).
    */
   async runDiscoveryCycle(
@@ -51,6 +81,20 @@ export class AutomationCoordinator {
     const isoStart = new Date(startTime).toISOString();
     const timeBucket = isoStart.replace(/[:.]/g, '-');
     const runId = `RUN-DISCOVERY-${timeBucket}`;
+
+    // 0. Circuit Breaker Check
+    if (this.circuitBreakerTripped) {
+      return {
+        runId,
+        jobType: 'DISCOVERY',
+        trigger,
+        status: 'SKIPPED',
+        startedAt: isoStart,
+        completedAt: isoStart,
+        durationMs: 0,
+        skippedReason: `CIRCUIT_BREAKER_ACTIVE: ${this.circuitBreakerReason || 'Emergency stop triggered.'}`
+      };
+    }
 
     // 1. Concurrency Protection (Prevent Overlapping Runs)
     if (this.isJobActive('DISCOVERY')) {
@@ -84,7 +128,7 @@ export class AutomationCoordinator {
 
       // 4. Sequential Council Dispatching (Phase 5B)
       let dispatchSummary;
-      if (autoDispatch) {
+      if (autoDispatch && !this.circuitBreakerTripped) {
         dispatchSummary = await this.dispatcher.dispatchAll();
       }
 
@@ -139,7 +183,21 @@ export class AutomationCoordinator {
     const timeBucket = isoStart.replace(/[:.]/g, '-');
     const runId = `RUN-MONITORING-${timeBucket}`;
 
-    // 1. Concurrency Protection (Prevent Overlapping Runs)
+    // 0. Circuit Breaker Check
+    if (this.circuitBreakerTripped) {
+      return {
+        runId,
+        jobType: 'MONITORING',
+        trigger,
+        status: 'SKIPPED',
+        startedAt: isoStart,
+        completedAt: isoStart,
+        durationMs: 0,
+        skippedReason: `CIRCUIT_BREAKER_ACTIVE: ${this.circuitBreakerReason || 'Emergency stop triggered.'}`
+      };
+    }
+
+    // 1. Concurrency Protection
     if (this.isJobActive('MONITORING')) {
       return {
         runId,
@@ -158,9 +216,9 @@ export class AutomationCoordinator {
     try {
       const executeExits = config?.executeExits ?? true;
 
-      // 2. Position Monitoring & Protective Invalidation (Phase 6C)
+      // 2. Execute authoritative monitoring cycle (Phase 6C)
       const monitoringResult: MonitoringCycleResult = await this.monitoringService.runMonitoringCycle({
-        executeExits
+        executeExits: executeExits && !this.circuitBreakerTripped
       });
 
       const endTime = Date.now();
@@ -195,5 +253,4 @@ export class AutomationCoordinator {
   }
 }
 
-/** Singleton instance of AutomationCoordinator */
 export const automationCoordinator = new AutomationCoordinator();

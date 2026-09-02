@@ -1,4 +1,4 @@
-# Dependencies
+﻿# Dependencies
 node_modules/
 .pnpm-store/
 
@@ -68,3 +68,7 @@ generated/
 # Misc
 *.swp
 *.swo
+
+# Runtime Data Journals
+data/
+

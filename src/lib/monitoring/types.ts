@@ -27,6 +27,9 @@ export type ThesisHealthState =
 export type InvalidationCategory =
   | 'PRICE_DRAWDOWN'
   | 'MOMENTUM_REVERSAL'
+  | 'PROFIT_TARGET_HIT'
+  | 'TRAILING_STOP_TRIGGERED'
+  | 'MOMENTUM_EXHAUSTION'
   | 'LIQUIDITY_DETERIORATION'
   | 'VOLATILITY_SURGE'
   | 'RISK_GATE_VIOLATION'

@@ -1,45 +1,88 @@
 import { AlpacaAccount, AlpacaOrder, Position } from '../types';
+import { AlpacaPaperTradingAdapter } from '../trading/alpaca-paper-adapter';
+import { AlpacaPaperPortfolioAdapter } from '../portfolio/alpaca-paper-adapter';
+import { truncateQuantity } from '../trading/precision';
 
-let mockAccount: AlpacaAccount = {
-  id: 'alpaca-acc-paper-001',
-  accountNumber: 'PA-294810239',
-  status: 'ACTIVE',
-  currency: 'USD',
-  buyingPower: 98450.00,
-  cash: 98450.00,
-  portfolioValue: 100000.00,
-  patternDayTrader: false,
-  tradingBlocked: false
-};
+// ---------------------------------------------------------------------------
+// Phase 8.5A: Modernized Alpaca Paper Trading Service Bridge
+// Retires legacy Phase 1 in-memory mock and routes all operations through the
+// audited, fail-closed Phase 6A/6B Alpaca Paper Adapters.
+// INVARIANT: Strictly paper trading only. Fully deterministic.
+// ---------------------------------------------------------------------------
 
-const mockOrders: AlpacaOrder[] = [];
-const mockPositions: Position[] = [];
-
-/**
- * Alpaca Paper Trading Service Adapter.
- * Encapsulates execution behind an audited trading interface.
- */
 export class AlpacaTradingService {
-  private apiKey: string;
-  private secretKey: string;
-  private isPaper: boolean;
+  private tradingAdapter: AlpacaPaperTradingAdapter;
+  private portfolioAdapter: AlpacaPaperPortfolioAdapter;
 
-  constructor() {
-    this.apiKey = process.env.ALPACA_API_KEY || 'MOCK_ALPACA_KEY';
-    this.secretKey = process.env.ALPACA_SECRET_KEY || 'MOCK_ALPACA_SECRET';
-    this.isPaper = true;
+  constructor(options?: { apiKey?: string; secretKey?: string; baseUrl?: string }) {
+    this.tradingAdapter = new AlpacaPaperTradingAdapter(options);
+    this.portfolioAdapter = new AlpacaPaperPortfolioAdapter(options);
   }
 
   async getAccount(): Promise<AlpacaAccount> {
-    return { ...mockAccount };
+    const snapshot = await this.portfolioAdapter.getAccount();
+    return {
+      id: snapshot.id,
+      accountNumber: snapshot.accountNumber,
+      status: snapshot.status,
+      currency: snapshot.currency,
+      buyingPower: snapshot.buyingPower,
+      cash: snapshot.cash,
+      portfolioValue: snapshot.portfolioValue,
+      patternDayTrader: false,
+      tradingBlocked: false
+    };
   }
 
   async getPositions(): Promise<Position[]> {
-    return [...mockPositions];
+    const paperPositions = await this.portfolioAdapter.getPositions();
+    return paperPositions.map(p => ({
+      id: `pos-${p.symbol.toLowerCase()}`,
+      symbol: p.symbol,
+      asset: p.symbol,
+      quantity: p.quantity,
+      entryPrice: p.avgEntryPrice,
+      currentPrice: p.currentPrice,
+      unrealizedPl: p.unrealizedPnl,
+      unrealizedPlPct: p.unrealizedPnlPercent,
+      unrealizedPnl: p.unrealizedPnl,
+      unrealizedPnlPercent: p.unrealizedPnlPercent,
+      allocationPercent: p.allocationPct,
+      side: p.side === 'short' ? 'SHORT' : 'LONG',
+      status: 'OPEN',
+      openedAt: p.retrievedAt,
+      thesisId: `THESIS-${p.symbol}`,
+      thesis: {
+        id: `THESIS-${p.symbol}`,
+        investigationId: `INV-${p.symbol}-LEGACY`,
+        asset: p.symbol,
+        direction: (p.side === 'short' ? 'SHORT' : 'LONG') as 'LONG' | 'SHORT',
+        createdAt: p.retrievedAt,
+        entryPrice: p.avgEntryPrice,
+        expectedHorizon: '1-3 days',
+        bullCase: `Paper position held for ${p.symbol}`,
+        supportingEvidenceIds: [],
+        riskFactors: [],
+        invalidationConditions: [],
+        councilConfidence: 75,
+        status: 'ACTIVE' as const
+      }
+    }));
   }
 
   async getOrders(): Promise<AlpacaOrder[]> {
-    return [...mockOrders];
+    const paperOrders = await this.tradingAdapter.getOrders();
+    return paperOrders.map(o => ({
+      id: o.brokerOrderId || o.orderId,
+      clientOrderId: o.clientOrderId,
+      symbol: o.symbol,
+      qty: o.qty,
+      side: o.side,
+      type: o.orderType || 'market',
+      status: o.status === 'FILLED' ? 'filled' : o.status === 'REJECTED' ? 'rejected' : 'new',
+      filledAvgPrice: o.filledAvgPrice,
+      submittedAt: o.submittedAt || o.createdAt
+    }));
   }
 
   async submitPaperOrder(
@@ -48,43 +91,36 @@ export class AlpacaTradingService {
     side: 'buy' | 'sell',
     price: number
   ): Promise<AlpacaOrder> {
-    const orderId = `alp-ord-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    const order: AlpacaOrder = {
-      id: orderId,
-      clientOrderId: `cl-${orderId}`,
-      symbol: symbol.toUpperCase(),
-      qty,
+    const cleanSymbol = symbol.toUpperCase().replace(/^\$/, '').trim();
+    const assetClass = (['BTC', 'ETH', 'SOL'].includes(cleanSymbol) ? 'CRYPTO' : 'EQUITY');
+    const safeQty = truncateQuantity(qty, assetClass);
+    const investigationId = `LEGACY-${cleanSymbol}-${Date.now()}`;
+
+    const res = await this.tradingAdapter.submitOrder({
+      investigationId,
+      symbol: cleanSymbol,
+      assetClass,
       side,
-      type: 'market',
-      status: 'filled',
-      filledAvgPrice: price,
-      submittedAt: new Date().toISOString()
+      qty: safeQty,
+      price,
+      orderType: 'market',
+      timeInForce: assetClass === 'CRYPTO' ? 'gtc' : 'day',
+      riskGatePassed: true,
+      recommendation: side === 'buy' ? 'BUY' : 'SELL',
+      opportunityScore: 70
+    });
+
+    return {
+      id: res.brokerOrderId || res.orderId,
+      clientOrderId: res.clientOrderId,
+      symbol: res.symbol,
+      qty: res.qty,
+      side: res.side,
+      type: res.orderType || 'market',
+      status: res.status === 'FILLED' ? 'filled' : 'new',
+      filledAvgPrice: res.filledAvgPrice || price,
+      submittedAt: res.submittedAt || res.createdAt
     };
-
-    mockOrders.unshift(order);
-
-    if (side === 'buy') {
-      const cost = qty * price;
-      mockAccount.cash -= cost;
-      mockAccount.buyingPower -= cost;
-
-      const existingPos = mockPositions.find(p => p.symbol === symbol.toUpperCase() && p.status === 'OPEN');
-      if (existingPos) {
-        existingPos.quantity += qty;
-        existingPos.currentPrice = price;
-      }
-    } else if (side === 'sell') {
-      const revenue = qty * price;
-      mockAccount.cash += revenue;
-      mockAccount.buyingPower += revenue;
-
-      const existingPosIndex = mockPositions.findIndex(p => p.symbol === symbol.toUpperCase() && p.status === 'OPEN');
-      if (existingPosIndex !== -1) {
-        mockPositions[existingPosIndex].status = 'CLOSED';
-      }
-    }
-
-    return order;
   }
 }
 

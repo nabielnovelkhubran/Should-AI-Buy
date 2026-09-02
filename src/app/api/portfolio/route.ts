@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { paperPortfolioService } from '@/lib/portfolio';
 import { storage } from '@/lib/storage';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const portfolio = await paperPortfolioService.getPortfolioSnapshot();

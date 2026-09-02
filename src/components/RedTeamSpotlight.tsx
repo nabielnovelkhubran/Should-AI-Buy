@@ -31,28 +31,28 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({
   const hasRefutations = refutationClaims.length > 0;
 
   return (
-    <div className={`p-6 rounded-2xl border relative overflow-hidden transition ${
+    <div className={`p-6 rounded-lg border relative overflow-hidden transition ${
       isDisproved 
-        ? 'bg-gradient-to-b from-rose-950/30 to-[#11141d] border-rose-500/40 glow-redteam' 
+        ? 'bg-gradient-to-b from-rose-950/30 to-[#1f1e23] border-rose-500/40 glow-redteam' 
         : isWeakened 
-        ? 'bg-gradient-to-b from-amber-950/20 to-[#11141d] border-amber-500/30' 
-        : 'bg-gradient-to-b from-emerald-950/20 to-[#11141d] border-emerald-500/30'
+        ? 'bg-gradient-to-b from-amber-950/20 to-[#1f1e23] border-amber-500/30' 
+        : 'bg-gradient-to-b from-emerald-950/20 to-[#1f1e23] border-[#00ff84]/20'
     }`}>
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-rose-600/20 border border-rose-500/40 flex items-center justify-center">
-            <Flame className="w-4 h-4 text-rose-400" />
+            <Flame className="w-4 h-4 text-[#ff3b5c]" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               🔴 Red-Team Adversarial Challenge
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono font-bold">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-[#ff3b5c] font-mono font-bold">
                 Core Differentiator
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[#848388]">
               Mandatory refutation attack against initial bull thesis before trade execution
             </p>
           </div>
@@ -60,10 +60,10 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({
 
         <div className={`px-3 py-1 rounded-full text-xs font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 ${
           isDisproved
-            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+            ? 'bg-rose-500/20 text-[#ff3b5c] border border-rose-500/40'
             : isWeakened
             ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-            : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+            : 'bg-[#00ff84]/10 text-[#00ff84] border border-emerald-500/40'
         }`}>
           {isDisproved ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
           Thesis Status: {details?.thesisStatus || redTeamResult.verdict}
@@ -71,23 +71,23 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({
       </div>
 
       {/* Summary Banner */}
-      <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-200 leading-relaxed mb-4">
-        <strong className="text-rose-400">Red-Team Findings: </strong>
+      <div className="p-3.5 rounded-lg bg-[#1f1e23] border border-[#28272e] text-xs text-slate-200 leading-relaxed mb-4">
+        <strong className="text-[#ff3b5c]">Red-Team Findings: </strong>
         {redTeamResult.summary}
       </div>
 
       {/* Attack Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
         {/* Assumptions Tested */}
-        <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800">
-          <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+        <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e]">
+          <h4 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
             Assumptions Challenged
           </h4>
-          <ul className="space-y-2 text-xs text-slate-400">
+          <ul className="space-y-2 text-xs text-[#848388]">
             {details?.assumptionsChallenged?.map((a, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="text-indigo-400 font-mono">[{i + 1}]</span>
+                <span className="text-[#848388] font-mono">[{i + 1}]</span>
                 <span>{a}</span>
               </li>
             )) || <li>No assumptions logged.</li>}
@@ -95,25 +95,25 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({
         </div>
 
         {/* Vulnerabilities Found */}
-        <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800">
-          <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+        <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e]">
+          <h4 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
             <span className={`w-1.5 h-1.5 rounded-full ${isDisproved ? 'bg-rose-400' : 'bg-emerald-400'}`} />
             Counter-Evidence &amp; Vulnerabilities
           </h4>
           <ul className="space-y-2 text-xs">
             {details?.vulnerabilitiesFound?.map((v, i) => (
-              <li key={i} className="flex items-start gap-2 text-rose-300">
-                <AlertOctagon className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+              <li key={i} className="flex items-start gap-2 text-[#ff3b5c]">
+                <AlertOctagon className="w-3.5 h-3.5 text-[#ff3b5c] shrink-0 mt-0.5" />
                 <span>{v}</span>
               </li>
-            )) || <li className="text-emerald-400">No vulnerabilities detected. Opportunity passed attack.</li>}
+            )) || <li className="text-[#00ff84]">No vulnerabilities detected. Opportunity passed attack.</li>}
           </ul>
         </div>
       </div>
 
       {/* Phase 3: REFUTATION Claims — structured adversarial assertions */}
       {hasRefutations && (
-        <div className="border border-orange-500/20 rounded-xl overflow-hidden">
+        <div className="border border-orange-500/20 rounded-lg overflow-hidden">
           <button
             onClick={() => setShowRefutations(r => !r)}
             className="w-full flex items-center justify-between px-4 py-3 bg-orange-950/20 hover:bg-orange-950/30 transition"
@@ -132,7 +132,7 @@ export const RedTeamSpotlight: React.FC<RedTeamSpotlightProps> = ({
           </button>
 
           {showRefutations && (
-            <div className="p-3 space-y-2 bg-slate-950/30">
+            <div className="p-3 space-y-2 bg-[#1f1e23]">
               {refutationClaims.map(claim => (
                 <ClaimInspector
                   key={claim.id}
