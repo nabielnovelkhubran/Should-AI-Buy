@@ -36,6 +36,7 @@ import { RuntimeJournalEvent, WorkerHeartbeatTelemetry } from '@/lib/agent/analy
 import { AlphaStrategyReviewSnapshot } from '@/lib/agent/analytics/strategy-review-types';
 import { useCurrency } from './CurrencyProvider';
 import { PortfolioGraphHistory } from './PortfolioGraphHistory';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export interface RiskTierInfo {
   id: 'STANDARD' | 'RISKY' | 'HIGH_RISK' | 'ALL_IN';
@@ -146,6 +147,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   onResetCircuitBreaker
 }) => {
   const { formatCurrency } = useCurrency();
+  const { role, isOperator, isViewer } = useAuth();
   const [localSnapshot, setLocalSnapshot] = useState<AgentRuntimeSnapshot | null>(null);
   const [activeAttributionTab, setActiveAttributionTab] = useState<'strategy' | 'regime' | 'asset' | 'confidence' | 'factors'>('strategy');
   const [alphaSnapshot, setAlphaSnapshot] = useState<AlphaReviewSnapshot | null>(null);
@@ -204,6 +206,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   const riskDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleRiskPercentageChange = (pct: number) => {
+    if (isViewer) {
+      alert('Action restricted: View-Only (Judge) Mode cannot modify risk or capital allocation. Log in with the Operator passphrase.');
+      return;
+    }
     const clamped = Math.max(0, Math.min(100, pct));
     setRiskPercentage(clamped);
     try {
@@ -512,6 +518,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   const isCircuitBreakerTripped = worker.circuitBreakerTripped || safety.circuitBreakerActive;
 
   const handleRunCycle = async () => {
+    if (isViewer) {
+      alert('Action restricted: View-Only (Judge) Mode does not permit executing cycles. Log in with the Operator passphrase.');
+      return;
+    }
     try {
       setActionLoading('cycle');
       if (onRunCycleNow) {
@@ -530,6 +540,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   };
 
   const handleStartRuntime = async () => {
+    if (isViewer) {
+      alert('Action restricted: View-Only (Judge) Mode does not permit starting the autonomous agent. Log in with the Operator passphrase.');
+      return;
+    }
     try {
       setActionLoading('start_agent');
       await fetch('/api/agent/runtime', {
@@ -544,6 +558,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   };
 
   const handleStopRuntime = async () => {
+    if (isViewer) {
+      alert('Action restricted: View-Only (Judge) Mode does not permit stopping the autonomous agent. Log in with the Operator passphrase.');
+      return;
+    }
     try {
       setActionLoading('stop_agent');
       await fetch('/api/agent/runtime', {
@@ -578,6 +596,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   };
 
   const handleToggleProofMode = async () => {
+    if (isViewer) {
+      alert('Action restricted: View-Only (Judge) Mode does not permit toggling Proof Mode. Log in with the Operator passphrase.');
+      return;
+    }
     try {
       setActionLoading('proof_mode');
       const nextProof = !(worker.proofMode ?? false);
@@ -593,6 +615,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   };
 
   const handleResetCB = async () => {
+    if (isViewer) {
+      alert('Action restricted: View-Only (Judge) Mode does not permit resetting circuit breakers. Log in with the Operator passphrase.');
+      return;
+    }
     try {
       setActionLoading('cb');
       if (onResetCircuitBreaker) {
@@ -617,6 +643,17 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
       
       {/* 1. Header Banner & Operator Controls */}
       <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5 shadow-xl">
+        {isViewer && (
+          <div className="mb-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-mono flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+              <span><strong>View-Only (Judge) Mode Active:</strong> Real-time quant telemetry, live deliberation journals, and equity curves are live. Operator controls (Start/Stop, Risk Slider, Manual Cycles) are disabled to protect live broker capital.</span>
+            </div>
+            <span className="hidden md:inline-block px-2 py-0.5 rounded text-[10px] bg-blue-500/20 text-blue-200 border border-blue-500/40 shrink-0">
+              Passphrase: alpaca2026
+            </span>
+          </div>
+        )}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2">
           
           <div className="flex items-center gap-2">
@@ -657,8 +694,9 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
             {isCircuitBreakerTripped && (
               <button
                 onClick={handleResetCB}
-                disabled={actionLoading === 'cb'}
-                className="px-3.5 py-2 bg-[#ff3b5c] hover:bg-[#e03350] text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5"
+                disabled={actionLoading === 'cb' || isViewer}
+                title={isViewer ? 'Operator passphrase required to reset CB' : undefined}
+                className="px-3.5 py-2 bg-[#ff3b5c] hover:bg-[#e03350] text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 disabled:opacity-50"
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 Reset Circuit Breaker
@@ -668,7 +706,8 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
             {isWorkerRunning ? (
               <button
                 onClick={handleStopRuntime}
-                disabled={actionLoading === 'stop_agent'}
+                disabled={actionLoading === 'stop_agent' || isViewer}
+                title={isViewer ? 'Operator passphrase required to stop agent' : undefined}
                 className="px-3.5 py-2 bg-[#ff3b5c] hover:bg-[#e03350] text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Lock className="w-3.5 h-3.5" />
@@ -677,7 +716,8 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
             ) : (
               <button
                 onClick={handleStartRuntime}
-                disabled={actionLoading === 'start_agent' || isCircuitBreakerTripped}
+                disabled={actionLoading === 'start_agent' || isCircuitBreakerTripped || isViewer}
+                title={isViewer ? 'Operator passphrase required to start agent' : undefined}
                 className="px-3.5 py-2 bg-[#00ff84] hover:bg-[#00e576] text-black text-xs font-bold rounded-lg transition flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Zap className="w-3.5 h-3.5" />
@@ -722,8 +762,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                     step={1}
                     value={riskPercentage}
                     onChange={(e) => handleRiskPercentageChange(+e.target.value)}
-                    disabled={actionLoading !== null}
-                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-[#28272e] transition my-1"
+                    disabled={actionLoading !== null || isViewer}
+                    className={`w-full h-1.5 rounded-full appearance-none bg-[#28272e] transition my-1 ${
+                      isViewer ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                    }`}
                     style={{
                       accentColor: currentTier.color,
                     }}
@@ -795,21 +837,22 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
 
             <button
               onClick={handleToggleProofMode}
-              disabled={actionLoading === 'proof_mode'}
+              disabled={actionLoading === 'proof_mode' || isViewer}
               className={`px-3 py-2 text-xs font-bold rounded-lg transition border ${
                 worker.proofMode
                   ? 'bg-[#00ff84] text-black border-[#00ff84] font-bold'
                   : 'bg-slate-800 text-[#9ca3af] border-[#34333b] hover:bg-slate-700'
-              }`}
-              title="Toggle First-Trade Proof Mode (Restricts to max 1 new position while preserving all strategy thresholds)"
+              } ${isViewer ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={isViewer ? 'Operator passphrase required to toggle Proof Mode' : 'Toggle First-Trade Proof Mode'}
             >
               {worker.proofMode ? 'Proof Mode ON' : 'Proof Mode OFF'}
             </button>
 
             <button
               onClick={handleRunCycle}
-              disabled={actionLoading === 'cycle' || isCircuitBreakerTripped}
+              disabled={actionLoading === 'cycle' || isCircuitBreakerTripped || isViewer}
               className="px-4 py-2 bg-[#00ff84] hover:bg-[#00e576] text-black text-xs font-bold rounded-lg transition flex items-center gap-1.5 disabled:opacity-50"
+              title={isViewer ? 'Operator passphrase required to execute cycles' : undefined}
             >
               <Play className="w-3.5 h-3.5 fill-current" />
               {actionLoading === 'cycle' ? 'Executing Cycle...' : 'Run Cycle Now'}

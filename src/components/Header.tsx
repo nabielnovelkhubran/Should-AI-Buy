@@ -1,8 +1,9 @@
 'use client';
 import React from 'react';
-import { Award, Lock } from 'lucide-react';
+import { Award, Lock, Shield, UserCheck } from 'lucide-react';
 import { AlpacaAccount } from '../lib/types';
 import { useCurrency } from './CurrencyProvider';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export type DashboardTab = 'command' | 'council' | 'discovery' | 'portfolio' | 'evidence' | 'automation' | 'observability' | 'broker_diagnostics' | 'execution_lab' | 'workflow_auditor';
 
@@ -25,6 +26,7 @@ const NAV_TABS: { id: DashboardTab; label: string }[] = [
 
 export const Header: React.FC<HeaderProps> = ({ account, activeTab, setActiveTab }) => {
   const { currency, setCurrency, formatCurrency } = useCurrency();
+  const { role, isOperator, isViewer, logout } = useAuth();
   const isCompetition = process.env.NEXT_PUBLIC_TRADING_ENVIRONMENT === 'competition';
   const equity = (account as any)?.equity ?? (account as any)?.portfolioValue ?? null;
 
@@ -113,13 +115,20 @@ export const Header: React.FC<HeaderProps> = ({ account, activeTab, setActiveTab
             <option value="AUD">AUD</option>
           </select>
 
+          {/* Active Role Badge */}
+          {role && (
+            <div className={`hidden sm:flex items-center gap-1.5 text-[10px] font-mono font-bold px-2 py-1 rounded border select-none ${
+              isOperator
+                ? 'bg-[#00ff84]/10 text-[#00ff84] border-[#00ff84]/30'
+                : 'bg-blue-500/10 text-blue-300 border border-blue-500/30'
+            }`}>
+              {isOperator ? <UserCheck className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+              <span>{isOperator ? 'OPERATOR' : 'VIEW-ONLY'}</span>
+            </div>
+          )}
+
           <button
-            onClick={async () => {
-              try {
-                await fetch('/api/auth/logout', { method: 'POST' });
-                window.location.reload();
-              } catch {}
-            }}
+            onClick={logout}
             className="p-1.5 rounded hover:text-white transition flex items-center gap-1 text-[11px] font-mono cursor-pointer"
             style={{
               background: '#1f1e23',

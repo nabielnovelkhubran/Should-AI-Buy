@@ -33,6 +33,7 @@ import { AlertCircle } from 'lucide-react';
 import { CurrencyProvider } from '@/components/CurrencyProvider';
 import { QuantTickerRibbon } from '@/components/QuantTickerRibbon';
 import { AuthGate } from '@/components/AuthGate';
+import { AuthProvider } from '@/lib/auth/auth-context';
 
 const BASE_POLL_INTERVAL_MS = 8000;
 const MAX_BACKOFF_INTERVAL_MS = 30000;
@@ -427,9 +428,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <CurrencyProvider>
-      <AuthGate>
-        <main className="min-h-screen flex flex-col" style={{ background: '#121117', color: '#e2e8f0' }}>
+    <AuthProvider>
+      <CurrencyProvider>
+        <AuthGate>
+          <main className="min-h-screen flex flex-col" style={{ background: '#121117', color: '#e2e8f0' }}>
 
         {/* Top Nav */}
         <Header account={account} activeTab={activeTab} setActiveTab={handleTabChange} />
@@ -609,7 +611,8 @@ export default function DashboardPage() {
         </footer>
 
       </main>
-      </AuthGate>
-    </CurrencyProvider>
+        </AuthGate>
+      </CurrencyProvider>
+    </AuthProvider>
   );
 }
