@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Award } from 'lucide-react';
+import { Award, Lock } from 'lucide-react';
 import { AlpacaAccount } from '../lib/types';
 import { useCurrency } from './CurrencyProvider';
 
@@ -112,6 +112,25 @@ export const Header: React.FC<HeaderProps> = ({ account, activeTab, setActiveTab
             <option value="SGD">SGD</option>
             <option value="AUD">AUD</option>
           </select>
+
+          <button
+            onClick={async () => {
+              try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.reload();
+              } catch {}
+            }}
+            className="p-1.5 rounded hover:text-white transition flex items-center gap-1 text-[11px] font-mono cursor-pointer"
+            style={{
+              background: '#1f1e23',
+              border: '1px solid #28272e',
+              color: '#8b8a91'
+            }}
+            title="Lock Terminal Session"
+          >
+            <Lock className="w-3 h-3 text-[#00ff84]" />
+            <span className="hidden sm:inline text-[10px]">LOCK</span>
+          </button>
         </div>
       </div>
     </header>
