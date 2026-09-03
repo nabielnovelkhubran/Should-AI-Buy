@@ -68,7 +68,8 @@ export class AlpacaPaperPortfolioAdapter implements PaperPortfolioAdapter {
             'APCA-API-KEY-ID': this.apiKey,
             'APCA-API-SECRET-KEY': this.secretKey,
             'Content-Type': 'application/json'
-          }
+          },
+          cache: 'no-store'
         });
 
         const latencyMs = Date.now() - startTime;
@@ -193,7 +194,8 @@ export class AlpacaPaperPortfolioAdapter implements PaperPortfolioAdapter {
             'APCA-API-KEY-ID': this.apiKey,
             'APCA-API-SECRET-KEY': this.secretKey,
             'Content-Type': 'application/json'
-          }
+          },
+          cache: 'no-store'
         });
 
         const latencyMs = Date.now() - startTime;
@@ -327,7 +329,8 @@ export class AlpacaPaperPortfolioAdapter implements PaperPortfolioAdapter {
             'APCA-API-KEY-ID': this.apiKey,
             'APCA-API-SECRET-KEY': this.secretKey,
             'Content-Type': 'application/json'
-          }
+          },
+          cache: 'no-store'
         });
 
         const latencyMs = Date.now() - startTime;

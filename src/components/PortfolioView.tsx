@@ -57,7 +57,10 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      const res = await fetch('/api/trading/paper/portfolio');
+      const res = await fetch(`/api/trading/paper/portfolio?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.portfolio) {
