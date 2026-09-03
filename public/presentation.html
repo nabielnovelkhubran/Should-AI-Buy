@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Should-AI-Buy? — Official Hackathon Pitch Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #0b0a0e;
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .slide {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+      padding: 3.5rem 5rem;
+      background: radial-gradient(circle at top right, rgba(0, 255, 132, 0.04), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(255, 59, 92, 0.02), transparent 40%),
+                  #121117;
+      position: relative;
+    }
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card {
+      background-color: #1f1e23;
+      border: 1px solid #28272e;
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+    .card-accent {
+      background-color: #1f1e23;
+      border: 1px solid rgba(0, 255, 132, 0.3);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 255, 132, 0.05);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-green {
+      background-color: rgba(0, 255, 132, 0.12);
+      color: #00ff84;
+      border: 1px solid rgba(0, 255, 132, 0.3);
+    }
+    .badge-red {
+      background-color: rgba(255, 59, 92, 0.12);
+      color: #ff3b5c;
+      border: 1px solid rgba(255, 59, 92, 0.3);
+    }
+    .badge-gray {
+      background-color: rgba(132, 131, 136, 0.12);
+      color: #848388;
+      border: 1px solid #28272e;
+    }
+    @media print {
+      body {
+        overflow: visible;
+        background: #121117;
+      }
+      .slide {
+        display: flex !important;
+        page-break-after: always;
+        height: 100vh !important;
+        width: 100vw !important;
+        padding: 2.5rem 3.5rem !important;
+      }
+      .nav-controls {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SLIDE 1: TITLE & COVER -->
+  <section class="slide active" id="slide-1">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 rounded-full bg-[#00ff84] shadow-[0_0_10px_#00ff84]"></div>
+        <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">Alpaca AI Trading Hackathon 2026</span>
+      </div>
+      <div class="badge badge-green">Live Autonomous Cloud Stack</div>
+    </div>
+
+    <div class="my-auto max-w-5xl">
+      <div class="inline-block mb-3">
+        <span class="text-[#00ff84] font-mono text-sm font-bold tracking-wider">PROJECT SHOWCASE & ARCHITECTURE</span>
+      </div>
+      <h1 class="text-7xl font-extrabold tracking-tight text-white mb-6 leading-none">
+        SHOULD <span class="text-[#00ff84]">AI</span> BUY ?
+      </h1>
+      <p class="text-2xl text-[#848388] max-w-3xl leading-relaxed mb-8">
+        Autonomous Multi-Agent Algorithmic Trading with <span class="text-white font-semibold">Adversarial Deliberation</span>, Verifiable Evidence Ledgers, and Real-Time Broker Execution.
+      </p>
+
+      <div class="grid grid-cols-3 gap-6 max-w-3xl">
+        <div class="card p-4">
+          <div class="text-[#00ff84] text-xs font-mono font-bold mb-1">AI COUNCIL ARCHITECTURE</div>
+          <div class="text-white text-sm font-semibold">3 Specialist Agents + 1 Adversarial Red Team</div>
+        </div>
+        <div class="card p-4">
+          <div class="text-[#00ff84] text-xs font-mono font-bold mb-1">EXECUTION ENGINE</div>
+          <div class="text-white text-sm font-semibold">Alpaca Paper API v2 with Hard Risk Gates</div>
+        </div>
+        <div class="card p-4">
+          <div class="text-[#00ff84] text-xs font-mono font-bold mb-1">PRODUCTION STATUS</div>
+          <div class="text-white text-sm font-semibold">24/7 Cloud Daemon on AWS EC2 (Ubuntu)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-4 text-xs text-[#848388] font-mono">
+      <div>TEAM: <span class="text-white font-bold">SquadBlessingMiracle</span> (Nabiel, Daffa, Fortero, Ghifari)</div>
+      <div>STANDALONE SUBMISSION DECK • SLIDE 01 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: THE PROBLEM -->
+  <section class="slide" id="slide-2">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">01. Problem Space</span>
+      <div class="badge badge-red">Market Failure Analysis</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">The Black-Box Trap in Retail & AI Trading</h2>
+      <p class="text-base text-[#848388] mb-8">Why 95% of retail traders lose capital and single LLMs cannot be trusted with real broker balances.</p>
+
+      <div class="grid grid-cols-3 gap-6">
+        <div class="card">
+          <div class="w-10 h-10 rounded-lg bg-red-500/10 text-[#ff3b5c] flex items-center justify-center font-bold text-lg mb-4 border border-red-500/20">01</div>
+          <h3 class="text-lg font-bold text-white mb-2">Emotional Capitulation</h3>
+          <p class="text-xs text-[#848388] leading-relaxed mb-4">
+            95% of retail traders fail due to psychological exhaustion: revenge trading, FOMO entries at local tops, and stubborn refusal to honor stops.
+          </p>
+          <div class="p-2 rounded bg-[#17161b] border border-[#28272e] font-mono text-[11px] text-[#ff3b5c]">
+            Stat: >80% blow up within 90 days.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg mb-4 border border-amber-500/20">02</div>
+          <h3 class="text-lg font-bold text-white mb-2">Single LLM Hallucinations</h3>
+          <p class="text-xs text-[#848388] leading-relaxed mb-4">
+            Asking a single ChatGPT or Claude prompt "Should I buy BTC?" generates polite probabilistic text, not quantitative risk modeling or order book awareness.
+          </p>
+          <div class="p-2 rounded bg-[#17161b] border border-[#28272e] font-mono text-[11px] text-amber-400">
+            Flaw: Zero liquidity checks & sycophantic bias.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="w-10 h-10 rounded-lg bg-[#00ff84]/10 text-[#00ff84] flex items-center justify-center font-bold text-lg mb-4 border border-[#00ff84]/20">03</div>
+          <h3 class="text-lg font-bold text-white mb-2">Zero Thesis Explainability</h3>
+          <p class="text-xs text-[#848388] leading-relaxed mb-4">
+            Traditional black-box trading bots flash "BUY" signals without explaining WHY, where invalidation stops lie, or what catastrophic catalysts would void the trade.
+          </p>
+          <div class="p-2 rounded bg-[#17161b] border border-[#28272e] font-mono text-[11px] text-[#00ff84]">
+            Need: Verifiable auditable debate records.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • MULTI-AGENT QUANT ENGINE</div>
+      <div>SLIDE 02 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3: THE SOLUTION -->
+  <section class="slide" id="slide-3">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">02. Value Proposition</span>
+      <div class="badge badge-green">The Core Innovation</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">The Solution: Adversarial Multi-Agent Council</h2>
+      <p class="text-base text-[#848388] mb-8">Replacing single-prompt guesswork with institutional-grade adversarial deliberation and deterministic safety gates.</p>
+
+      <div class="grid grid-cols-3 gap-6 mb-6">
+        <div class="card-accent">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-1">STAGE 1</div>
+          <h3 class="text-xl font-bold text-white mb-2">Autonomous Discovery</h3>
+          <p class="text-xs text-[#848388] leading-relaxed">
+            Continuous background scanning of 40+ crypto and equity assets against quantitative liquidity filters, bid-ask spread limits, and 8-factor momentum indicators.
+          </p>
+        </div>
+
+        <div class="card-accent" style="border-color: rgba(255, 59, 92, 0.4); box-shadow: 0 4px 20px rgba(255, 59, 92, 0.05);">
+          <div class="text-[#ff3b5c] font-mono text-xs font-bold mb-1">STAGE 2 (KEY DIFFERENTIATOR)</div>
+          <h3 class="text-xl font-bold text-white mb-2">Adversarial Red Team</h3>
+          <p class="text-xs text-[#848388] leading-relaxed">
+            Every proposed trade is rigorously attacked by a dedicated Red Team skeptic asking: <span class="text-white font-semibold">"What if we're completely wrong?"</span> to expose false breakouts, wash trading, and liquidity traps.
+          </p>
+        </div>
+
+        <div class="card-accent">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-1">STAGE 3</div>
+          <h3 class="text-xl font-bold text-white mb-2">Deterministic Risk Gate</h3>
+          <p class="text-xs text-[#848388] leading-relaxed">
+            AI cannot execute trades directly. Decisions must clear a deterministic algorithmic Risk Gate enforcing max portfolio exposure, concentration caps, and position sizing limits.
+          </p>
+        </div>
+      </div>
+
+      <div class="card p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-2.5 h-2.5 rounded-full bg-[#00ff84]"></div>
+          <span class="text-sm font-semibold text-white">Result: Zero Emotional Errors + Fully Auditable Reasoning</span>
+        </div>
+        <span class="text-xs font-mono text-[#848388]">Every trade requires 3+ verifiable evidence links before execution.</span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • MULTI-AGENT QUANT ENGINE</div>
+      <div>SLIDE 03 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4: ARCHITECTURE -->
+  <section class="slide" id="slide-4">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">03. Technical Architecture</span>
+      <div class="badge badge-green">End-to-End Pipeline</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">System Architecture & Execution Pipeline</h2>
+      <p class="text-base text-[#848388] mb-6">How market data flows from Alpaca through our multi-agent council into broker execution.</p>
+
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="card p-4">
+          <div class="badge badge-gray mb-2">01. INGESTION</div>
+          <h4 class="text-base font-bold text-white mb-1">Alpaca Market Data</h4>
+          <p class="text-xs text-[#848388] mb-3">Sub-second 1-min & 15-min crypto and equity bars, real-time quotes, and live news intelligence.</p>
+          <div class="font-mono text-[10px] text-[#00ff84] bg-[#17161b] p-2 rounded">
+            Rate Limiter: 200 req/min deduplicated
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <div class="badge badge-gray mb-2">02. QUANT FUNNEL</div>
+          <h4 class="text-base font-bold text-white mb-1">Multi-Factor Screener</h4>
+          <p class="text-xs text-[#848388] mb-3">Filters candidates via liquidity (> $100k), spread (< 100 bps), 8-factor score, and market regime.</p>
+          <div class="font-mono text-[10px] text-[#00ff84] bg-[#17161b] p-2 rounded">
+            Aging & Starvation: Rotation queue
+          </div>
+        </div>
+
+        <div class="card p-4" style="border-color: rgba(255, 59, 92, 0.4);">
+          <div class="badge badge-red mb-2">03. AI COUNCIL</div>
+          <h4 class="text-base font-bold text-white mb-1">Adversarial Debate</h4>
+          <p class="text-xs text-[#848388] mb-3">Quant Momentum, Macro Regime, and Market Intel agents build bull case; Red Team attacks assumptions.</p>
+          <div class="font-mono text-[10px] text-[#ff3b5c] bg-[#17161b] p-2 rounded">
+            Featherless Open-Source LLMs
+          </div>
+        </div>
+
+        <div class="card p-4" style="border-color: rgba(0, 255, 132, 0.4);">
+          <div class="badge badge-green mb-2">04. BROKER GATE</div>
+          <h4 class="text-base font-bold text-white mb-1">Risk Gate & Sizing</h4>
+          <p class="text-xs text-[#848388] mb-3">Computes ATR invalidation stop, sizes position, checks cash, and submits paper order to Alpaca v2.</p>
+          <div class="font-mono text-[10px] text-[#00ff84] bg-[#17161b] p-2 rounded">
+            Alpaca Paper API: Real Execution
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 flex items-center justify-between font-mono text-xs">
+        <span class="text-[#848388]">Cloud Hosting Environment:</span>
+        <span class="text-white">AWS EC2 Ubuntu 24.04 LTS (t3.micro, 2 vCPUs, 30GB gp3 SSD, 2GB Swap)</span>
+        <span class="text-[#00ff84] font-bold">● PM2 Clustered (24/7 Daemon)</span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • MULTI-AGENT QUANT ENGINE</div>
+      <div>SLIDE 04 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5: RED TEAM ADVERSARIAL -->
+  <section class="slide" id="slide-5">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">04. The Secret Sauce</span>
+      <div class="badge badge-red">Adversarial Intelligence</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">The Red Team: "What If We're Completely Wrong?"</h2>
+      <p class="text-base text-[#848388] mb-8">How an adversarial agent prevents costly false breakouts and protects trading capital.</p>
+
+      <div class="grid grid-cols-2 gap-8">
+        <div class="card p-6">
+          <div class="text-[#ff3b5c] font-mono text-xs font-bold mb-3 uppercase tracking-wider">The Skeptic's Audit Checklist</div>
+          <div class="space-y-4">
+            <div class="p-3 bg-[#17161b] rounded-lg border border-[#28272e]">
+              <div class="text-white font-bold text-sm mb-1">1. Liquidity Trap & Order Book Depth</div>
+              <div class="text-xs text-[#848388]">Is the volume spike organic, or is the asset too illiquid for clean entry/exit without devastating slippage?</div>
+            </div>
+            <div class="p-3 bg-[#17161b] rounded-lg border border-[#28272e]">
+              <div class="text-white font-bold text-sm mb-1">2. Macro Regime Incompatibility</div>
+              <div class="text-xs text-[#848388]">Does this breakout fight against macro market trend (e.g. attempting long breakout in strong BEAR market)?</div>
+            </div>
+            <div class="p-3 bg-[#17161b] rounded-lg border border-[#28272e]">
+              <div class="text-white font-bold text-sm mb-1">3. Asymmetric Risk/Reward Ratio</div>
+              <div class="text-xs text-[#848388]">Is the expected return at least 1.25x–2.0x larger than the technical invalidation stop distance?</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-6 flex flex-col justify-between">
+          <div>
+            <div class="text-[#00ff84] font-mono text-xs font-bold mb-3 uppercase tracking-wider">Deliberation Outcome Matrix</div>
+            <p class="text-xs text-[#848388] leading-relaxed mb-6">
+              Unlike traditional bots that binary-fire every moving average cross, our Synthesis Agent computes a consensus confidence score. If the Red Team discovers high contradictions, the candidate is instantly demoted to <span class="text-amber-400 font-bold">HOLD</span> or <span class="text-[#ff3b5c] font-bold">REJECT</span>.
+            </p>
+          </div>
+
+          <div class="card bg-[#17161b] p-4 border border-[#28272e] space-y-2 font-mono text-xs">
+            <div class="flex justify-between">
+              <span class="text-[#848388]">Unanimous Strong Bull:</span>
+              <span class="text-[#00ff84] font-bold">ENTER (100% Size Cap)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#848388]">Moderate Bull + Red Team Skeptic:</span>
+              <span class="text-amber-400 font-bold">SCALE (50% Sized Entry)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#848388]">Unresolved Fatal Flaw / High Risk:</span>
+              <span class="text-[#ff3b5c] font-bold">PASS / REJECT ($0 Risked)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • MULTI-AGENT QUANT ENGINE</div>
+      <div>SLIDE 05 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6: ALPACA INTEGRATION -->
+  <section class="slide" id="slide-6">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">05. Broker Infrastructure</span>
+      <div class="badge badge-green">Deep Alpaca Integration</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">Deep Alpaca Integration: 24/7 Paper Alpha</h2>
+      <p class="text-base text-[#848388] mb-8">Leveraging the full breadth of Alpaca's modern API infrastructure for multi-asset institutional simulation.</p>
+
+      <div class="grid grid-cols-3 gap-6 mb-6">
+        <div class="card">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-2">MARKET DATA ENGINE</div>
+          <h3 class="text-base font-bold text-white mb-2">Multi-Asset Data Feeds</h3>
+          <p class="text-xs text-[#848388] leading-relaxed">
+            Real-time ingestion of crypto and equity historical bars, latest trades, and streaming quotes across 40+ tickers with automatic rate-limit deduplication.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-2">EXECUTION & SIZING</div>
+          <h3 class="text-base font-bold text-white mb-2">Paper Trading API v2</h3>
+          <p class="text-xs text-[#848388] leading-relaxed">
+            Submits market and limit orders with deterministic client order IDs, tracking partial fills, fractional quantities, and real fill prices with zero lookahead bias.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-2">ACCOUNT RECONCILIATION</div>
+          <h3 class="text-base font-bold text-white mb-2">Real-Time Portfolio Audit</h3>
+          <p class="text-xs text-[#848388] leading-relaxed">
+            Continuous sync of cash balances, buying power, cost basis, and unrealized P&L directly from Alpaca ground truth, preventing phantom fills.
+          </p>
+        </div>
+      </div>
+
+      <div class="card p-5 bg-[#17161b]">
+        <div class="grid grid-cols-4 gap-4 text-center font-mono">
+          <div>
+            <div class="text-[#848388] text-[10px] uppercase">Account Tested</div>
+            <div class="text-white text-base font-bold mt-1">$100,000 Paper</div>
+          </div>
+          <div>
+            <div class="text-[#848388] text-[10px] uppercase">Assets Traded</div>
+            <div class="text-white text-base font-bold mt-1">Crypto & Equities</div>
+          </div>
+          <div>
+            <div class="text-[#848388] text-[10px] uppercase">Execution Latency</div>
+            <div class="text-[#00ff84] text-base font-bold mt-1">< 450ms</div>
+          </div>
+          <div>
+            <div class="text-[#848388] text-[10px] uppercase">Broker Reconciliation</div>
+            <div class="text-[#00ff84] text-base font-bold mt-1">Automated 15s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • MULTI-AGENT QUANT ENGINE</div>
+      <div>SLIDE 06 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7: OBSERVABILITY & DASHBOARD -->
+  <section class="slide" id="slide-7">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">06. Human-in-the-Loop</span>
+      <div class="badge badge-green">Production Observability</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">Production Dashboard: Complete Operator Control</h2>
+      <p class="text-base text-[#848388] mb-8">No black boxes. Operators see every debate, adjust parameters on the fly, and monitor live risk metrics.</p>
+
+      <div class="grid grid-cols-3 gap-6">
+        <div class="card">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-2">DYNAMIC RISK SLIDER</div>
+          <h3 class="text-base font-bold text-white mb-2">0% – 100% Capital Dial</h3>
+          <p class="text-xs text-[#848388] leading-relaxed mb-3">
+            Smooth continuous slider scaling between Standard (50% max exposure, $5k caps) up to All-In (100% exposure, $25k caps, 16 positions) with local persistence.
+          </p>
+          <div class="p-2 bg-[#17161b] rounded border border-[#28272e] font-mono text-[11px] text-[#00ff84]">
+            Live sync to engine via runtime API
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-2">ADVERSARIAL FEED</div>
+          <h3 class="text-base font-bold text-white mb-2">Real-Time Deliberation Logs</h3>
+          <p class="text-xs text-[#848388] leading-relaxed mb-3">
+            Watch the AI agents argue in real-time with full transparency: factor breakdowns, Red Team critiques, consensus voting, and reasons for rejection.
+          </p>
+          <div class="p-2 bg-[#17161b] rounded border border-[#28272e] font-mono text-[11px] text-[#848388]">
+            Full auditable transcript per cycle
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-2">CUSTOM TICKERS & PRESETS</div>
+          <h3 class="text-base font-bold text-white mb-2">Interactive Quant Ribbon</h3>
+          <p class="text-xs text-[#848388] leading-relaxed mb-3">
+            Type bar allowing users to dynamically add any crypto pair or equity ticker, saved locally with instant background Alpaca price fetching and preset manager.
+          </p>
+          <div class="p-2 bg-[#17161b] rounded border border-[#28272e] font-mono text-[11px] text-[#00ff84]">
+            Balanced / Aggressive / Conservative
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • MULTI-AGENT QUANT ENGINE</div>
+      <div>SLIDE 07 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 8: LIVE PERFORMANCE -->
+  <section class="slide" id="slide-8">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">07. Empirical Validation</span>
+      <div class="badge badge-green">Broker Ground Truth</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">Live Paper Validation: 69.2% Win Rate, 97% Deployed</h2>
+      <p class="text-base text-[#848388] mb-8">Tested under real Alpaca Paper v2 execution conditions. No cherry-picked backtests, no lookahead bias.</p>
+
+      <div class="grid grid-cols-4 gap-6 mb-8">
+        <div class="card text-center">
+          <div class="text-[#848388] font-mono text-xs uppercase mb-1">Capital Deployed</div>
+          <div class="text-4xl font-extrabold text-[#00ff84] font-mono">96.8%</div>
+          <div class="text-xs text-[#848388] mt-1">$78.9k of $100k active</div>
+        </div>
+        <div class="card text-center">
+          <div class="text-[#848388] font-mono text-xs uppercase mb-1">Active Positions Win Rate</div>
+          <div class="text-4xl font-extrabold text-[#00ff84] font-mono">69.2%</div>
+          <div class="text-xs text-[#848388] mt-1">9 out of 13 green</div>
+        </div>
+        <div class="card text-center">
+          <div class="text-[#848388] font-mono text-xs uppercase mb-1">Max Intraday Drawdown</div>
+          <div class="text-4xl font-extrabold text-white font-mono">0.29%</div>
+          <div class="text-xs text-[#848388] mt-1">$294 max dip from peak</div>
+        </div>
+        <div class="card text-center">
+          <div class="text-[#848388] font-mono text-xs uppercase mb-1">Unit Tests Passed</div>
+          <div class="text-4xl font-extrabold text-[#00ff84] font-mono">891 / 891</div>
+          <div class="text-xs text-[#848388] mt-1">100% test coverage</div>
+        </div>
+      </div>
+
+      <div class="card p-4">
+        <div class="text-xs font-mono text-[#00ff84] font-bold mb-2">LIVE PORTFOLIO POSITION SNAPSHOT (BROKER AUDITED)</div>
+        <div class="grid grid-cols-4 gap-4 text-xs font-mono">
+          <div class="p-2 bg-[#17161b] rounded"><span class="text-white font-bold">LTCUSD:</span> <span class="text-[#00ff84]">+$104.32 (+1.93%)</span></div>
+          <div class="p-2 bg-[#17161b] rounded"><span class="text-white font-bold">BTCUSD:</span> <span class="text-[#00ff84]">+$44.39 (+0.28%)</span></div>
+          <div class="p-2 bg-[#17161b] rounded"><span class="text-white font-bold">GOOGL:</span> <span class="text-[#00ff84]">+$19.65 (+0.74%)</span></div>
+          <div class="p-2 bg-[#17161b] rounded"><span class="text-white font-bold">FILUSD:</span> <span class="text-[#00ff84]">+$17.78 (+0.63%)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • MULTI-AGENT QUANT ENGINE</div>
+      <div>SLIDE 08 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 9: MARKET & BUSINESS MODEL -->
+  <section class="slide" id="slide-9">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">08. Market & Monetization</span>
+      <div class="badge badge-green">Commercial Viability</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">Target Market & Dual Monetization Model</h2>
+      <p class="text-base text-[#848388] mb-8">Bridging the gap between $50k/year institutional Bloomberg quant tools and 50M retail traders.</p>
+
+      <div class="grid grid-cols-3 gap-6 mb-6">
+        <div class="card">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-2">TIER 1: PRO RETAIL</div>
+          <h3 class="text-xl font-bold text-white mb-1">$49 / Month</h3>
+          <p class="text-xs text-[#848388] mb-4">Autonomous Council SaaS for active retail crypto & stock traders.</p>
+          <ul class="text-xs text-[#848388] space-y-2">
+            <li>• Connect personal Alpaca API keys</li>
+            <li>• Real-time deliberation feed & alerts</li>
+            <li>• Custom risk profiles & presets</li>
+          </ul>
+        </div>
+
+        <div class="card-accent">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-1">TIER 2: PROP FIRMS & QUANTS</div>
+          <h3 class="text-xl font-bold text-white mb-1">$299 / Month + 10%</h3>
+          <p class="text-xs text-[#848388] mb-4">Dedicated cloud worker instance with custom risk parameters.</p>
+          <ul class="text-xs text-[#848388] space-y-2">
+            <li>• 24/7 dedicated AWS EC2 worker daemon</li>
+            <li>• Sub-second custom webhooks</li>
+            <li>• Proprietary model fine-tuning</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="text-[#00ff84] font-mono text-xs font-bold mb-2">TIER 3: B2B API</div>
+          <h3 class="text-xl font-bold text-white mb-1">Usage-Based API</h3>
+          <p class="text-xs text-[#848388] mb-4">Red Team Adversarial Audit API for fintechs, wallets, and brokerages.</p>
+          <ul class="text-xs text-[#848388] space-y-2">
+            <li>• <span class="text-white font-semibold">"Second Opinion"</span> API for retail brokers</li>
+            <li>• Instant adversarial risk audit per ticker</li>
+            <li>• High-margin developer API billing</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card p-4 flex items-center justify-between font-mono text-xs">
+        <span class="text-[#848388]">Total Addressable Market (TAM):</span>
+        <span class="text-white">$14.8B Algorithmic Trading Software Market (11.2% CAGR)</span>
+        <span class="text-[#00ff84] font-bold">Initial Focus: 12M US Retail Quant Users</span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • MULTI-AGENT QUANT ENGINE</div>
+      <div>SLIDE 09 / 10</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 10: ROADMAP & TEAM -->
+  <section class="slide" id="slide-10">
+    <div class="flex items-center justify-between border-b border-[#28272e] pb-3">
+      <span class="font-mono text-xs text-[#848388] uppercase tracking-wider">09. Team & Roadmap</span>
+      <div class="badge badge-green">Future Milestones</div>
+    </div>
+
+    <div class="my-auto">
+      <h2 class="text-4xl font-extrabold text-white mb-2">The Team & Next Milestones</h2>
+      <p class="text-base text-[#848388] mb-6">From hackathon MVP to commercial autonomous wealth management platform.</p>
+
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="card p-4 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-[#17161b] border border-[#00ff84] flex items-center justify-center font-bold text-white mb-2">N</div>
+          <h4 class="text-sm font-bold text-white">Nabiel</h4>
+          <p class="text-[11px] text-[#00ff84] font-mono">Lead Architect</p>
+          <p class="text-[10px] text-[#848388] mt-1">Multi-Agent Council & Pipeline</p>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-[#17161b] border border-[#00ff84] flex items-center justify-center font-bold text-white mb-2">D</div>
+          <h4 class="text-sm font-bold text-white">Daffa</h4>
+          <p class="text-[11px] text-[#00ff84] font-mono">Systems & Cloud</p>
+          <p class="text-[10px] text-[#848388] mt-1">Alpaca Broker & AWS EC2 Infra</p>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-[#17161b] border border-[#00ff84] flex items-center justify-center font-bold text-white mb-2">F</div>
+          <h4 class="text-sm font-bold text-white">Fortero</h4>
+          <p class="text-[11px] text-[#00ff84] font-mono">Quant Strategy</p>
+          <p class="text-[10px] text-[#848388] mt-1">Factor Sizing & Risk Gates</p>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-[#17161b] border border-[#00ff84] flex items-center justify-center font-bold text-white mb-2">G</div>
+          <h4 class="text-sm font-bold text-white">Ghifari</h4>
+          <p class="text-[11px] text-[#00ff84] font-mono">Frontend & UI</p>
+          <p class="text-[10px] text-[#848388] mt-1">Observability & Terminal UI</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="card p-3">
+          <div class="text-[#00ff84] font-mono text-[10px] font-bold">PHASE 1 (COMPLETED)</div>
+          <div class="text-white text-xs font-bold mt-0.5">Alpaca Multi-Asset Engine</div>
+          <div class="text-[11px] text-[#848388] mt-1">Multi-agent council, 24/7 AWS daemon, 891 tests passed.</div>
+        </div>
+        <div class="card p-3">
+          <div class="text-amber-400 font-mono text-[10px] font-bold">PHASE 2 (Q4 2026)</div>
+          <div class="text-white text-xs font-bold mt-0.5">Live Production Brokerage</div>
+          <div class="text-[11px] text-[#848388] mt-1">Live money trading, options contracts, multi-broker routing.</div>
+        </div>
+        <div class="card p-3">
+          <div class="text-[#848388] font-mono text-[10px] font-bold">PHASE 3 (2027)</div>
+          <div class="text-white text-xs font-bold mt-0.5">Social Alpha & Copy Trading</div>
+          <div class="text-[11px] text-[#848388] mt-1">Leaderboards, verified on-chain track records, mobile app.</div>
+        </div>
+      </div>
+
+      <div class="card p-3.5 bg-[#17161b] flex items-center justify-between font-mono text-xs">
+        <div>
+          <span class="text-[#848388]">Live Dashboard: </span>
+          <a href="http://3.107.230.146:3000" target="_blank" class="text-[#00ff84] underline font-bold">http://3.107.230.146:3000</a>
+        </div>
+        <div>
+          <span class="text-[#848388]">GitHub: </span>
+          <span class="text-white">github.com/nabielnovelkhubran/should-ai-buy</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[#28272e] pt-3 text-xs text-[#848388] font-mono">
+      <div>SHOULD-AI-BUY? • SQUADBLESSINGMIRACLE</div>
+      <div>SLIDE 10 / 10 • THANK YOU!</div>
+    </div>
+  </section>
+
+  <!-- NAVIGATION CONTROLS (HIDDEN DURING PRINT/PDF) -->
+  <div class="nav-controls fixed bottom-4 right-6 flex items-center gap-3 bg-[#1f1e23]/90 backdrop-blur border border-[#28272e] px-4 py-2 rounded-xl shadow-2xl z-50">
+    <button id="prev-btn" class="px-3 py-1 rounded bg-[#28272e] text-white hover:bg-[#34333b] text-xs font-mono font-bold transition">◀ Prev</button>
+    <span id="slide-num" class="font-mono text-xs text-[#00ff84] font-bold px-2">01 / 10</span>
+    <button id="next-btn" class="px-3 py-1 rounded bg-[#00ff84] text-black hover:bg-[#00e576] text-xs font-mono font-bold transition">Next ▶</button>
+    <button id="pdf-btn" onclick="window.print()" class="ml-2 px-3 py-1 rounded bg-[#17161b] border border-[#28272e] text-[#848388] hover:text-white text-xs font-mono transition">Export PDF</button>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 10;
+
+    function showSlide(n) {
+      document.querySelectorAll('.slide').forEach((s, idx) => {
+        s.classList.remove('active');
+        if (idx === n - 1) {
+          s.classList.add('active');
+        }
+      });
+      document.getElementById('slide-num').innerText = String(n).padStart(2, '0') + ' / ' + String(totalSlides).padStart(2, '0');
+    }
+
+    document.getElementById('prev-btn').addEventListener('click', () => {
+      if (currentSlide > 1) {
+        currentSlide--;
+        showSlide(currentSlide);
+      }
+    });
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        showSlide(currentSlide);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        if (currentSlide < totalSlides) {
+          currentSlide++;
+          showSlide(currentSlide);
+        }
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        if (currentSlide > 1) {
+          currentSlide--;
+          showSlide(currentSlide);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
