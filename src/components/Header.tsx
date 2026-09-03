@@ -37,8 +37,13 @@ export const Header: React.FC<HeaderProps> = ({ account, activeTab, setActiveTab
       <div className="flex items-center justify-between h-11 gap-2">
         {/* Left: Brand Logo + Nav Tabs in the same container */}
         <div className="flex items-center gap-2 min-w-0 overflow-hidden">
-          {/* Brand — blinking dot removed */}
-          <div className="flex items-center shrink-0">
+          {/* Brand Logo & Name */}
+          <div className="flex items-center gap-2 shrink-0">
+            <img
+              src="/logo.png"
+              alt="SAIB Logo"
+              className="w-7 h-7 object-contain select-none"
+            />
             <span
               className="text-sm font-bold tracking-tight font-phantom"
               style={{ color: '#00ff84', letterSpacing: '-0.03em' }}
