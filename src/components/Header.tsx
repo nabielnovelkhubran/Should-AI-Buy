@@ -21,7 +21,6 @@ const NAV_TABS: { id: DashboardTab; label: string }[] = [
   { id: 'workflow_auditor', label: 'Strategy Audit' },
   { id: 'broker_diagnostics', label: 'Broker Diag' },
   { id: 'evidence', label: 'Evidence' },
-  { id: 'automation', label: 'Automation' },
 ];
 
 export const Header: React.FC<HeaderProps> = ({ account, activeTab, setActiveTab }) => {
