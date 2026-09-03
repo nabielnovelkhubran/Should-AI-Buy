@@ -35,6 +35,7 @@ import { AgentRuntimeSnapshot, AlphaReviewSnapshot } from '@/lib/agent/analytics
 import { RuntimeJournalEvent, WorkerHeartbeatTelemetry } from '@/lib/agent/analytics/durable-types';
 import { AlphaStrategyReviewSnapshot } from '@/lib/agent/analytics/strategy-review-types';
 import { useCurrency } from './CurrencyProvider';
+import { PortfolioGraphHistory } from './PortfolioGraphHistory';
 
 export interface RiskTierInfo {
   id: 'STANDARD' | 'RISKY' | 'HIGH_RISK' | 'ALL_IN';
@@ -823,9 +824,15 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
-
         </div>
       </div>
+
+      {/* Portfolio Graph History (TradingView / Phantom Style with ON/OFF Toggle) */}
+      <PortfolioGraphHistory
+        currentEquity={account.equity}
+        accountNumber={account.accountNumberMasked}
+        onRefreshParent={fetchTelemetry}
+      />
 
       {/* Auxiliary Telemetry Degradation Banner */}
       {telemetryStatus === 'DEGRADED' && degradedWarnings.length > 0 && (
