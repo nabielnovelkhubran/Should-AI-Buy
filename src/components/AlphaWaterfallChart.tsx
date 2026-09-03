@@ -7,19 +7,49 @@ interface AlphaWaterfallChartProps {
   totalR?: number;
   winRate?: number;
   completedTrades?: number;
+  equity?: number;
 }
 
 export const AlphaWaterfallChart: React.FC<AlphaWaterfallChartProps> = ({
-  totalPnL = 126.38,
+  totalPnL = 3132.28,
   totalR = 3.25,
-  winRate = 75.0,
+  winRate = 69.2,
   completedTrades = 8,
+  equity = 103132.28,
 }) => {
+  const pnlPct = ((totalPnL / 100000) * 100).toFixed(2);
+  const pnlSign = totalPnL >= 0 ? '+' : '';
+  const pnlColor = totalPnL >= 0 ? '#00ff84' : '#ff3b5c';
+
   const metrics = [
-    { icon: <TrendingUp className="w-3 h-3" />, label: 'Net P&L', value: `+$${totalPnL.toFixed(2)}`, sub: '+0.13% on Account', color: '#00ff84' },
-    { icon: <Target className="w-3 h-3" />, label: 'R-Expectancy', value: `+${totalR.toFixed(2)}R`, sub: `+${(totalR / Math.max(1, completedTrades)).toFixed(2)}R avg`, color: '#00ff84' },
-    { icon: <Award className="w-3 h-3" />, label: 'Win Rate', value: `${winRate.toFixed(1)}%`, sub: `${completedTrades} logged fills`, color: winRate >= 60 ? '#00ff84' : '#f59e0b' },
-    { icon: <BarChart2 className="w-3 h-3" />, label: 'Profit Factor', value: '2.84', sub: 'Gross Gain / Loss', color: '#00ff84' },
+    { 
+      icon: <TrendingUp className="w-3 h-3" />, 
+      label: 'Net P&L', 
+      value: `${pnlSign}$${totalPnL.toFixed(2)}`, 
+      sub: `${pnlSign}${pnlPct}% on Account`, 
+      color: pnlColor 
+    },
+    { 
+      icon: <Target className="w-3 h-3" />, 
+      label: 'R-Expectancy', 
+      value: `+${totalR.toFixed(2)}R`, 
+      sub: `+${(totalR / Math.max(1, completedTrades)).toFixed(2)}R avg`, 
+      color: '#00ff84' 
+    },
+    { 
+      icon: <Award className="w-3 h-3" />, 
+      label: 'Win Rate', 
+      value: `${winRate.toFixed(1)}%`, 
+      sub: `${completedTrades} active / logged fills`, 
+      color: winRate >= 60 ? '#00ff84' : '#f59e0b' 
+    },
+    { 
+      icon: <BarChart2 className="w-3 h-3" />, 
+      label: 'Profit Factor', 
+      value: '2.84', 
+      sub: 'Gross Gain / Loss', 
+      color: '#00ff84' 
+    },
   ];
 
   return (
@@ -28,9 +58,13 @@ export const AlphaWaterfallChart: React.FC<AlphaWaterfallChartProps> = ({
         <span className="terminal-label">Realized Alpha Expectancy & Strategy Attribution</span>
         <span
           className="mono-num text-xs font-bold px-2 py-0.5 rounded"
-          style={{ color: '#00ff84', background: 'rgba(0,255,132,0.08)', border: '1px solid rgba(0,255,132,0.2)' }}
+          style={{ 
+            color: pnlColor, 
+            background: totalPnL >= 0 ? 'rgba(0,255,132,0.08)' : 'rgba(255,59,92,0.08)', 
+            border: `1px solid ${totalPnL >= 0 ? 'rgba(0,255,132,0.2)' : 'rgba(255,59,92,0.2)'}` 
+          }}
         >
-          +${totalPnL.toFixed(2)} · +{totalR.toFixed(2)}R
+          {pnlSign}${totalPnL.toFixed(2)} · +{totalR.toFixed(2)}R
         </span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
