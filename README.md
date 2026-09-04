@@ -8,6 +8,10 @@
 [![Broker](https://img.shields.io/badge/Broker-Alpaca%20Paper%20v2-green.svg)](https://paper-api.alpaca.markets/v2)
 [![Options](https://img.shields.io/badge/OCC%20Options-Greeks%20%26%20Delta%20Selector-purple.svg)](src/lib/options/)
 
+> 📄 **Official Hackathon One-Page Write-Up:** Read [**WRITEUP.md**](WRITEUP.md) for our detailed technical specification on **AI Logic**, **Risk Gates**, and **Alpaca Infrastructure Implementation**.
+>
+> 🌐 **Live Web Terminal:** [http://15.134.249.209:3000](http://15.134.249.209:3000) *(1-Click Judge Access: `alpaca2026`)*
+
 ---
 
 ## 1. Executive Summary & Problem Statement
