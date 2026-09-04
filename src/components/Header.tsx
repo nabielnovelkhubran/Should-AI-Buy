@@ -14,7 +14,7 @@ interface HeaderProps {
 }
 
 const NAV_TABS: { id: DashboardTab; label: string }[] = [
-  { id: 'observability', label: 'Live Alpha' },
+  { id: 'observability', label: 'Dashboard' },
   { id: 'command', label: 'Command Lab' },
   { id: 'council', label: 'Council' },
   { id: 'discovery', label: 'Discovery' },
