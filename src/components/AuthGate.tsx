@@ -217,50 +217,39 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
               </button>
             </form>
 
-            {/* Dual Access Role Helper Options */}
-            <div className="mt-6 pt-4 border-t border-[#28272e] space-y-2 font-mono text-[11px]">
+            {/* Hackathon Judge / View-Only Quick Access */}
+            <div className="mt-6 pt-4 border-t border-[#28272e] space-y-2.5 font-mono text-[11px]">
               <div className="text-[10px] text-[#848388] uppercase tracking-wider text-center mb-1">
-                Select Quick Fill / Access Tier
+                Hackathon Judge / Public Evaluation
               </div>
 
               {/* View Only (Judge Mode) */}
-              <div
+              <button
+                type="button"
                 onClick={() => {
                   setPassword('alpaca2026');
                   handleLogin(undefined, 'alpaca2026');
                 }}
-                className="p-2.5 rounded-xl bg-[#1f1e23] hover:bg-[#28272e] border border-[#28272e] hover:border-blue-500/40 cursor-pointer transition flex items-center justify-between"
+                className="w-full p-3 rounded-xl bg-[#1f1e23] hover:bg-[#28272e] border border-blue-500/30 hover:border-blue-500/60 cursor-pointer transition flex items-center justify-between group text-left"
               >
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-blue-400" />
+                <div className="flex items-center gap-2.5">
+                  <Shield className="w-4 h-4 text-blue-400 shrink-0" />
                   <div>
-                    <div className="text-white font-bold text-xs">View-Only Mode (Judge)</div>
-                    <div className="text-[10px] text-[#848388]">Full inspection • Safe read-only telemetry</div>
+                    <div className="text-white font-bold text-xs group-hover:text-blue-300 transition">
+                      1-Click Judge Access (View-Only)
+                    </div>
+                    <div className="text-[10px] text-[#848388]">
+                      Full quant models, live deliberations &amp; equity curve
+                    </div>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-300 font-bold border border-blue-500/30">
+                <span className="px-2.5 py-1 rounded text-[10px] bg-blue-500/10 text-blue-300 font-bold border border-blue-500/30 group-hover:bg-blue-500/20 transition shrink-0">
                   alpaca2026
                 </span>
-              </div>
+              </button>
 
-              {/* Full Operator Mode */}
-              <div
-                onClick={() => {
-                  setPassword('operator2026');
-                  handleLogin(undefined, 'operator2026');
-                }}
-                className="p-2.5 rounded-xl bg-[#1f1e23] hover:bg-[#28272e] border border-[#28272e] hover:border-[#00ff84]/40 cursor-pointer transition flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-[#00ff84]" />
-                  <div>
-                    <div className="text-white font-bold text-xs">Full Operation Mode</div>
-                    <div className="text-[10px] text-[#848388]">Autonomous execution &amp; risk controls</div>
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] bg-[#00ff84]/10 text-[#00ff84] font-bold border border-[#00ff84]/30">
-                  operator2026
-                </span>
+              <div className="text-[10px] text-center text-[#525158] pt-1">
+                Operators: Enter private deployment passphrase above to unlock full command controls.
               </div>
             </div>
           </div>
