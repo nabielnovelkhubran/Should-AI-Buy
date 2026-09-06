@@ -8,7 +8,7 @@
 [![Broker](https://img.shields.io/badge/Broker-Alpaca%20Paper%20v2-green.svg)](https://paper-api.alpaca.markets/v2)
 [![Options](https://img.shields.io/badge/OCC%20Options-Greeks%20%26%20Delta%20Selector-purple.svg)](src/lib/options/)
 
-> 📄 **Official Hackathon One-Page Write-Up:** Read [**WRITEUP.md**](WRITEUP.md) for our detailed technical specification on **AI Logic**, **Risk Gates**, and **Alpaca Infrastructure Implementation**.
+> 📄 **Official Hackathon One-Page Write-Up:** Read [**WRITEUP.md**](WRITEUP.md) for our detailed technical specification on **AI Logic**, **Risk Gates**, and **Alpaca Infrastructure Implementat[...]
 >
 > 🌐 **Live Web Terminal:** [http://15.134.249.209:3000](http://15.134.249.209:3000) *(1-Click Judge Access: `alpaca2026`)*
 
@@ -19,18 +19,18 @@
 Most AI trading bots suffer from three fatal design flaws:
 1. **Sycophantic Confirmation Bias:** Single-prompt LLMs rubber-stamp user queries and invent hallucinated rationales.
 2. **Opaque, Unverifiable Assertions:** Decisions are rendered as free-form prose without traceable evidence or claim provenance.
-3. **Open-Loop Execution Without Post-Trade Invalidation:** Once an order is filled, systems ignore whether the entry thesis remains intact, failing to protect capital when market conditions deteriorate.
+3. **Open-Loop Execution Without Post-Trade Invalidation:** Once an order is filled, systems ignore whether the entry thesis remains intact, failing to protect capital when market conditions deter[...]
 
-**Should-AI Buy?** solves this through an end-to-end, multi-stage autonomous trading research pipeline. It continuously scans markets, deliberates through specialized agents, subjects investment theses to adversarial Red Team challenge, enforces a deterministic Risk Gate, executes paper orders via Alpaca, selects high-expectancy OCC option contracts, and continuously monitors held positions for thesis invalidation.
+**Should-AI Buy?** solves this through an end-to-end, multi-stage autonomous trading research pipeline. It continuously scans markets, deliberates through specialized agents, subjects investment t[...]
 
 ---
 
 ## 2. The 9-Stage Reasoning & Execution Lifecycle
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                               9-STAGE AUTONOMOUS REASONING & EXECUTION PIPELINE                 │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+��────────────────────────────────────────────────────────────────────────────────────────┘
 
    [1] DISCOVERY SCANNED       ──> 25-asset continuous market scanner evaluates RVOL, momentum, RSI
         │
@@ -190,4 +190,4 @@ Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 8. License
 
-This project is licensed under the Apache 2.0 License. Built for the Alpaca AI Trading Agents Hackathon.
+This project is licensed under the Apache 2.0 License. Built for the Alpaca AI Trading Agents Hackathon. 
