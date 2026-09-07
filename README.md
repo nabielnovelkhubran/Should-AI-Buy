@@ -121,14 +121,17 @@ The test suite enforces complete domain invariants across 52 verification suites
 
 ---
 
-## 5. Technology Stack
+## 5. System Infrastructure & Execution Topology
 
-- **Framework:** [Next.js 14](https://nextjs.org/) (App Router, Server Components & Route Handlers)
-- **Language:** TypeScript 5.0 (Strict Mode, 0 Type Errors)
-- **Styling:** Tailwind CSS + Lucide Icons
-- **Broker Integration:** Alpaca Markets Paper Trading API (`@alpacahq/alpaca-trade-api` & REST v2)
-- **AI Models:** Google Gemini API / Featherless AI (`Qwen/Qwen3.8-27B-Instruct`)
-- **Testing:** Custom zero-dependency automated test runner (`tests/run-tests.js`)
+### Observability & Control Interface
+- **Control Plane:** Next.js 14 (Utilized strictly as an asynchronous telemetry dashboard, event-logging terminal, and attention-center UI layer).
+- **Type Safety Enforcer:** TypeScript 5.0 (Strict mode, zero type errors, enforcing absolute domain contract compliance across all execution data structures).
+- **Layout Engine:** Tailwind CSS / Lucide Icons.
+
+### Algorithmic Trading Core & Routing Engine
+- **Broker Interface:** Alpaca Markets REST API v2 & WebSocket Data Stream (Integrated via strict state-isolated network requests).
+- **Execution Airlock:** Fully decoupled, zero-dependency order compilation pipeline with deterministic state-drift validation gates.
+- **Inference Core:** Google Gemini API / Featherless AI (`Qwen/Qwen3.8-27B-Instruct`) running specialized multi-brain text triage, completely sandboxed from direct tool-execution permissions.
 
 ---
 
