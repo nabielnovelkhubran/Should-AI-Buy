@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Award-2nd%20Place%20Winner%20%7C%20Alpaca%20x%20Lablab.ai-f59e0b?style=flat-square&labelColor=17161d" alt="Award: 2nd Place Winner" />
+  <a href="https://lablab.ai/ai-hackathons/alpaca-ai-trading-agents-hackathon"><img src="https://img.shields.io/badge/Award-2nd%20Place%20Winner%20%7C%20Alpaca%20x%20Lablab.ai-f59e0b?style=flat-square&labelColor=17161d" alt="Award: 2nd Place Winner" /></a>
   <a href="tests/run-tests.js"><img src="https://img.shields.io/badge/Tests-897%2F897%20Passed-00ff84?style=flat-square&labelColor=17161d" alt="Tests Passed" /></a>
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict%200%20Errors-38bdf8?style=flat-square&labelColor=17161d" alt="TypeScript Strict" /></a>
   <a href="src/lib/trading/alpaca-paper-adapter.ts"><img src="https://img.shields.io/badge/Execution-Paper%20Trading%20Only-f59e0b?style=flat-square&labelColor=17161d" alt="Paper Trading Only" /></a>
@@ -22,7 +22,7 @@
   <strong>Live Deployment:</strong> <a href="http://15.134.249.209:3000">http://15.134.249.209:3000</a> &nbsp;|&nbsp; <strong>Judge / Demo Passphrase:</strong> <code>alpaca2026</code>
 </p>
 
-> **Recognition:** Awarded **2nd Place** at the official **Alpaca × Lablab.ai Autonomous Trading Hackathon**, evaluated on multi-agent adversarial deliberation, deterministic risk gates, and paper execution integrity.
+> **Recognition:** Awarded **2nd Place** at the official [Alpaca × Lablab.ai Autonomous Trading Hackathon](https://lablab.ai/ai-hackathons/alpaca-ai-trading-agents-hackathon) ([Official Project Submission](https://lablab.ai/submissions/iaeyvyzloybhtn7skq176bjw)). Evaluated on multi-agent adversarial deliberation, deterministic risk gates, and paper execution integrity.
 
 ---
 
@@ -229,6 +229,15 @@ Comprehensive technical specifications and system designs are maintained in the 
 
 ---
 
+## Official Accreditations & Verification
+
+- **Hackathon Winners Showcase:** [Alpaca AI Trading Agents Hackathon](https://lablab.ai/ai-hackathons/alpaca-ai-trading-agents-hackathon)
+- **Official Submission Entry:** [Should-AI-Buy on LabLab.ai](https://lablab.ai/submissions/iaeyvyzloybhtn7skq176bjw)
+- **Official Winner Announcements:** [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7511345812862541824/) &bull; [X (Twitter)](https://x.com/lablabai/status/2105583053867495711?s=20) &bull; [Instagram](https://www.instagram.com/p/Dd8hUvgirWg/?img_index=1)
+
+---
+
 ## License
 
 This software is released under the Apache 2.0 License. Built for the Alpaca AI Trading Hackathon.
+
