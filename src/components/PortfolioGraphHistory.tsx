@@ -1,16 +1,5 @@
 'use client';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Calendar,
-  Layers,
-  CheckCircle2
-} from 'lucide-react';
 import { useCurrency } from './CurrencyProvider';
 
 interface PortfolioHistoryData {
@@ -237,67 +226,59 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
 
   return (
     <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] shadow-xl overflow-hidden transition-all duration-200">
-      {/* 1. Header Toolbar */}
-      <div className="p-3.5 sm:p-4 border-b border-[#28272e] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 bg-[#17161b]">
-        {/* Left: Title & Live Indicator */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded bg-[#00ff84]/10 border border-[#00ff84]/20 text-[#00ff84]">
-              <Activity className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-white tracking-tight uppercase font-mono">
-                  Portfolio History Graph
-                </h3>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#00ff84]/10 text-[#00ff84] border border-[#00ff84]/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00ff84] animate-pulse" />
-                  ALPACA GROUND TRUTH
-                </span>
-              </div>
-              <p className="text-[11px] text-[#848388] font-mono mt-0.5">
-                Live mark-to-market equity curve • Account: {accountNumber || 'PA34A4***'}
-              </p>
-            </div>
-          </div>
+      {/* 1. Header Toolbar — Spacious Height & Generous Padding */}
+      <div className="px-5 border-b border-[#28272e] flex items-center justify-between gap-4 bg-[#17161b] h-16 shrink-0">
+        {/* Left: Clean Title */}
+        <div className="flex items-center gap-2 shrink-0">
+          <h3 className="text-xs font-bold text-white tracking-wider uppercase font-phantom select-none">
+            Portfolio History Graph
+          </h3>
         </div>
 
-        {/* Center: Live Stats Badges */}
-        <div className="flex items-center gap-3 font-mono text-xs flex-wrap">
-          <div className="px-2.5 py-1 rounded bg-[#1f1e23] border border-[#28272e]">
-            <span className="text-[10px] text-[#848388] block uppercase">Equity</span>
-            <span className="text-sm font-bold text-white">
+        {/* Center: Live Stats Badges with comfortable spacing and clean sans-serif labels */}
+        <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap shrink-0">
+          <div className="px-3.5 h-10 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-center whitespace-nowrap shrink-0 min-w-[110px]">
+            <span className="text-[10px] text-[#8b8a91] font-sans font-medium uppercase tracking-wider leading-none mb-1 select-none">
+              Equity
+            </span>
+            <span className="text-xs font-bold text-white tabular-nums leading-none">
               {formatCurrency(activePoint?.data.equity ?? stats.current)}
             </span>
           </div>
 
-          <div className="px-2.5 py-1 rounded bg-[#1f1e23] border border-[#28272e]">
-            <span className="text-[10px] text-[#848388] block uppercase">Total Return</span>
-            <span className={`text-sm font-bold flex items-center gap-1 ${
+          <div className="px-3.5 h-10 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-center whitespace-nowrap shrink-0 min-w-[140px]">
+            <span className="text-[10px] text-[#8b8a91] font-sans font-medium uppercase tracking-wider leading-none mb-1 select-none">
+              Total Return
+            </span>
+            <div className={`text-xs font-bold tabular-nums leading-none flex items-center gap-1.5 whitespace-nowrap ${
               (activePoint?.data.pl ?? stats.change) >= 0 ? 'text-[#00ff84]' : 'text-[#ff3b5c]'
             }`}>
-              {(activePoint?.data.pl ?? stats.change) >= 0 ? '+' : ''}
-              {formatCurrency(activePoint?.data.pl ?? stats.change)}
-              <span className="text-[10px] opacity-80">
+              <span>
+                {(activePoint?.data.pl ?? stats.change) >= 0 ? '+' : ''}
+                {formatCurrency(activePoint?.data.pl ?? stats.change)}
+              </span>
+              <span className="text-[10px] opacity-75 font-normal">
                 ({(activePoint?.data.pl ?? stats.change) >= 0 ? '+' : ''}
                 {((activePoint?.data.plPct ?? stats.changePct / 100) * 100).toFixed(2)}%)
               </span>
-            </span>
+            </div>
           </div>
 
-          <div className="hidden lg:block px-2.5 py-1 rounded bg-[#1f1e23] border border-[#28272e]">
-            <span className="text-[10px] text-[#848388] block uppercase">High / Low</span>
-            <span className="text-xs text-white">
+          <div className="flex px-3.5 h-10 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-center whitespace-nowrap shrink-0">
+            <span className="text-[10px] text-[#8b8a91] font-sans font-medium uppercase tracking-wider leading-none mb-1 select-none">
+              High / Low
+            </span>
+            <span className="text-xs text-white tabular-nums leading-none">
               {formatCurrency(stats.max)} / {formatCurrency(stats.min)}
             </span>
           </div>
         </div>
 
         {/* Right: Timeframe Pills & Toggle Visibility Switch */}
-        <div className="flex items-center gap-2 self-end md:self-auto">
+        <div className="flex items-center gap-2.5 shrink-0">
           {/* Timeframe selector (only active when visible) */}
           {isVisible && (
-            <div className="flex items-center bg-[#1f1e23] p-0.5 rounded-lg border border-[#28272e] font-mono text-xs">
+            <div className="flex items-center bg-[#1f1e23] p-0.5 rounded-lg border border-[#28272e] text-xs">
               {(['1D', '1W', '1M', 'ALL'] as const).map(tf => (
                 <button
                   key={tf}
@@ -321,33 +302,23 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
               if (onRefreshParent) onRefreshParent();
             }}
             disabled={isLoading}
-            className="p-1.5 rounded bg-[#1f1e23] border border-[#28272e] text-[#848388] hover:text-white transition"
+            className="p-1.5 px-2.5 rounded bg-[#1f1e23] border border-[#28272e] text-[#848388] hover:text-white transition text-xs"
             title="Refresh Chart Data"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <span className={isLoading ? 'inline-block animate-spin' : ''}>↻</span>
           </button>
 
           {/* Toggle ON/OFF Switch */}
           <button
             onClick={toggleVisibility}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono font-bold transition ${
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
               isVisible
-                ? 'bg-[#00ff84]/15 border-[#00ff84]/40 text-[#00ff84] hover:bg-[#00ff84]/25'
-                : 'bg-[#1f1e23] border-[#28272e] text-[#848388] hover:text-white'
+                ? 'bg-[#00ff84]/15 text-[#00ff84] hover:bg-[#00ff84]/25'
+                : 'bg-[#1f1e23] text-[#848388] hover:text-white'
             }`}
             title={isVisible ? 'Click to collapse graph' : 'Click to show graph'}
           >
-            {isVisible ? (
-              <>
-                <Eye className="w-3.5 h-3.5 text-[#00ff84]" />
-                <span>GRAPH: ON</span>
-              </>
-            ) : (
-              <>
-                <EyeOff className="w-3.5 h-3.5 text-[#848388]" />
-                <span>GRAPH: OFF</span>
-              </>
-            )}
+            <span>GRAPH: {isVisible ? 'ON' : 'OFF'}</span>
           </button>
         </div>
       </div>
@@ -356,12 +327,12 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
       {isVisible ? (
         <div className="p-4 bg-[#121117]" ref={containerRef}>
           {isLoading && !data ? (
-            <div className="h-[220px] flex flex-col items-center justify-center text-xs font-mono text-[#848388] gap-2">
-              <RefreshCw className="w-5 h-5 animate-spin text-[#00ff84]" />
+            <div className="h-[220px] flex flex-col items-center justify-center text-xs text-[#848388] gap-2">
+              <div className="w-5 h-5 rounded-full border-2 border-[#00ff84] border-t-transparent animate-spin" />
               <span>Fetching live broker equity curve from Alpaca...</span>
             </div>
           ) : error && series.length === 0 ? (
-            <div className="h-[220px] flex flex-col items-center justify-center text-xs font-mono text-[#ff3b5c] gap-1">
+            <div className="h-[220px] flex flex-col items-center justify-center text-xs text-[#ff3b5c] gap-1">
               <span>Failed to load portfolio history: {error}</span>
               <button
                 onClick={fetchHistory}
@@ -381,7 +352,7 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
                     top: `${(activePoint.y / chartHeight) * 100}%`
                   }}
                 >
-                  <div className="bg-[#1f1e23]/95 backdrop-blur border border-[#00ff84]/40 px-2.5 py-1.5 rounded shadow-xl font-mono text-[11px] whitespace-nowrap">
+                  <div className="bg-[#1f1e23]/95 backdrop-blur border border-[#00ff84]/40 px-2.5 py-1.5 rounded shadow-xl tabular-nums text-[11px] whitespace-nowrap">
                     <div className="text-white font-bold">
                       {formatCurrency(activePoint.data.equity)}
                     </div>
@@ -436,7 +407,8 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
                         y={y + 3.5}
                         fill="#848388"
                         fontSize="10"
-                        fontFamily="monospace"
+                        fontFamily="var(--font-phantom), sans-serif"
+                        className="tabular-nums"
                       >
                         ${(priceVal / 1000).toFixed(1)}k
                       </text>
@@ -465,7 +437,8 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
                           y={baseY - 4}
                           fill="#718096"
                           fontSize="9"
-                          fontFamily="monospace"
+                          fontFamily="var(--font-phantom), sans-serif"
+                          className="tabular-nums"
                         >
                           Base $100K
                         </text>
@@ -534,10 +507,9 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
                   />
                 )}
 
-                {/* Pulse circle on the active/last point */}
+                {/* Solid highlight circle on the active/last point (no blinking pulse) */}
                 {activePoint && (
                   <g transform={`translate(${activePoint.x}, ${activePoint.y})`}>
-                    <circle r="7" fill="#00ff84" opacity="0.25" className="animate-ping" />
                     <circle r="4.5" fill="#00ff84" stroke="#121117" strokeWidth="2" />
                   </g>
                 )}
@@ -566,7 +538,8 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
                         textAnchor="middle"
                         fill="#718096"
                         fontSize="10"
-                        fontFamily="monospace"
+                        fontFamily="var(--font-phantom), sans-serif"
+                        className="tabular-nums"
                       >
                         {timeStr}
                       </text>
@@ -578,27 +551,26 @@ export const PortfolioGraphHistory: React.FC<PortfolioGraphHistoryProps> = ({
           )}
 
           {/* Bottom Bar: Quick Summary Ledger */}
-          <div className="mt-2 pt-2.5 border-t border-[#28272e] flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[#848388]">
+          <div className="mt-2 pt-2.5 border-t border-[#28272e] flex flex-wrap items-center justify-between gap-2 text-[11px] tabular-nums text-[#848388]">
             <div className="flex items-center gap-4">
               <span>Day Base: <strong className="text-white font-semibold">{formatCurrency(stats.base)}</strong></span>
               <span>Intervals: <strong className="text-white font-semibold">{series.length} snapshots</strong></span>
               <span>Spread Latency: <strong className="text-[#00ff84]">&lt; 40ms</strong></span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#00ff84]" />
-              <span className="text-white font-semibold">Alpaca Paper API v2 Reconciled</span>
+              <span className="text-[#00ff84] font-semibold">Alpaca Paper API v2 Reconciled</span>
             </div>
           </div>
         </div>
       ) : (
         /* Collapsed minimal notification banner */
-        <div className="px-4 py-2 bg-[#121117]/80 flex items-center justify-between text-xs font-mono text-[#848388]">
+        <div className="px-4 py-2 bg-[#121117]/80 flex items-center justify-between text-xs text-[#848388]">
           <span>Portfolio history graph is currently hidden.</span>
           <button
             onClick={toggleVisibility}
-            className="text-[#00ff84] hover:underline font-bold text-[11px] flex items-center gap-1"
+            className="text-[#00ff84] hover:underline font-bold text-[11px]"
           >
-            <Eye className="w-3 h-3" /> Click to expand graph
+            Click to expand graph
           </button>
         </div>
       )}

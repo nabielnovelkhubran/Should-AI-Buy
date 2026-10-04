@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Lock, Unlock, Eye, EyeOff, ShieldCheck, AlertCircle, RefreshCw, KeyRound, Sparkles, UserCheck, Shield } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { UserRole } from '@/lib/auth/types';
 
@@ -46,7 +45,6 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
         try {
           const res = await fetch('/api/auth/verify', { cache: 'no-store' });
           if (!res.ok) {
-            // Invalid session
             auth.logout();
             setIsAuthenticated(false);
           }
@@ -98,12 +96,12 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
   // 1. Initial Checking State
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen bg-[#0b0a0e] flex flex-col items-center justify-center p-4 font-mono text-xs text-[#848388]">
-        <div className="w-12 h-12 rounded-2xl bg-[#1f1e23] border border-[#28272e] flex items-center justify-center p-2 mb-4 shadow-2xl animate-pulse">
+      <div className="min-h-screen bg-[#121117] flex flex-col items-center justify-center p-4 font-sans text-xs text-[#848388]">
+        <div className="w-12 h-12 rounded-lg bg-[#1f1e23] border border-[#28272e] flex items-center justify-center p-2 mb-4 shadow-2xl">
           <img src="/logo.png" alt="SAIB Logo" className="w-full h-full object-contain" />
         </div>
         <div className="flex items-center gap-2">
-          <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#00ff84]" />
+          <span className="w-3.5 h-3.5 border-2 border-[#00ff84] border-t-transparent rounded-full animate-spin" />
           <span>Verifying terminal credentials...</span>
         </div>
       </div>
@@ -113,87 +111,79 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
   // 2. Unauthenticated Gate
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#0b0a0e] flex flex-col items-center justify-center p-4 relative overflow-hidden">
-        {/* Ambient radial glows */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#00ff84]/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-[#3b82f6]/5 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="w-full max-w-md relative z-10">
+      <div className="min-h-screen bg-[#121117] flex flex-col items-center justify-center p-4 relative">
+        <div className="w-full max-w-sm relative z-10">
           {/* Card Container */}
-          <div className="bg-[#121117] rounded-2xl border border-[#28272e] p-6 sm:p-8 shadow-2xl shadow-black/80 backdrop-blur-xl relative">
-            {/* Top Accent Pill */}
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#28272e]">
+          <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-6 shadow-2xl relative">
+            {/* Top Status Bar */}
+            <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#28272e]">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#00ff84] animate-ping" />
-                <span className="text-[11px] font-mono text-[#00ff84] font-bold uppercase tracking-wider">
+                <span className="text-[10px] text-[#00ff84] font-bold uppercase tracking-wider font-sans">
                   Terminal Gate Active
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-[#848388] px-2 py-0.5 rounded bg-[#1f1e23] border border-[#28272e]">
+              <span className="text-[10px] text-[#848388] font-sans">
                 Alpaca Paper v2
               </span>
             </div>
 
             {/* Header Brand */}
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-[#1f1e23] border border-[#28272e] p-3 flex items-center justify-center shadow-inner group hover:border-[#00ff84]/40 transition">
+            <div className="text-center mb-5">
+              <div className="w-12 h-12 mx-auto mb-2.5 rounded-lg bg-[#17161b] border border-[#28272e] p-2 flex items-center justify-center">
                 <img src="/logo.png" alt="SAIB Logo" className="w-full h-full object-contain select-none" />
               </div>
-              <h1 className="text-2xl font-extrabold text-white tracking-tight">
-                SHOULD <span className="text-[#00ff84]">AI</span> BUY ?
+              <h1 className="text-lg font-bold text-[#00ff84] tracking-tight font-phantom">
+                SHOULD-AI BUY?
               </h1>
-              <p className="text-xs text-[#848388] mt-1">
-                Autonomous Multi-Agent Quant Trading Council
+              <p className="text-[11px] text-[#848388] mt-0.5 font-sans">
+                Autonomous Multi-Agent Trading Council
               </p>
             </div>
 
             {/* Error Notification */}
             {error && (
-              <div className="mb-5 p-3 rounded-xl bg-[#ff3b5c]/10 border border-[#ff3b5c]/30 flex items-start gap-2.5 text-xs text-[#ff3b5c]">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="mb-4 p-2.5 rounded bg-[#ff3b5c]/10 border border-[#ff3b5c]/30 flex items-start gap-2 text-xs text-[#ff3b5c]">
+                <span>⚠</span>
                 <span>{error}</span>
               </div>
             )}
 
             {/* Form */}
-            <form onSubmit={(e) => handleLogin(e)} className="space-y-4">
+            <form onSubmit={(e) => handleLogin(e)} className="space-y-3.5">
               <div>
-                <label className="block text-[11px] font-mono font-semibold text-[#848388] uppercase tracking-wider mb-1.5">
-                  Enter Passphrase
+                <label className="block text-[10px] font-sans font-bold text-[#848388] uppercase tracking-wider mb-1">
+                  Terminal Passphrase
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#848388]">
-                    <KeyRound className="w-4 h-4" />
-                  </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password..."
+                    placeholder="Enter passphrase..."
                     autoFocus
                     disabled={loading}
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#1f1e23] border border-[#28272e] rounded-xl text-sm text-white placeholder-[#525158] focus:outline-none focus:border-[#00ff84] focus:ring-1 focus:ring-[#00ff84] font-mono transition"
+                    className="w-full px-3 py-2 pr-12 bg-[#17161b] border border-[#28272e] rounded text-xs text-white placeholder-[#848388] focus:outline-none focus:border-[#00ff84] transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#848388] hover:text-white transition"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[11px] text-[#848388] hover:text-white transition font-sans"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
               </div>
 
               {/* Remember Me Checkbox */}
-              <div className="flex items-center justify-between text-xs font-mono">
-                <label className="flex items-center gap-2 cursor-pointer text-[#848388] hover:text-slate-300 select-none">
+              <div className="flex items-center justify-between text-[11px] font-sans">
+                <label className="flex items-center gap-1.5 cursor-pointer text-[#848388] hover:text-white select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-3.5 h-3.5 rounded border-[#28272e] bg-[#1f1e23] text-[#00ff84] focus:ring-0 cursor-pointer accent-[#00ff84]"
+                    className="w-3.5 h-3.5 rounded border-[#28272e] bg-[#17161b] text-[#00ff84] focus:ring-0 cursor-pointer accent-[#00ff84]"
                   />
-                  <span>Remember session (Persistent Cookie)</span>
+                  <span>Remember session token</span>
                 </label>
               </div>
 
@@ -201,62 +191,51 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-xl bg-[#00ff84] hover:bg-[#00e576] text-black font-bold text-sm tracking-wide transition shadow-lg shadow-[#00ff84]/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full py-2 rounded bg-[#00ff84] hover:bg-[#00e576] text-[#121117] font-bold text-xs tracking-wide transition shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer font-sans active:scale-[0.98]"
               >
                 {loading ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
                     <span>Authenticating...</span>
                   </>
                 ) : (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    <span>Unlock Terminal</span>
-                  </>
+                  <span>Unlock Terminal</span>
                 )}
               </button>
             </form>
 
-            {/* Hackathon Judge / View-Only Quick Access */}
-            <div className="mt-6 pt-4 border-t border-[#28272e] space-y-2.5 font-mono text-[11px]">
-              <div className="text-[10px] text-[#848388] uppercase tracking-wider text-center mb-1">
-                Hackathon Judge / Public Evaluation
+            {/* View-Only Evaluation Access */}
+            <div className="mt-5 pt-3.5 border-t border-[#28272e] space-y-2 text-[11px] font-sans">
+              <div className="text-[10px] text-[#848388] uppercase tracking-wider text-center">
+                Demo &amp; Evaluation Access
               </div>
 
-              {/* View Only (Judge Mode) */}
               <button
                 type="button"
                 onClick={() => {
                   setPassword('alpaca2026');
                   handleLogin(undefined, 'alpaca2026');
                 }}
-                className="w-full p-3 rounded-xl bg-[#1f1e23] hover:bg-[#28272e] border border-blue-500/30 hover:border-blue-500/60 cursor-pointer transition flex items-center justify-between group text-left"
+                className="w-full p-2.5 rounded bg-[#17161b] hover:bg-[#28272f] border border-[#28272e] hover:border-[#34333b] cursor-pointer transition flex items-center justify-between group text-left"
               >
-                <div className="flex items-center gap-2.5">
-                  <Shield className="w-4 h-4 text-blue-400 shrink-0" />
-                  <div>
-                    <div className="text-white font-bold text-xs group-hover:text-blue-300 transition">
-                      1-Click Judge Access (View-Only)
-                    </div>
-                    <div className="text-[10px] text-[#848388]">
-                      Full quant models, live deliberations &amp; equity curve
-                    </div>
+                <div>
+                  <div className="text-white font-bold text-[11px] group-hover:text-[#38bdf8] transition font-sans">
+                    1-Click Viewer Mode
+                  </div>
+                  <div className="text-[10px] text-[#848388]">
+                    Full quant telemetry &amp; live council feed
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded text-[10px] bg-blue-500/10 text-blue-300 font-bold border border-blue-500/30 group-hover:bg-blue-500/20 transition shrink-0">
-                  alpaca2026
+                <span className="text-[10px] text-[#38bdf8] font-bold tabular-nums group-hover:underline">
+                  alpaca2026 →
                 </span>
               </button>
-
-              <div className="text-[10px] text-center text-[#525158] pt-1">
-                Operators: Enter private deployment passphrase above to unlock full command controls.
-              </div>
             </div>
           </div>
 
           {/* Footer Note */}
-          <div className="mt-4 text-center font-mono text-[10px] text-[#525158]">
-            SquadBlessingMiracle • 24/7 Autonomous Cloud Daemon Active
+          <div className="mt-3 text-center font-sans text-[10px] text-[#848388]">
+            Should-AI Buy? Autonomous Trading Terminal • Alpaca Paper v2
           </div>
         </div>
       </div>

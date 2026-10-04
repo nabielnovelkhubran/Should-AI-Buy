@@ -113,16 +113,16 @@ html, body {
 .brand-glow-box { box-shadow: 0 0 20px -4px var(--brand-glow); }
 .sell-glow-box { box-shadow: 0 0 20px -4px var(--sell-glow); }
 
-/* ---- Clean Monospace number utility ---- */
+/* ---- Clean number utility ---- */
 .mono-num {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', ui-monospace, monospace;
+  font-family: 'Phantom', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 /* Optional phantom cash icon font */
 .phantom-ghost-font {
-  font-family: 'PhantomCash', monospace;
+  font-family: 'PhantomCash', 'Phantom', sans-serif;
 }
 
 /* ---- Section label (terminal style) ---- */
@@ -178,17 +178,82 @@ html, body {
   color: #00ff84;
 }
 
-/* ---- Ensure all slate background variations are pure #1f1e23 ---- */
-.bg-slate-900,
-.bg-slate-950,
-[class*="bg-slate-900"],
-[class*="bg-slate-950"] {
-  background-color: #1f1e23 !important;
+/* =========================================
+   PHANTOM TERMINAL DROPDOWN ANIMATION SYSTEM
+   Cubic Bezier: (0.16, 1, 0.3, 1) Spring Easing
+   ========================================= */
+@keyframes phantomDropdownEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-/* ---- 0.65rem top & bottom padding for divs within space-y-2 containers ---- */
-.space-y-2 > div,
-.space-y-2 > section {
-  padding-top: 0.65rem;
-  padding-bottom: 0.65rem;
+@keyframes phantomItemStagger {
+  0% {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+.phantom-dropdown-panel {
+  position: absolute;
+  z-index: 120;
+  transform-origin: top center;
+  animation: phantomDropdownEntrance 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(23, 22, 27, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 16px -4px rgba(0, 0, 0, 0.6);
+  border-radius: 16px;
+}
+
+.phantom-dropdown-panel::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+.phantom-dropdown-item {
+  transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 12px;
+}
+
+.phantom-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.phantom-dropdown-item-stagger-1 {
+  animation: phantomItemStagger 180ms cubic-bezier(0.16, 1, 0.3, 1) 20ms backwards;
+}
+
+.phantom-dropdown-item-stagger-2 {
+  animation: phantomItemStagger 180ms cubic-bezier(0.16, 1, 0.3, 1) 50ms backwards;
+}
+
+.phantom-dropdown-item-stagger-3 {
+  animation: phantomItemStagger 180ms cubic-bezier(0.16, 1, 0.3, 1) 80ms backwards;
+}
+
+.phantom-chevron {
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+

@@ -37,9 +37,9 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Phantom', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        mono: ['Phantom', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'sans-serif'],
         phantom: ['Phantom', 'sans-serif'],
-        cash: ['PhantomCash', 'JetBrains Mono', 'monospace'],
+        cash: ['PhantomCash', 'Phantom', 'sans-serif'],
       },
       animation: {
         'pulse-subtle': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',

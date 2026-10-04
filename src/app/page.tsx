@@ -29,7 +29,6 @@ import { MonitoringCycleResult, MonitoredPositionRecord } from '@/lib/monitoring
 import { AutomationStatus } from '@/lib/automation/types';
 import { AgentRuntimeSnapshot } from '@/lib/agent/analytics/types';
 import { sanitizeErrorMessage } from '@/lib/errors';
-import { AlertCircle } from 'lucide-react';
 import { CurrencyProvider } from '@/components/CurrencyProvider';
 import { QuantTickerRibbon } from '@/components/QuantTickerRibbon';
 import { AuthGate } from '@/components/AuthGate';
@@ -281,7 +280,9 @@ export default function DashboardPage() {
         }
       }
 
-      setActiveTab('council');
+      if (activeTab !== 'command') {
+        setActiveTab('command');
+      }
     } catch (err: any) {
       setErrorMessage(sanitizeErrorMessage(err.message) || 'Failed to execute command.');
     } finally {
@@ -431,7 +432,7 @@ export default function DashboardPage() {
     <AuthProvider>
       <CurrencyProvider>
         <AuthGate>
-          <main className="min-h-screen flex flex-col" style={{ background: '#121117', color: '#e2e8f0' }}>
+          <main className="min-h-screen flex flex-col" style={{ background: '#121117', color: '#ffffff' }}>
 
         {/* Top Nav */}
         <Header account={account} activeTab={activeTab} setActiveTab={handleTabChange} />
@@ -449,13 +450,10 @@ export default function DashboardPage() {
         {/* Global Error Strip */}
         {errorMessage && (
           <div
-            className="flex items-center justify-between px-4 py-1.5 text-[11px] mono-num"
+            className="flex items-center justify-between px-4 py-1.5 text-xs font-sans"
             style={{ background: 'rgba(255,59,92,0.08)', borderBottom: '1px solid rgba(255,59,92,0.25)', color: '#ff3b5c' }}
           >
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-3 h-3 shrink-0" />
-              <span>{errorMessage}</span>
-            </div>
+            <span>{errorMessage}</span>
             <button onClick={() => setErrorMessage(null)} className="font-bold px-2 hover:opacity-70">✕</button>
           </div>
         )}
@@ -464,11 +462,101 @@ export default function DashboardPage() {
         <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
 
           {/* Left Asset Sidebar */}
-          <QuantTickerRibbon />
+          <QuantTickerRibbon
+            onSelectSymbol={(symbol) => {
+              handleRunCommand(`Should-AI buy $${symbol}?`);
+              setActiveTab('command');
+            }}
+          />
 
           {/* Main Scrollable Content */}
           <div className="flex-1 overflow-y-auto" style={{ minWidth: 0 }}>
             <div className="p-2 space-y-2 max-w-[1400px]">
+
+              {/* Council Domain In-Page Sub-Navigation */}
+              {(activeTab === 'council' || activeTab === 'workflow_auditor' || activeTab === 'evidence') && (
+                <div className="relative flex items-center justify-center px-3 py-1.5 rounded-lg bg-[#17161b] border border-[#28272e]">
+                  <div className="relative flex items-center justify-center">
+                    <div className="hidden sm:flex items-center gap-2.5 absolute right-full mr-3 whitespace-nowrap">
+                      <span className="text-[11px] font-bold text-[#848388] uppercase tracking-wider">
+                        Council Hub
+                      </span>
+                      <span className="text-[#383742] text-xs">|</span>
+                    </div>
+                    <div className="flex items-center gap-1 p-0.5 rounded-md bg-[#121117] border border-[#28272e]">
+                      <button
+                        onClick={() => setActiveTab('council')}
+                        className={`px-2.5 py-0.5 rounded text-[11px] font-medium font-sans transition cursor-pointer ${
+                          activeTab === 'council'
+                            ? 'bg-[#1f1e23] text-[#00ff84] border border-[#28272e] shadow-sm'
+                            : 'text-[#848388] hover:text-white'
+                        }`}
+                      >
+                        Live Deliberation
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('workflow_auditor')}
+                        className={`px-2.5 py-0.5 rounded text-[11px] font-medium font-sans transition cursor-pointer ${
+                          activeTab === 'workflow_auditor'
+                            ? 'bg-[#1f1e23] text-[#00ff84] border border-[#28272e] shadow-sm'
+                            : 'text-[#848388] hover:text-white'
+                        }`}
+                      >
+                        Strategy Audit
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedEvidenceCategory('ALL');
+                          setActiveTab('evidence');
+                        }}
+                        className={`px-2.5 py-0.5 rounded text-[11px] font-medium font-sans transition cursor-pointer ${
+                          activeTab === 'evidence'
+                            ? 'bg-[#1f1e23] text-[#00ff84] border border-[#28272e] shadow-sm'
+                            : 'text-[#848388] hover:text-white'
+                        }`}
+                      >
+                        Evidence Library
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Portfolio Domain In-Page Sub-Navigation */}
+              {(activeTab === 'portfolio' || activeTab === 'broker_diagnostics') && (
+                <div className="relative flex items-center justify-center px-3 py-1.5 rounded-lg bg-[#17161b] border border-[#28272e]">
+                  <div className="relative flex items-center justify-center">
+                    <div className="hidden sm:flex items-center gap-2.5 absolute right-full mr-3 whitespace-nowrap">
+                      <span className="text-[11px] font-bold text-[#848388] uppercase tracking-wider">
+                        Portfolio Hub
+                      </span>
+                      <span className="text-[#383742] text-xs">|</span>
+                    </div>
+                    <div className="flex items-center gap-1 p-0.5 rounded-md bg-[#121117] border border-[#28272e]">
+                      <button
+                        onClick={() => setActiveTab('portfolio')}
+                        className={`px-2.5 py-0.5 rounded text-[11px] font-medium font-sans transition cursor-pointer ${
+                          activeTab === 'portfolio'
+                            ? 'bg-[#1f1e23] text-[#00ff84] border border-[#28272e] shadow-sm'
+                            : 'text-[#848388] hover:text-white'
+                        }`}
+                      >
+                        Positions &amp; Ledger
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('broker_diagnostics')}
+                        className={`px-2.5 py-0.5 rounded text-[11px] font-medium font-sans transition cursor-pointer ${
+                          activeTab === 'broker_diagnostics'
+                            ? 'bg-[#1f1e23] text-[#00ff84] border border-[#28272e] shadow-sm'
+                            : 'text-[#848388] hover:text-white'
+                        }`}
+                      >
+                        Broker Diagnostics
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* TAB: Command Lab */}
               {activeTab === 'command' && (
@@ -488,7 +576,7 @@ export default function DashboardPage() {
                 />
               )}
 
-              {/* TAB: Live Alpha Observability */}
+              {/* TAB: Strategy & System Telemetry */}
               {activeTab === 'observability' && (
                 <RuntimeObservabilityView
                   snapshot={runtimeSnapshot}
@@ -510,15 +598,15 @@ export default function DashboardPage() {
                   {investigation && investigation.status !== 'FAILED' ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                       <div className="lg:col-span-2 space-y-5">
+                        <DeliberationFeed
+                          investigation={investigation}
+                          onViewEvidence={handleViewEvidence}
+                        />
                         <RedTeamSpotlight
                           redTeamResult={investigation.agentRuns['red_team']}
                           asset={investigation.asset}
                           claims={investigation.claims ?? []}
                           evidence={investigation.evidence}
-                        />
-                        <DeliberationFeed
-                          investigation={investigation}
-                          onViewEvidence={handleViewEvidence}
                         />
                       </div>
                       <div className="space-y-5">
@@ -528,7 +616,7 @@ export default function DashboardPage() {
                             <span className="terminal-label">Key Evidence ({investigation.evidence.length} items)</span>
                             <button
                               onClick={() => handleViewEvidence('ALL')}
-                              className="text-[10px] font-semibold mono-num transition"
+                              className="text-[10px] font-medium transition"
                               style={{ color: '#00ff84' }}
                             >
                               View All →
@@ -536,8 +624,8 @@ export default function DashboardPage() {
                           </div>
                           <div className="space-y-2">
                             {investigation.evidence.slice(0, 3).map((e) => (
-                              <div key={e.id} className="p-2.5 rounded text-[11px]" style={{ background: '#121117', border: '1px solid #1c2030' }}>
-                                <div className="font-bold" style={{ color: '#e2e8f0' }}>{e.title}</div>
+                              <div key={e.id} className="p-2.5 rounded text-[11px]" style={{ background: '#121117', border: '1px solid #28272e' }}>
+                                <div className="font-bold" style={{ color: '#ffffff' }}>{e.title}</div>
                                 <div className="mt-0.5 line-clamp-1" style={{ color: '#848388' }}>{e.description}</div>
                               </div>
                             ))}
@@ -547,7 +635,7 @@ export default function DashboardPage() {
                     </div>
                   ) : (
                     <div className="terminal-card p-12 text-center space-y-2">
-                      <div className="text-sm font-bold" style={{ color: '#e2e8f0' }}>No Active Deliberation</div>
+                      <div className="text-sm font-bold" style={{ color: '#ffffff' }}>No Active Deliberation</div>
                       <p className="text-xs max-w-md mx-auto" style={{ color: '#848388' }}>
                         Submit a query from Command Lab or select an asset from the Discovery Queue.
                       </p>
@@ -576,7 +664,7 @@ export default function DashboardPage() {
                     />
                   ) : (
                     <div className="terminal-card p-12 text-center space-y-2">
-                      <div className="text-sm font-bold" style={{ color: '#e2e8f0' }}>No Evidence Loaded</div>
+                      <div className="text-sm font-bold" style={{ color: '#ffffff' }}>No Evidence Loaded</div>
                       <p className="text-xs" style={{ color: '#848388' }}>
                         Investigate an asset first to inspect supporting and contradictory evidence.
                       </p>
@@ -603,8 +691,8 @@ export default function DashboardPage() {
 
         {/* Footer */}
         <footer
-          className="shrink-0 flex items-center justify-between px-5 py-2 text-[10px] mono-num"
-          style={{ background: '#121117', borderTop: '1px solid #28272e', color: '#2d3748' }}
+          className="shrink-0 flex items-center justify-between px-5 py-2 text-[11px] font-sans"
+          style={{ background: '#121117', borderTop: '1px solid #28272e', color: '#848388' }}
         >
           <span>Should-AI Buy? · Alpaca AI Trading Hackathon</span>
           <span>Discover · Challenge · Decide</span>

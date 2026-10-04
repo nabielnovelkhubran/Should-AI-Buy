@@ -12,6 +12,7 @@ import { PaperTradingService, paperTradingService } from '../trading';
 import { fetchMarketSnapshot } from '../market-data';
 import { normalizeScanSymbol } from '../scanner/universe';
 import { PaperOrderResult } from '../trading/types';
+import { webhookDispatcher } from '../notifications/webhook-dispatcher';
 
 // ---------------------------------------------------------------------------
 // Phase 6C: Position Monitoring & Protective Invalidation Service
@@ -178,6 +179,20 @@ export class PositionMonitoringService {
                   symbol: cleanSymbol,
                   message: `Protective paper exit for ${cleanSymbol} SUBMITTED (Order: ${execResult.orderId}).`
                 });
+
+                // Dispatch protective exit event to Discord & Telegram
+                webhookDispatcher.dispatch({
+                  type: 'PROTECTIVE_EXIT',
+                  asset: cleanSymbol,
+                  title: `Protective Paper Exit: ${cleanSymbol}`,
+                  description: `Thesis invalidated: ${primaryFinding}. Automatic paper exit submitted to Alpaca.`,
+                  severity: 'CRITICAL',
+                  metrics: {
+                    quantity: pos.quantity,
+                    orderId: execResult.orderId,
+                    score: health.score,
+                  }
+                }).catch(() => {});
               } else {
                 proposal.status = 'FAILED';
                 proposal.error = execResult.error;

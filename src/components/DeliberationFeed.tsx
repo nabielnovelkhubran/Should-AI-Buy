@@ -1,23 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import {
-  Activity,
-  BarChart2,
-  Globe,
-  Shield,
-  Scale,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Flame,
-  Search,
-  Lock,
-  ArrowRight,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  MessageSquare
-} from 'lucide-react';
 import { Investigation, CouncilStage, CouncilStageStatus, AgentResult, Claim } from '../lib/types';
 import { ClaimInspector } from './ClaimInspector';
 import { ContradictionMatrix } from './ContradictionMatrix';
@@ -32,56 +14,48 @@ const STAGE_CONFIG: {
   label: string;
   question: string;
   fullDescription: string;
-  icon: React.ComponentType<{ className?: string }>;
 }[] = [
   {
     stage: 'DISCOVERY',
     label: 'Discovery',
     question: 'What is happening?',
-    fullDescription: 'Scans real-time Alpaca market feeds to measure price velocity, volume acceleration, and baseline opportunity threshold.',
-    icon: Search
+    fullDescription: 'Scans real-time Alpaca market feeds to measure price velocity, volume acceleration, and baseline opportunity threshold.'
   },
   {
     stage: 'QUANT',
     label: 'Quant',
     question: 'What do numbers say?',
-    fullDescription: 'Computes deterministic mathematical indicators including RSI-14, Relative Volume (RVOL), realized volatility, and return windows.',
-    icon: BarChart2
+    fullDescription: 'Computes deterministic mathematical indicators including RSI-14, Relative Volume (RVOL), realized volatility, and return windows.'
   },
   {
     stage: 'INTELLIGENCE',
     label: 'Intelligence',
     question: 'What news/catalysts exist?',
-    fullDescription: 'Audits public disclosures, news releases, and external sentiment without fabricating unverified claims.',
-    icon: Globe
+    fullDescription: 'Audits public disclosures, news releases, and external sentiment without fabricating unverified claims.'
   },
   {
     stage: 'RISK',
     label: 'Risk',
     question: 'What could go wrong?',
-    fullDescription: 'Analyzes liquidity pool depth, top holder wallet concentration, on-chain anomalies, and token unlock hazards.',
-    icon: AlertTriangle
+    fullDescription: 'Analyzes liquidity pool depth, top holder wallet concentration, on-chain anomalies, and token unlock hazards.'
   },
   {
     stage: 'RED_TEAM',
     label: 'Red Team',
     question: 'Why might we be wrong?',
-    fullDescription: 'Mounts an adversarial challenge to refute the bullish thesis, identifying structural vulnerabilities and exit traps.',
-    icon: Flame
+    fullDescription: 'Mounts an adversarial challenge to refute the bullish thesis, identifying structural vulnerabilities and exit traps.'
   },
   {
     stage: 'DECISION',
     label: 'Decision',
     question: 'What is the verdict?',
-    fullDescription: 'Synthesizes all council perspectives into an actionable consensus verdict (BUY, HOLD, SELL, REJECT) with grounded rationale.',
-    icon: Scale
+    fullDescription: 'Synthesizes all council perspectives into an actionable consensus verdict (BUY, HOLD, SELL, REJECT) with grounded rationale.'
   },
   {
     stage: 'RISK_GATE',
     label: 'Risk Gate',
     question: 'Deterministic safety check',
-    fullDescription: 'Hard code-enforced safety boundary evaluating liquidity ($250k min), allocation (25% max), and fatal flaw refutations.',
-    icon: Lock
+    fullDescription: 'Hard code-enforced safety boundary evaluating liquidity ($250k min), allocation (25% max), and fatal flaw refutations.'
   }
 ];
 
@@ -165,7 +139,6 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
       <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#848388]" />
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">
               Visible Council Deliberation Pipeline
             </h3>
@@ -177,7 +150,7 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
             >
               {showFullQuestions ? 'Compact View' : 'Show Full Prompts'}
             </button>
-            <span className="text-[11px] font-mono text-[#2d3748]">
+            <span className="text-[11px] tabular-nums text-[#848388]">
               {investigation.id} • {investigation.asset}
             </span>
           </div>
@@ -185,7 +158,7 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
 
         {/* 7-Stage Interactive Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-          {STAGE_CONFIG.map(({ stage, label, question, icon: IconComponent }) => {
+          {STAGE_CONFIG.map(({ stage, label, question }, stageIdx) => {
             const status = getStageStatus(stage);
             const isCompleted = status === 'COMPLETED';
             const isFailed = status === 'FAILED';
@@ -213,21 +186,21 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
                 <div>
                   <div className="flex items-center justify-between gap-1 mb-1.5">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <IconComponent className={`w-3.5 h-3.5 shrink-0 ${
-                        isSelected ? 'text-[#848388]' : isCompleted ? 'text-[#00ff84]' : isFailed ? 'text-[#ff3b5c]' : isRunning ? 'text-[#848388]' : 'text-[#2d3748]'
-                      }`} />
+                      <span className={`text-[10px] tabular-nums font-bold shrink-0 ${
+                        isSelected ? 'text-[#848388]' : isCompleted ? 'text-[#00ff84]' : isFailed ? 'text-[#ff3b5c]' : 'text-[#848388]'
+                      }`}>
+                        {stageIdx + 1}.
+                      </span>
                       <span className="text-xs font-bold text-white tracking-tight truncate">{label}</span>
                     </div>
 
                     {isCompleted ? (
-                      <CheckCircle className="w-3.5 h-3.5 text-[#00ff84] shrink-0" />
+                      <span className="text-xs font-bold text-[#00ff84] shrink-0">✓</span>
                     ) : isFailed ? (
-                      <XCircle className="w-3.5 h-3.5 text-[#ff3b5c] shrink-0" />
+                      <span className="text-xs font-bold text-[#ff3b5c] shrink-0">✕</span>
                     ) : isRunning ? (
                       <div className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin shrink-0" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-slate-700 shrink-0" />
-                    )}
+                    ) : null}
                   </div>
 
                   <div className={`text-[11px] text-[#9ca3af] leading-snug transition-all ${
@@ -237,8 +210,8 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
                   </div>
                 </div>
 
-                <div className="mt-2 pt-1.5 border-t border-[#28272e]/50 flex items-center justify-between text-[10px] text-[#2d3748]">
-                  <span className="uppercase font-mono font-bold tracking-wider text-[9px]">
+                <div className="mt-2 pt-1.5 border-t border-[#28272e]/50 flex items-center justify-between text-[10px] text-[#848388]">
+                  <span className="uppercase font-bold tracking-wider text-[9px]">
                     {status}
                   </span>
                   <span className="text-[#848388] group-hover:text-[#848388] font-medium">
@@ -255,9 +228,6 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
           <div className="p-4 rounded-lg bg-[#1f1e23] border border-indigo-500/30 space-y-3 animate-fadeIn">
             <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[#28272e]">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-[#848388]">
-                  <activeStageConfig.icon className="w-4 h-4" />
-                </div>
                 <div>
                   <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                     {activeStageConfig.label} Stage Details
@@ -271,7 +241,7 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
 
               <div className="flex items-center gap-2">
                 {activeStageState?.timestamp && (
-                  <span className="text-[11px] font-mono text-[#848388]">
+                  <span className="text-[11px] tabular-nums text-[#848388]">
                     Logged: {new Date(activeStageState.timestamp).toLocaleTimeString()}
                   </span>
                 )}
@@ -286,7 +256,7 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
 
             {/* Stage Findings and Metrics */}
             <div className="text-xs text-slate-200 leading-relaxed">
-              <strong className="text-[#848388] uppercase font-mono text-[10px] block mb-1">Stage Deliberation Output:</strong>
+              <strong className="text-[#848388] uppercase font-bold text-[10px] block mb-1">Stage Deliberation Output:</strong>
               <div className="p-3 rounded-lg bg-[#1f1e23] border border-[#28272e] text-slate-200">
                 {activeStageState?.summary || activeStageConfig.fullDescription}
               </div>
@@ -295,7 +265,7 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
             {/* Direct Contextual Links */}
             <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
               <div className="text-[11px] text-[#848388]">
-                Status: <strong className="text-white font-mono">{getStageStatus(activeStageConfig.stage)}</strong>
+                Status: <strong className="text-white font-semibold">{getStageStatus(activeStageConfig.stage)}</strong>
               </div>
 
               {onViewEvidence && (
@@ -306,7 +276,7 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
                   }}
                   className="text-xs text-[#848388] hover:text-[#848388] font-semibold flex items-center gap-1"
                 >
-                  Inspect Related Evidence Records <ArrowRight className="w-3 h-3" />
+                  Inspect Related Evidence Records →
                 </button>
               )}
             </div>
@@ -320,7 +290,6 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
               return (
                 <div className="space-y-2 pt-2 border-t border-[#28272e]/50">
                   <div className="flex items-center gap-2 text-[10px] font-semibold text-[#848388] uppercase tracking-wider">
-                    <MessageSquare className="w-3.5 h-3.5 text-[#848388]" />
                     <span>Claims ({stageClaims.length}) — Verifiable Assertions from this Stage</span>
                   </div>
                   <div className="space-y-1.5">
@@ -360,7 +329,7 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
         }`}>
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
             <div>
-              <div className="text-xs font-mono text-[#848388] uppercase tracking-wider flex items-center gap-2">
+              <div className="text-xs text-[#848388] uppercase tracking-wider flex items-center gap-2">
                 <span>Council Synthesis • ${investigation.asset}</span>
                 {isRiskGateBlocked && (
                   <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
@@ -375,40 +344,33 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
                   decision.conclusion === 'REJECT' ? 'text-[#ff3b5c]' :
                   'text-amber-400'
                 }`}>
-                  {decision.conclusion === 'BUY' ? '🟢 BUY' : decision.conclusion === 'REJECT' ? '🚫 REJECT' : '🟡 HOLD'}
+                  {decision.conclusion === 'BUY' ? 'BUY' : decision.conclusion === 'REJECT' ? 'REJECT' : 'HOLD'}
                 </span>
 
-                <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-[#9ca3af] font-medium">
+                <span className="text-xs text-[#9ca3af] font-medium">
                   Council Confidence: {decision.confidence}%
                 </span>
 
                 {executionState ? (
-                  <span className={`text-xs px-2.5 py-1 rounded-full border flex items-center gap-1 font-medium ${
+                  <span className={`text-xs font-medium ${
                     executionState.status === 'SUBMITTED' || executionState.status === 'FILLED'
-                      ? 'bg-[#00ff84]/10 text-[#00ff84] border-[#00ff84]/20'
+                      ? 'text-[#00ff84]'
                       : executionState.status === 'BLOCKED'
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                      : 'bg-rose-500/20 text-[#ff3b5c] border-rose-500/30'
+                      ? 'text-amber-300'
+                      : 'text-[#ff3b5c]'
                   }`}>
-                    {executionState.status === 'SUBMITTED' || executionState.status === 'FILLED' ? (
-                      <CheckCircle className="w-3 h-3" />
-                    ) : executionState.status === 'BLOCKED' ? (
-                      <Lock className="w-3 h-3" />
-                    ) : (
-                      <AlertTriangle className="w-3 h-3" />
-                    )}
                     Paper Order: {executionState.status}
                   </span>
                 ) : decision.conclusion === 'BUY' && decision.riskGateApproved ? (
                   <button
                     onClick={handleExecutePaperOrder}
                     disabled={isExecutingPaperOrder}
-                    className="text-xs px-3 py-1 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition flex items-center gap-1 shadow-md shadow-indigo-600/20 active:scale-95"
+                    className="text-xs px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition flex items-center gap-1 shadow-md shadow-indigo-600/20 active:scale-95"
                   >
                     {isExecutingPaperOrder ? 'Submitting Order...' : 'Authorize Paper Order →'}
                   </button>
                 ) : (
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800/80 text-[#848388] border border-[#34333b] font-medium">
+                  <span className="text-xs text-[#848388] font-medium">
                     Paper Execution: NOT SUBMITTED
                   </span>
                 )}
@@ -449,7 +411,6 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
           {/* Strongest Counterargument if present */}
           {decision.strongestCounterargument && (
             <div className="mt-2.5 text-xs text-amber-300 flex items-start gap-2 bg-amber-950/20 p-2.5 rounded-lg border border-amber-500/20">
-              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <div>
                 <strong className="text-amber-200">Strongest Counterargument: </strong>
                 <span>{decision.strongestCounterargument}</span>
@@ -461,7 +422,6 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
           {isRiskGateBlocked && (
             <div className="mt-3.5 p-3.5 rounded-lg bg-rose-950/40 border border-rose-500/40 text-xs text-[#ff3b5c] space-y-1">
               <div className="font-bold text-[#ff3b5c] flex items-center gap-1.5">
-                <Shield className="w-4 h-4 text-[#ff3b5c]" />
                 Deterministic Risk Gate Blocked Execution:
               </div>
               <div className="pl-5 text-[#9ca3af]">
@@ -483,14 +443,9 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
           <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-                    <Search className="w-4 h-4 text-[#848388]" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Discovery</h4>
-                    <span className="text-[10px] text-[#2d3748]">What is happening?</span>
-                  </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Discovery</h4>
+                  <span className="text-[10px] text-[#848388]">What is happening?</span>
                 </div>
                 {getVerdictBadge(agentRuns['discovery'].verdict)}
               </div>
@@ -505,9 +460,9 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
               {onViewEvidence && (
                 <button
                   onClick={() => onViewEvidence('MARKET')}
-                  className="text-xs text-[#848388] hover:text-[#848388] flex items-center gap-1 font-semibold"
+                  className="text-xs text-[#848388] hover:text-white flex items-center gap-1 font-semibold"
                 >
-                  View Market Data <ArrowRight className="w-3 h-3" />
+                  View Market Data →
                 </button>
               )}
             </div>
@@ -519,30 +474,25 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
           <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-[#00ff84]/8 border border-[#00ff84]/20">
-                    <BarChart2 className="w-4 h-4 text-[#00ff84]" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Quant Agent</h4>
-                    <span className="text-[10px] text-[#2d3748]">What do numbers say?</span>
-                  </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Quant Agent</h4>
+                  <span className="text-[10px] text-[#848388]">What do numbers say?</span>
                 </div>
                 {getVerdictBadge(agentRuns['quant'].verdict, agentRuns['quant'].failed)}
               </div>
 
               <div className="grid grid-cols-3 gap-1.5 my-2.5 p-2 rounded-lg bg-[#1f1e23] border border-[#28272e] text-center text-[11px]">
                 <div>
-                  <span className="text-[10px] text-[#2d3748] block">Momentum</span>
-                  <strong className="text-white font-mono">{agentRuns['quant'].metrics?.momentum ?? 50}/100</strong>
+                  <span className="text-[10px] text-[#848388] block">Momentum</span>
+                  <strong className="text-white tabular-nums">{agentRuns['quant'].metrics?.momentum ?? 50}/100</strong>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#2d3748] block">RSI-14</span>
-                  <strong className="text-white font-mono">{agentRuns['quant'].metrics?.rsi14 ?? 50}</strong>
+                  <span className="text-[10px] text-[#848388] block">RSI-14</span>
+                  <strong className="text-white tabular-nums">{agentRuns['quant'].metrics?.rsi14 ?? 50}</strong>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#2d3748] block">RVOL</span>
-                  <strong className="text-white font-mono">{agentRuns['quant'].metrics?.rvol ?? 1.0}x</strong>
+                  <span className="text-[10px] text-[#848388] block">RVOL</span>
+                  <strong className="text-white tabular-nums">{agentRuns['quant'].metrics?.rvol ?? 1.0}x</strong>
                 </div>
               </div>
 
@@ -556,9 +506,9 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
               {onViewEvidence && (
                 <button
                   onClick={() => onViewEvidence('MARKET')}
-                  className="text-xs text-[#00ff84] hover:text-[#00ff84] flex items-center gap-1 font-semibold"
+                  className="text-xs text-[#00ff84] hover:text-[#00ff84]/80 flex items-center gap-1 font-semibold"
                 >
-                  Inspect Math <ArrowRight className="w-3 h-3" />
+                  Inspect Math →
                 </button>
               )}
             </div>
@@ -570,14 +520,9 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
           <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                    <Globe className="w-4 h-4 text-[#00ff84]" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Intelligence</h4>
-                    <span className="text-[10px] text-[#2d3748]">What external news exists?</span>
-                  </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Intelligence</h4>
+                  <span className="text-[10px] text-[#848388]">What external news exists?</span>
                 </div>
                 {getVerdictBadge(agentRuns['intelligence'].verdict, agentRuns['intelligence'].failed)}
               </div>
@@ -592,9 +537,9 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
               {onViewEvidence && (
                 <button
                   onClick={() => onViewEvidence('NEWS')}
-                  className="text-xs text-[#00ff84] hover:text-[#00ff84] flex items-center gap-1 font-semibold"
+                  className="text-xs text-[#00ff84] hover:text-[#00ff84]/80 flex items-center gap-1 font-semibold"
                 >
-                  View News <ArrowRight className="w-3 h-3" />
+                  View News →
                 </button>
               )}
             </div>
@@ -606,28 +551,23 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
           <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <AlertTriangle className="w-4 h-4 text-amber-400" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Risk Agent</h4>
-                    <span className="text-[10px] text-[#2d3748]">What could go wrong?</span>
-                  </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Risk Agent</h4>
+                  <span className="text-[10px] text-[#848388]">What could go wrong?</span>
                 </div>
                 {getVerdictBadge(agentRuns['risk'].verdict, agentRuns['risk'].failed)}
               </div>
 
               <div className="grid grid-cols-2 gap-2 my-2.5 p-2 rounded-lg bg-[#1f1e23] border border-[#28272e] text-center text-[11px]">
                 <div>
-                  <span className="text-[10px] text-[#2d3748] block">Risk Score</span>
-                  <strong className={`font-mono ${Number(agentRuns['risk'].metrics?.compositeRiskScore) > 60 ? 'text-[#ff3b5c]' : 'text-white'}`}>
+                  <span className="text-[10px] text-[#848388] block">Risk Score</span>
+                  <strong className={`tabular-nums ${Number(agentRuns['risk'].metrics?.compositeRiskScore) > 60 ? 'text-[#ff3b5c]' : 'text-white'}`}>
                     {agentRuns['risk'].metrics?.compositeRiskScore ?? 40}/100
                   </strong>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#2d3748] block">Top 10 Supply</span>
-                  <strong className="text-white font-mono">{agentRuns['risk'].metrics?.top10HoldersPct ?? 35}%</strong>
+                  <span className="text-[10px] text-[#848388] block">Top 10 Supply</span>
+                  <strong className="text-white tabular-nums">{agentRuns['risk'].metrics?.top10HoldersPct ?? 35}%</strong>
                 </div>
               </div>
 
@@ -643,7 +583,7 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
                   onClick={() => onViewEvidence('RISK')}
                   className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1 font-semibold"
                 >
-                  View Risks <ArrowRight className="w-3 h-3" />
+                  View Risks →
                 </button>
               )}
             </div>
@@ -655,14 +595,9 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
           <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-[#ff3b5c]/8 border border-rose-500/20">
-                    <Flame className="w-4 h-4 text-[#ff3b5c]" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">Red Team</h4>
-                    <span className="text-[10px] text-[#2d3748]">Why might we be wrong?</span>
-                  </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Red Team</h4>
+                  <span className="text-[10px] text-[#848388]">Why might we be wrong?</span>
                 </div>
                 {getVerdictBadge(agentRuns['red_team'].verdict)}
               </div>
@@ -673,15 +608,23 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
             </div>
 
             <div className="mt-3 pt-3 border-t border-[#28272e]/60 flex items-center justify-between text-[11px] text-[#848388]">
-              <span>Thesis: <strong className="font-mono text-[#ff3b5c]">{agentRuns['red_team'].redTeamAttackDetails?.thesisStatus}</strong></span>
-              {onViewEvidence && (
-                <button
-                  onClick={() => onViewEvidence('RISK')}
-                  className="text-xs text-[#ff3b5c] hover:text-[#ff3b5c] flex items-center gap-1 font-semibold"
+              <span>Thesis: <strong className="text-[#ff3b5c] font-semibold">{agentRuns['red_team'].redTeamAttackDetails?.thesisStatus}</strong></span>
+              <div className="flex items-center gap-2">
+                <a
+                  href="#red-team-spotlight"
+                  className="text-xs text-amber-400 hover:text-amber-300 font-semibold"
                 >
-                  Counter-Evidence <ArrowRight className="w-3 h-3" />
-                </button>
-              )}
+                  Attack Breakdown ↓
+                </a>
+                {onViewEvidence && (
+                  <button
+                    onClick={() => onViewEvidence('RISK')}
+                    className="text-xs text-[#ff3b5c] hover:text-[#ff3b5c]/80 flex items-center gap-1 font-semibold cursor-pointer"
+                  >
+                    Counter-Evidence →
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -691,14 +634,13 @@ export const DeliberationFeed: React.FC<DeliberationFeedProps> = ({
       {/* 4. Chronological Council Audit Trail */}
       <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e]">
         <h4 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-          <Activity className="w-3.5 h-3.5 text-[#848388]" />
           Chronological Council Audit Trail ({investigation.id})
         </h4>
         <div className="space-y-2 max-h-56 overflow-y-auto pr-1 divide-y divide-slate-800/40">
           {timeline.map((event, idx) => (
             <div key={idx} className="pt-2 first:pt-0 flex items-start gap-3 text-xs">
-              <span className="font-mono text-[#2d3748] shrink-0 text-[11px]">{event.timestamp}</span>
-              <span className="font-mono text-[#848388] uppercase font-semibold shrink-0">[{event.agent}]</span>
+              <span className="tabular-nums text-[#848388] shrink-0 text-[11px]">{event.timestamp}</span>
+              <span className="text-[#848388] uppercase font-semibold shrink-0">[{event.agent?.replace(/_/g, ' ')}]</span>
               <span className="text-[#9ca3af] leading-relaxed">{event.message}</span>
             </div>
           ))}

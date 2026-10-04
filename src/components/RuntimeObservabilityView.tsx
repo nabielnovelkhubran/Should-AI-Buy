@@ -1,36 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Activity,
-  ShieldAlert,
-  ShieldCheck,
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  RefreshCw,
-  Play,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  DollarSign,
-  PieChart,
-  BarChart2,
-  Sliders,
-  Layers,
-  ChevronRight,
-  Sparkles,
-  Award,
-  Lock,
-  Target,
-  FileText,
-  Radio,
-  Bookmark,
-  Edit2,
-  Trash2,
-  Save,
-  Plus,
-  RotateCcw
-} from 'lucide-react';
+import { Play } from 'lucide-react';
 import { AgentRuntimeSnapshot, AlphaReviewSnapshot } from '@/lib/agent/analytics/types';
 import { RuntimeJournalEvent, WorkerHeartbeatTelemetry } from '@/lib/agent/analytics/durable-types';
 import { AlphaStrategyReviewSnapshot } from '@/lib/agent/analytics/strategy-review-types';
@@ -61,7 +31,7 @@ export function getRiskTierForPercentage(pct: number): RiskTierInfo {
       id: 'RISKY',
       label: 'Risky',
       color: '#eab308',
-      description: 'Moderate alpha swing capture (Max 65% exposure, 6 positions)',
+      description: 'Moderate swing capture (Max 65% exposure, 6 positions)',
       profile: 'STANDARD',
     };
   }
@@ -70,13 +40,13 @@ export function getRiskTierForPercentage(pct: number): RiskTierInfo {
       id: 'HIGH_RISK',
       label: 'High Risk',
       color: '#f97316',
-      description: 'High-alpha momentum allocation (Max 80% exposure, 8 positions)',
+      description: 'High-conviction momentum allocation (Max 80% exposure, 8 positions)',
       profile: 'HIGH_RISK',
     };
   }
   return {
     id: 'ALL_IN',
-    label: 'All In',
+    label: 'Max Allocation',
     color: '#ff3b5c',
     description: 'Maximum capital deployment & lowest entry barriers (100% exposure cap)',
     profile: 'HIGH_RISK',
@@ -96,6 +66,16 @@ export function getThresholdsForPercentage(pct: number) {
     maxPositionSizeUsd: Math.round(5000 + factor * 20000), // Scales from $5k to $25k!
   };
 }
+
+const formatDisplayLabel = (value: string) => {
+  const normalized = value
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, char => char.toUpperCase());
+
+  return normalized === 'Min Opportunity Score' ? 'Min. Opportunity Score' : normalized;
+};
 
 export interface FilterPreset {
   id: string;
@@ -119,7 +99,7 @@ const DEFAULT_FILTER_PRESETS: FilterPreset[] = [
   },
   {
     id: 'preset-aggressive',
-    name: 'Aggressive Alpha',
+    name: 'Aggressive Momentum',
     thresholds: { minLiquidityUsd: 250000, maxSpreadBps: 75, minOpportunityScore: 50, minConfidenceScore: 55, minRiskRewardRatio: 1.8 },
     isDefault: true,
   },
@@ -147,7 +127,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   onResetCircuitBreaker
 }) => {
   const { formatCurrency } = useCurrency();
-  const { role, isOperator, isViewer } = useAuth();
+  const { isViewer } = useAuth();
   const [localSnapshot, setLocalSnapshot] = useState<AgentRuntimeSnapshot | null>(null);
   const [activeAttributionTab, setActiveAttributionTab] = useState<'strategy' | 'regime' | 'asset' | 'confidence' | 'factors'>('strategy');
   const [alphaSnapshot, setAlphaSnapshot] = useState<AlphaReviewSnapshot | null>(null);
@@ -391,7 +371,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
           } catch {}
         }
       } else {
-        warnings.push('Alpha review auxiliary stream unavailable');
+        warnings.push('Strategy review auxiliary stream unavailable');
       }
 
       // 3. Live Events & Heartbeat Stream (Auxiliary)
@@ -487,10 +467,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
   if (!effectiveSnapshot) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 bg-[#1f1e23] rounded-lg border border-[#28272e]">
-        <Activity className="w-10 h-10 text-[#848388] animate-spin mb-4" />
+        <div className="w-8 h-8 rounded-full border-2 border-[#00ff84] border-t-transparent animate-spin mb-4" />
         <h3 className="text-lg font-bold text-white mb-2">Connecting to Autonomous Agent Telemetry...</h3>
         <p className="text-sm text-[#848388] max-w-md mb-6">
-          Initializing broker-confirmed paper snapshot, trade ledger, and alpha attribution diagnostics.
+          Initializing broker-confirmed paper snapshot, trade ledger, and performance attribution diagnostics.
         </p>
         <button
           onClick={() => {
@@ -595,25 +575,6 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
     }
   };
 
-  const handleToggleProofMode = async () => {
-    if (isViewer) {
-      alert('Action restricted: View-Only (Judge) Mode does not permit toggling Proof Mode. Log in with the Operator passphrase.');
-      return;
-    }
-    try {
-      setActionLoading('proof_mode');
-      const nextProof = !(worker.proofMode ?? false);
-      await fetch('/api/agent/runtime', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'SET_PROOF_MODE', enabled: nextProof })
-      });
-      await fetchTelemetry();
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   const handleResetCB = async () => {
     if (isViewer) {
       alert('Action restricted: View-Only (Judge) Mode does not permit resetting circuit breakers. Log in with the Operator passphrase.');
@@ -644,12 +605,11 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
       {/* 1. Header Banner & Operator Controls */}
       <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5 shadow-xl">
         {isViewer && (
-          <div className="mb-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-mono flex items-center justify-between">
+          <div className="mb-4 p-3 rounded-lg bg-[#17161b] border border-[#28272e] text-blue-300 text-xs font-sans flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
               <span><strong>View-Only (Judge) Mode Active:</strong> Real-time quant telemetry, live deliberation journals, and equity curves are live. Operator controls (Start/Stop, Risk Slider, Manual Cycles) are disabled to protect live broker capital.</span>
             </div>
-            <span className="hidden md:inline-block px-2 py-0.5 rounded text-[10px] bg-blue-500/20 text-blue-200 border border-blue-500/40 shrink-0">
+            <span className="text-[10px] text-blue-300 shrink-0 tabular-nums">
               Passphrase: alpaca2026
             </span>
           </div>
@@ -658,35 +618,28 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
           
           <div className="flex items-center gap-2">
             <div>
-              <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h2 className="text-xl font-bold text-white tracking-tight">Autonomous Agent Runtime</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                <span className="text-xs font-bold text-amber-400">
                   PAPER TRADING ONLY ($100K)
                 </span>
-                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
-                  isWorkerRunning
-                    ? 'bg-[#00ff84]/8 text-[#00ff84] border-[#00ff84]/20'
-                    : 'bg-slate-800 text-[#848388] border-[#34333b]'
-                }`}>
-                  {isWorkerRunning ? '● RUNNING' : '○ STOPPED'}
+                <span className={`text-xs font-semibold ${isWorkerRunning ? 'text-[#00ff84]' : 'text-[#848388]'}`}>
+                  {isWorkerRunning ? 'RUNNING' : 'STOPPED'}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/10 text-blue-300 border border-blue-500/30">
-                  MODE: {worker.runtimeMode || 'REAL_PAPER'}
-                </span>
-                {worker.proofMode && (
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                    ⚡ PROOF MODE (MAX 1 POS)
-                  </span>
-                )}
                 {worker.nextScheduledCycleAt && (
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-mono text-[#848388] border border-[#28272e] bg-[#1f1e23]">
+                  <span className="text-xs text-[#848388] font-sans">
                     Next: {new Date(worker.nextScheduledCycleAt).toLocaleTimeString()}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#848388] mt-0.5">
-                Live broker ground truth: <span className="text-[#9ca3af] font-mono">{account.accountNumberMasked}</span> • Session ID: <span className="text-[#9ca3af] font-mono">{session.sessionId}</span> • Evidence: <span className="text-amber-400 font-semibold">{session.evidenceQuality}</span>
-              </p>
+              <div className="flex items-center gap-1.5 mt-1 text-xs text-[#8b8a91]">
+                <span>Evidence Quality:</span>
+                <span className={`font-semibold font-sans text-xs ${
+                  session.evidenceQuality === 'INSUFFICIENT' ? 'text-amber-400' : 'text-[#00ff84]'
+                }`}>
+                  {session.evidenceQuality}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -696,9 +649,8 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                 onClick={handleResetCB}
                 disabled={actionLoading === 'cb' || isViewer}
                 title={isViewer ? 'Operator passphrase required to reset CB' : undefined}
-                className="px-3.5 py-2 bg-[#ff3b5c] hover:bg-[#e03350] text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3.5 py-2 bg-[#ff3b5c] hover:bg-[#e03350] text-white text-xs font-bold rounded-lg transition disabled:opacity-50"
               >
-                <ShieldAlert className="w-3.5 h-3.5" />
                 Reset Circuit Breaker
               </button>
             )}
@@ -708,9 +660,8 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                 onClick={handleStopRuntime}
                 disabled={actionLoading === 'stop_agent' || isViewer}
                 title={isViewer ? 'Operator passphrase required to stop agent' : undefined}
-                className="px-3.5 py-2 bg-[#ff3b5c] hover:bg-[#e03350] text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3.5 py-2 bg-[#ff3b5c] hover:bg-[#e03350] text-white text-xs font-bold rounded-lg transition disabled:opacity-50"
               >
-                <Lock className="w-3.5 h-3.5" />
                 {actionLoading === 'stop_agent' ? 'Stopping...' : 'Stop Autonomous Agent'}
               </button>
             ) : (
@@ -718,9 +669,8 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                 onClick={handleStartRuntime}
                 disabled={actionLoading === 'start_agent' || isCircuitBreakerTripped || isViewer}
                 title={isViewer ? 'Operator passphrase required to start agent' : undefined}
-                className="px-3.5 py-2 bg-[#00ff84] hover:bg-[#00e576] text-black text-xs font-bold rounded-lg transition flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3.5 py-2 bg-[#00ff84] hover:bg-[#00e576] text-black text-xs font-bold rounded-lg transition disabled:opacity-50"
               >
-                <Zap className="w-3.5 h-3.5" />
                 {actionLoading === 'start_agent' ? 'Starting...' : 'Start Autonomous Agent'}
               </button>
             )}
@@ -736,7 +686,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                     </span>
                     <div className="flex items-center gap-1.5">
                       <span
-                        className="text-xs font-mono font-bold"
+                        className="text-xs tabular-nums font-bold"
                         style={{ color: currentTier.color }}
                       >
                         {riskPercentage}%
@@ -772,7 +722,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                   />
 
                   {/* Faint text showing: standard, risky, high risk, all in */}
-                  <div className="flex justify-between items-center text-[9px] font-mono pt-0.5 select-none">
+                  <div className="flex justify-between items-center text-[9px] pt-0.5 select-none">
                     <span
                       onClick={() => handleRiskPercentageChange(12)}
                       className={`cursor-pointer transition ${
@@ -823,7 +773,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                         color: currentTier.id === 'ALL_IN' ? currentTier.color : undefined,
                       }}
                     >
-                      all in
+                      max cap
                     </span>
                   </div>
 
@@ -834,19 +784,6 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                 </div>
               );
             })()}
-
-            <button
-              onClick={handleToggleProofMode}
-              disabled={actionLoading === 'proof_mode' || isViewer}
-              className={`px-3 py-2 text-xs font-bold rounded-lg transition border ${
-                worker.proofMode
-                  ? 'bg-[#00ff84] text-black border-[#00ff84] font-bold'
-                  : 'bg-slate-800 text-[#9ca3af] border-[#34333b] hover:bg-slate-700'
-              } ${isViewer ? 'opacity-50 cursor-not-allowed' : ''}`}
-              title={isViewer ? 'Operator passphrase required to toggle Proof Mode' : 'Toggle First-Trade Proof Mode'}
-            >
-              {worker.proofMode ? 'Proof Mode ON' : 'Proof Mode OFF'}
-            </button>
 
             <button
               onClick={handleRunCycle}
@@ -864,7 +801,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               className="p-2 bg-slate-800 hover:bg-slate-700 text-[#9ca3af] hover:text-white rounded-lg border border-[#34333b] transition"
               title="Refresh Observability Snapshot"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span className={`text-xs ${isLoading ? 'inline-block animate-spin' : ''}`}>↻</span>
             </button>
           </div>
         </div>
@@ -881,7 +818,6 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
       {telemetryStatus === 'DEGRADED' && degradedWarnings.length > 0 && (
         <div className="bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg text-xs text-amber-300 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
             <span>System Degraded: Partial auxiliary telemetry latency ({degradedWarnings.join(' • ')})</span>
           </div>
         </div>
@@ -894,8 +830,8 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
           <span className="text-lg font-bold text-white mt-1 block">
             {formatCurrency(account.equity)}
           </span>
-          <span className="text-[10px] text-[#00ff84] flex items-center gap-1 mt-0.5">
-            <CheckCircle2 className="w-2.5 h-2.5" /> Confirmed Ground Truth
+          <span className="text-[10px] text-[#00ff84] block mt-0.5">
+            Confirmed Ground Truth
           </span>
         </div>
 
@@ -904,7 +840,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
           <span className="text-lg font-bold text-slate-200 mt-1 block">
             {formatCurrency(account.cash)}
           </span>
-          <span className="text-[10px] text-[#2d3748] block mt-0.5">
+          <span className="text-[10px] text-[#848388] block mt-0.5">
             Buying Power: {formatCurrency(account.buyingPower)}
           </span>
         </div>
@@ -930,7 +866,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
           }`}>
             {performance.portfolio.realizedPnLUsd >= 0 ? '+' : ''}{formatCurrency(performance.portfolio.realizedPnLUsd)}
           </span>
-          <span className="text-[10px] text-[#2d3748] block mt-0.5">
+          <span className="text-[10px] text-[#848388] block mt-0.5">
             {performance.portfolio.totalPnLPct >= 0 ? '+' : ''}{performance.portfolio.totalPnLPct.toFixed(2)}% return
           </span>
         </div>
@@ -946,7 +882,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
           }`}>
             {performance.trades.totalR >= 0 ? '+' : ''}{performance.trades.totalR.toFixed(2)}R
           </span>
-          <span className="text-[10px] text-[#2d3748] block mt-0.5">
+          <span className="text-[10px] text-[#848388] block mt-0.5">
             Avg: {performance.trades.avgActualR >= 0 ? '+' : ''}{performance.trades.avgActualR.toFixed(2)}R / trade
           </span>
         </div>
@@ -956,7 +892,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
           <span className="text-lg font-bold text-amber-400 mt-1 block">
             {performance.portfolio.maxDrawdownPct.toFixed(2)}%
           </span>
-          <span className="text-[10px] text-[#2d3748] block mt-0.5">
+          <span className="text-[10px] text-[#848388] block mt-0.5">
             Peak: {formatCurrency(performance.portfolio.peakEquityUsd)}
           </span>
         </div>
@@ -966,40 +902,37 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
       <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5 space-y-2">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#28272e] pb-3">
           <div className="flex items-center gap-2.5">
-            <Award className="w-5 h-5 text-amber-400" />
+            <span className="font-bold text-emerald-400 text-lg shrink-0 select-none leading-none">
+              ◈
+            </span>
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">Live Alpha Evidence & Diagnostic Review</h3>
+              <h3 className="text-base font-bold text-white tracking-tight">Strategy Performance &amp; Diagnostic Review</h3>
               <p className="text-xs text-[#848388]">Statistical evaluation across live paper executions without synthetic data</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+            <span className={`text-xs font-bold ${
               verdict?.quality === 'PROMISING'
-                ? 'bg-[#00ff84]/10 text-[#00ff84] border-[#00ff84]/20'
-                : verdict?.quality === 'MEANINGFUL'
-                ? 'bg-[#00ff84]/8 text-[#848388] border-indigo-500/30'
-                : verdict?.quality === 'PRELIMINARY'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                ? 'text-[#00ff84]'
                 : verdict?.quality === 'NO_DEMONSTRATED_ALPHA'
-                ? 'bg-rose-500/20 text-[#ff3b5c] border-rose-500/30'
-                : 'bg-slate-800 text-[#848388] border-[#34333b]'
+                ? 'text-[#ff3b5c]'
+                : 'text-amber-400'
             }`}>
-              VERDICT: {verdict?.quality || 'INSUFFICIENT'}
+              VERDICT: {verdict?.quality === 'NO_DEMONSTRATED_ALPHA' ? 'NO STATISTICAL EDGE' : (verdict?.quality?.replace(/_/g, ' ') || 'INSUFFICIENT')}
             </span>
           </div>
         </div>
 
         {verdict?.completedTrades === 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-            {/* Panel 1: Alpha Evidence (N=0) */}
+            {/* Panel 1: Trade Evidence (N=0) */}
             <div className="bg-[#1f1e23] p-4 rounded-lg border border-[#28272e] text-xs text-[#848388] space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                  <Clock className="w-4 h-4" />
-                  <span>Realized Alpha Evidence (N = 0)</span>
+                  <span>Trade Execution Evidence (N = 0)</span>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                <span className="text-[10px] font-bold text-amber-400">
                   INSUFFICIENT SAMPLE
                 </span>
               </div>
@@ -1017,25 +950,24 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
             <div className="bg-[#1f1e23] p-4 rounded-lg border border-[#28272e] text-xs text-[#848388] space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[#848388] font-bold text-sm">
-                  <Activity className="w-4 h-4 text-[#848388]" />
                   <span>Live Runtime Activity</span>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#00ff84]/8 text-[#00ff84] border border-[#00ff84]/20">
-                  {worker.state}
+                <span className="text-[10px] font-bold text-[#00ff84]">
+                  {worker.state.replace(/_/g, ' ')}
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2 pt-1">
                 <div className="bg-[#1f1e23] p-2 rounded-lg border border-[#28272e] text-center">
                   <span className="text-[10px] text-[#848388] block">Cycles Run</span>
-                  <strong className="text-sm text-white font-mono">{session.totalCyclesExecuted}</strong>
+                  <strong className="text-sm text-white tabular-nums">{session.totalCyclesExecuted}</strong>
                 </div>
                 <div className="bg-[#1f1e23] p-2 rounded-lg border border-[#28272e] text-center">
                   <span className="text-[10px] text-[#848388] block">Scanned</span>
-                  <strong className="text-sm text-white font-mono">{currentCycle?.executionFunnel?.candidatesScanned ?? session.totalCandidatesScanned}</strong>
+                  <strong className="text-sm text-white tabular-nums">{currentCycle?.executionFunnel?.candidatesScanned ?? session.totalCandidatesScanned}</strong>
                 </div>
                 <div className="bg-[#1f1e23] p-2 rounded-lg border border-[#28272e] text-center">
                   <span className="text-[10px] text-[#848388] block">Filtered / Rej</span>
-                  <strong className="text-sm text-amber-400 font-mono">
+                  <strong className="text-sm text-amber-400 tabular-nums">
                     {(() => {
                       const scanned = currentCycle?.executionFunnel?.candidatesScanned ?? session.totalCandidatesScanned ?? 0;
                       const passed = currentCycle?.executionFunnel?.scoredAboveThreshold ?? 0;
@@ -1044,8 +976,8 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                   </strong>
                 </div>
               </div>
-              <div className="pt-1 flex items-center justify-between text-[11px] text-[#2d3748] border-t border-[#28272e]/60">
-                <span>Avg Opp Score: <strong className={`font-mono font-bold ${
+              <div className="pt-1 flex items-center justify-between text-[11px] text-[#848388] border-t border-[#28272e]/60">
+                <span>Avg Opp Score: <strong className={`tabular-nums font-bold ${
                   avgOppScore == null ? 'text-[#848388]' :
                   avgOppScore >= funnelThresholds.minOpportunityScore ? 'text-[#00ff84]' :
                   avgOppScore >= 40 ? 'text-amber-400' : 'text-[#ff3b5c]'
@@ -1053,9 +985,9 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                 <span>Council Evals: <strong className="text-[#9ca3af]">{currentCycle?.executionFunnel?.councilEvaluated ?? recentDecisions.length}</strong></span>
                 <span>Submitted: <strong className="text-[#9ca3af]">{currentCycle?.executionFunnel?.brokerSubmitted ?? session.totalOrdersSubmitted}</strong></span>
               </div>
-              <div className="flex items-center justify-between text-[10px] text-[#2d3748]">
+              <div className="flex items-center justify-between text-[10px] text-[#848388]">
                 <span>Last Cycle: <strong className="text-[#848388]">{worker.lastCycleAt ? new Date(worker.lastCycleAt).toLocaleTimeString() : 'Active'}</strong></span>
-                <span className="text-[10px] text-[#2d3748] font-mono">Cutoff: ≥{funnelThresholds.minOpportunityScore}</span>
+                <span className="text-[10px] text-[#848388] tabular-nums">Cutoff: ≥{funnelThresholds.minOpportunityScore}</span>
               </div>
             </div>
           </div>
@@ -1066,7 +998,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <ul className="space-y-1 text-[#9ca3af]">
                 {verdict?.strengths.map((s, i) => (
                   <li key={i} className="flex items-start gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00ff84] shrink-0 mt-0.5" />
+                    <span className="text-[#00ff84] font-bold shrink-0">›</span>
                     <span>{s}</span>
                   </li>
                 ))}
@@ -1078,7 +1010,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <ul className="space-y-1 text-[#9ca3af]">
                 {verdict?.weaknesses.map((w, i) => (
                   <li key={i} className="flex items-start gap-1.5">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                    <span className="text-amber-400 font-bold shrink-0">›</span>
                     <span>{w}</span>
                   </li>
                 ))}
@@ -1090,7 +1022,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <ul className="space-y-1 text-[#9ca3af]">
                 {verdict?.recommendations.map((r, i) => (
                   <li key={i} className="flex items-start gap-1.5">
-                    <ChevronRight className="w-3.5 h-3.5 text-[#848388] shrink-0 mt-0.5" />
+                    <span className="text-[#848388] font-bold shrink-0">›</span>
                     <span>{r}</span>
                   </li>
                 ))}
@@ -1104,15 +1036,14 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
       <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[#848388]" />
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">Candidate Rotation & Starvation Elimination</h3>
           </div>
-          <span className="text-xs text-[#848388] font-mono">scanLimit = 5 • Deterministic Aging Active</span>
+          <span className="text-xs text-[#848388] font-sans">scanLimit = 5 • Deterministic Aging Active</span>
         </div>
 
         {currentCycle?.rotationTelemetry && currentCycle.rotationTelemetry.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-mono">
+            <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-[#28272e] text-[#848388]">
                   <th className="pb-2 font-semibold">Priority Rank</th>
@@ -1128,20 +1059,19 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <tbody className="divide-y divide-slate-800/60">
                 {currentCycle.rotationTelemetry.map((cand: any, idx: number) => (
                   <tr key={cand.symbol} className="hover:bg-slate-800/30">
-                    <td className="py-2 text-[#848388] font-bold">#{cand.rank || idx + 1}</td>
+                    <td className="py-2 text-[#848388] font-bold tabular-nums">#{cand.rank || idx + 1}</td>
                     <td className="py-2 font-bold text-white flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
                       {cand.symbol}
                     </td>
-                    <td className="py-2 text-[#9ca3af]">{cand.opportunityScore}</td>
+                    <td className="py-2 text-[#9ca3af] tabular-nums">{cand.opportunityScore}</td>
                     <td className="py-2">
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold tabular-nums ${
                         cand.cyclesWaiting > 1 ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-[#848388]'
                       }`}>
                         {cand.cyclesWaiting} cycles
                       </span>
                     </td>
-                    <td className="py-2 text-[#848388]">{cand.evaluationCount}x</td>
+                    <td className="py-2 text-[#848388] tabular-nums">{cand.evaluationCount}x</td>
                     <td className="py-2 text-purple-300 font-bold">{cand.rotationPriority}</td>
                     <td className="py-2">
                       {cand.selectedThisCycle ? (
@@ -1165,7 +1095,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
         ) : (
           <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e]/60 text-xs text-[#848388] flex items-center justify-between">
             <span>Candidate rotation telemetry will populate during next autonomous cycle execution.</span>
-            <span className="text-[#848388] font-mono font-bold">20-Universe Bounded</span>
+            <span className="text-[#848388] font-bold">20-Universe Bounded</span>
           </div>
         )}
       </div>
@@ -1175,13 +1105,13 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
         {/* Execution Funnel with Sliders */}
         <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5 space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#00ff84]" /> Candidate Execution Funnel
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              Candidate Execution Funnel
             </h3>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1f1e23] border border-[#28272e] text-xs font-mono">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1f1e23] border border-[#28272e] text-xs">
                 <span className="text-[#848388] text-[11px]">Avg Score:</span>
-                <strong className={`font-bold ${
+                <strong className={`font-bold tabular-nums ${
                   avgOppScore == null ? 'text-[#848388]' :
                   avgOppScore >= funnelThresholds.minOpportunityScore ? 'text-[#00ff84]' :
                   avgOppScore >= 40 ? 'text-amber-400' : 'text-[#ff3b5c]'
@@ -1189,17 +1119,16 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                   {avgOppScore != null ? `${avgOppScore}/100` : '--/100'}
                 </strong>
               </div>
-              <span className="text-xs text-[#848388] font-mono hidden sm:inline">Current / Last Cycle</span>
               <button
                 onClick={() => setShowSliders(s => !s)}
-                className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition ${
+                className={`px-2 py-1 rounded text-[10px] font-bold border transition ${
                   showSliders
                     ? 'bg-cyan-500/20 text-[#00ff84] border-cyan-500/40'
                     : 'bg-slate-800 text-[#848388] border-[#34333b] hover:border-slate-600'
                 }`}
                 title="Adjust filter thresholds"
               >
-                <Sliders className="w-3 h-3" /> Adjust
+                Adjust
               </button>
             </div>
           </div>
@@ -1214,16 +1143,16 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                     Live Filter Thresholds
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-mono">
+                <div className="flex items-center gap-2 text-xs">
                   <span className="text-[#848388] text-[11px]">Universe Avg Score:</span>
-                  <strong className={`font-bold ${
+                  <strong className={`font-bold tabular-nums ${
                     avgOppScore == null ? 'text-[#848388]' :
                     avgOppScore >= funnelThresholds.minOpportunityScore ? 'text-[#00ff84]' :
                     avgOppScore >= 40 ? 'text-amber-400' : 'text-[#ff3b5c]'
                   }`}>
                     {avgOppScore != null ? `${avgOppScore}/100` : 'N/A'}
                   </strong>
-                  <span className="text-[10px] text-[#2d3748]">vs Cutoff {funnelThresholds.minOpportunityScore}</span>
+                  <span className="text-[10px] text-[#848388] tabular-nums">vs Cutoff {funnelThresholds.minOpportunityScore}</span>
                 </div>
               </div>
 
@@ -1231,11 +1160,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <div className="p-2.5 rounded-lg bg-[#17161b] border border-[#28272e] space-y-2">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-1.5">
-                    <Bookmark className="w-3.5 h-3.5 text-[#00ff84]" />
                     <span className="text-[11px] font-bold uppercase tracking-wider text-white">
                       Filter Presets
                     </span>
-                    <span className="text-[10px] text-[#848388] font-mono">({presets.length})</span>
+                    <span className="text-[10px] text-[#848388] tabular-nums">({presets.length})</span>
                   </div>
 
                   <div className="flex items-center gap-1.5">
@@ -1246,10 +1174,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                           setIsCreatingPreset(true);
                           setNewPresetName('');
                         }}
-                        className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#00ff84] text-black hover:bg-[#00e576] transition flex items-center gap-1 cursor-pointer"
+                        className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#00ff84] text-black hover:bg-[#00e576] transition cursor-pointer"
                         title="Save current slider values as a new preset"
                       >
-                        <Plus className="w-3 h-3" /> Save Preset
+                        + Save Preset
                       </button>
                     )}
                   </div>
@@ -1273,9 +1201,9 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                     <button
                       type="submit"
                       disabled={!newPresetName.trim()}
-                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#00ff84] text-black hover:bg-[#00e576] disabled:opacity-40 transition flex items-center gap-1"
+                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#00ff84] text-black hover:bg-[#00e576] disabled:opacity-40 transition"
                     >
-                      <Save className="w-3 h-3" /> Save
+                      Save
                     </button>
                     <button
                       type="button"
@@ -1354,12 +1282,12 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                               setEditingPresetId(preset.id);
                               setEditingName(preset.name);
                             }}
-                            className={`p-0.5 hover:scale-110 transition ${
+                            className={`px-1 text-[11px] leading-none hover:scale-110 transition ${
                               isActive ? 'text-black hover:text-black/70' : 'text-[#848388] hover:text-white'
                             }`}
                             title="Rename this preset"
                           >
-                            <Edit2 className="w-2.5 h-2.5" />
+                            ✎
                           </button>
 
                           {/* Overwrite with current values */}
@@ -1369,12 +1297,12 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                               e.stopPropagation();
                               handleUpdatePresetValues(preset.id);
                             }}
-                            className={`p-0.5 hover:scale-110 transition ${
+                            className={`px-1 text-[11px] leading-none hover:scale-110 transition ${
                               isActive ? 'text-black hover:text-black/70' : 'text-[#848388] hover:text-[#00ff84]'
                             }`}
                             title="Update preset with current slider numbers"
                           >
-                            <Save className="w-2.5 h-2.5" />
+                            ✓
                           </button>
 
                           {/* Delete custom preset */}
@@ -1385,12 +1313,12 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                                 e.stopPropagation();
                                 handleDeletePreset(preset.id);
                               }}
-                              className={`p-0.5 hover:scale-110 transition ${
+                              className={`px-1 text-[11px] leading-none hover:scale-110 transition ${
                                 isActive ? 'text-black hover:text-[#ff3b5c]' : 'text-[#848388] hover:text-[#ff3b5c]'
                               }`}
                               title="Delete preset"
                             >
-                              <Trash2 className="w-2.5 h-2.5" />
+                              ✕
                             </button>
                           )}
                         </div>
@@ -1404,7 +1332,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <div className="space-y-1">
                 <div className="flex justify-between text-[11px]">
                   <span className="text-[#9ca3af]">Min Liquidity</span>
-                  <span className="text-[#00ff84] font-mono font-bold">${(funnelThresholds.minLiquidityUsd / 1000).toFixed(0)}k</span>
+                  <span className="text-[#00ff84] tabular-nums font-bold">${(funnelThresholds.minLiquidityUsd / 1000).toFixed(0)}k</span>
                 </div>
                 <input
                   type="range"
@@ -1424,7 +1352,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <div className="space-y-1">
                 <div className="flex justify-between text-[11px]">
                   <span className="text-[#9ca3af]">Max Spot Spread</span>
-                  <span className="text-[#00ff84] font-mono font-bold">{funnelThresholds.maxSpreadBps} bps</span>
+                  <span className="text-[#00ff84] tabular-nums font-bold">{funnelThresholds.maxSpreadBps} bps</span>
                 </div>
                 <input
                   type="range"
@@ -1443,8 +1371,8 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               {/* Min Opportunity Score */}
               <div className="space-y-1">
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-[#9ca3af]">Min Opportunity Score</span>
-                  <span className="text-[#00ff84] font-mono font-bold">{funnelThresholds.minOpportunityScore}</span>
+                  <span className="text-[#9ca3af]">Min. Opportunity Score:</span>
+                  <span className="text-[#00ff84] tabular-nums font-bold">{funnelThresholds.minOpportunityScore}</span>
                 </div>
                 <input
                   type="range"
@@ -1464,7 +1392,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <div className="space-y-1">
                 <div className="flex justify-between text-[11px]">
                   <span className="text-[#9ca3af]">Min AI Confidence</span>
-                  <span className="text-[#00ff84] font-mono font-bold">{funnelThresholds.minConfidenceScore}%</span>
+                  <span className="text-[#00ff84] tabular-nums font-bold">{funnelThresholds.minConfidenceScore}%</span>
                 </div>
                 <input
                   type="range"
@@ -1484,7 +1412,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               <div className="space-y-1">
                 <div className="flex justify-between text-[11px]">
                   <span className="text-[#9ca3af]">Min Risk / Reward Ratio</span>
-                  <span className="text-[#00ff84] font-mono font-bold">{funnelThresholds.minRiskRewardRatio.toFixed(2)}R</span>
+                  <span className="text-[#00ff84] tabular-nums font-bold">{funnelThresholds.minRiskRewardRatio.toFixed(2)}R</span>
                 </div>
                 <input
                   type="range"
@@ -1506,7 +1434,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                   setFunnelThresholds(defaults);
                   pushThresholds(defaults);
                 }}
-                className="text-[10px] text-[#2d3748] hover:text-[#9ca3af] transition underline"
+                className="text-[10px] text-[#848388] hover:text-[#9ca3af] transition underline"
               >
                 Reset to defaults
               </button>
@@ -1568,7 +1496,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                 <div key={idx} className="text-xs space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[#9ca3af] font-medium">{step.label}</span>
-                    <span className="font-mono font-bold text-white px-2 py-0.5 rounded bg-slate-800 min-w-[2.5rem] text-center">{step.count}</span>
+                    <span className="tabular-nums font-bold text-white px-2 py-0.5 rounded bg-slate-800 min-w-[2.5rem] text-center">{step.count}</span>
                   </div>
                   <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
                     <div
@@ -1585,10 +1513,10 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
         {/* Rejection Distribution */}
         <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-amber-400" /> Rejection Reasons Distribution
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              Rejection Reasons Distribution
             </h3>
-            <span className="text-xs text-[#848388] font-mono">Why isn't the agent trading?</span>
+            <span className="text-xs text-[#848388]">Why isn't the agent trading?</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-xs">
@@ -1604,7 +1532,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
             ].map((reason, idx) => (
               <div key={idx} className="p-2.5 rounded-lg bg-[#1f1e23] border border-[#28272e]/60 flex flex-col justify-between gap-1">
                 <span className="text-[11px] text-[#848388]">{reason.label}</span>
-                <span className={`text-base font-bold font-mono ${reason.color}`}>{reason.count}</span>
+                <span className={`text-base font-bold tabular-nums ${reason.color}`}>{reason.count}</span>
               </div>
             ))}
           </div>
@@ -1619,7 +1547,6 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
       <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Radio className="w-4 h-4 text-[#00ff84] animate-pulse" />
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Paper Event Journal Stream</h3>
           </div>
           <div className="flex items-center gap-3 text-xs text-[#848388]">
@@ -1629,25 +1556,25 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
         </div>
 
         {events.length === 0 ? (
-          <div className="text-center py-6 text-[#2d3748] text-xs bg-[#1f1e23] rounded-lg border border-[#28272e]/60">
+          <div className="text-center py-6 text-[#848388] text-xs bg-[#1f1e23] rounded-lg border border-[#28272e]/60">
             No events recorded yet in current paper session.
           </div>
         ) : (
           <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
             {events.slice(-15).reverse().map(evt => (
-              <div key={evt.eventId} className="flex items-center justify-between p-2 bg-[#1f1e23] rounded-lg border border-[#28272e]/80 text-xs font-mono">
+              <div key={evt.eventId} className="flex items-center justify-between p-2 bg-[#1f1e23] rounded-lg border border-[#28272e]/80 text-xs">
                 <div className="flex items-center gap-2.5 truncate">
-                  <span className="text-[#2d3748] text-[11px]">{new Date(evt.timestamp).toLocaleTimeString()}</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                  <span className="text-[#848388] text-[11px] tabular-nums">{new Date(evt.timestamp).toLocaleTimeString()}</span>
+                  <span className={`text-[10px] font-bold ${
                     evt.type.includes('COMPLETED') || evt.type.includes('FILLED')
-                      ? 'bg-[#00ff84]/10 text-[#00ff84] border border-[#00ff84]/20'
+                      ? 'text-[#00ff84]'
                       : evt.type.includes('FAILED') || evt.type.includes('REJECTED') || evt.type.includes('BLOCKED')
-                      ? 'bg-rose-500/20 text-[#ff3b5c] border border-rose-500/30'
+                      ? 'text-[#ff3b5c]'
                       : evt.type.includes('STARTED') || evt.type.includes('SUBMITTED')
-                      ? 'bg-[#00ff84]/8 text-[#848388] border border-indigo-500/30'
-                      : 'bg-slate-800 text-[#9ca3af]'
+                      ? 'text-[#848388]'
+                      : 'text-[#9ca3af]'
                   }`}>
-                    {evt.type}
+                    {evt.type.replace(/_/g, ' ')}
                   </span>
                   {evt.symbol && <span className="text-white font-bold">{evt.symbol}</span>}
                 </div>
@@ -1664,14 +1591,13 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
       <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <PieChart className="w-4 h-4 text-[#00ff84]" />
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">Active Open Positions ({openTrades.length})</h3>
           </div>
           <span className="text-xs text-[#848388]">Enforced 25% single-asset risk cap</span>
         </div>
 
         {openTrades.length === 0 ? (
-          <div className="text-center py-6 text-[#2d3748] text-xs bg-[#1f1e23] rounded-lg border border-[#28272e]/60">
+          <div className="text-center py-6 text-[#848388] text-xs bg-[#1f1e23] rounded-lg border border-[#28272e]/60">
             Zero open positions. Autonomous engine is in cash preservation mode.
           </div>
         ) : (
@@ -1694,12 +1620,12 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                   <tr key={trade.tradeId} className="hover:bg-slate-800/40">
                     <td className="py-2.5 font-bold text-white">{trade.symbol}</td>
                     <td className="py-2.5 text-[#848388]">{trade.assetClass}</td>
-                    <td className="py-2.5 text-[#848388] font-mono text-[11px]">{trade.strategy}</td>
-                    <td className="py-2.5 text-right text-[#9ca3af]">{trade.actualFilledQuantity ?? trade.approvedQuantity}</td>
-                    <td className="py-2.5 text-right text-[#9ca3af]">{formatCurrency(trade.actualFillPrice ?? trade.entryPrice)}</td>
-                    <td className="py-2.5 text-right text-[#00ff84] font-semibold">{formatCurrency(trade.targetPrice)}</td>
-                    <td className="py-2.5 text-right text-[#ff3b5c] font-semibold">{formatCurrency(trade.invalidationPrice)}</td>
-                    <td className="py-2.5 text-right text-[#848388]">{formatCurrency(trade.initialRiskAmountUsd)}</td>
+                    <td className="py-2.5 text-[#848388] text-[11px]">{trade.strategy?.replace(/_/g, ' ')}</td>
+                    <td className="py-2.5 text-right tabular-nums text-[#9ca3af]">{trade.actualFilledQuantity ?? trade.approvedQuantity}</td>
+                    <td className="py-2.5 text-right tabular-nums text-[#9ca3af]">{formatCurrency(trade.actualFillPrice ?? trade.entryPrice)}</td>
+                    <td className="py-2.5 text-right tabular-nums text-[#00ff84] font-semibold">{formatCurrency(trade.targetPrice)}</td>
+                    <td className="py-2.5 text-right tabular-nums text-[#ff3b5c] font-semibold">{formatCurrency(trade.invalidationPrice)}</td>
+                    <td className="py-2.5 text-right tabular-nums text-[#848388]">{formatCurrency(trade.initialRiskAmountUsd)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1712,7 +1638,6 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
       <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-[#848388]" />
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">Session Rejection Funnel Analysis (Observed Candidate Screenings)</h3>
           </div>
           <span className="text-xs text-[#848388]">Total Scanned: <strong className="text-white">{alphaSnapshot?.rejectionAnalysis.totalScanned || session.totalCandidatesScanned}</strong></span>
@@ -1721,9 +1646,9 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 text-xs mb-4">
           {alphaSnapshot?.rejectionAnalysis.stages.map(s => (
             <div key={s.stage} className="bg-[#1f1e23] p-2.5 rounded-lg border border-[#28272e] text-center">
-              <span className="text-[10px] text-[#848388] font-mono block truncate" title={s.stage}>{s.stage}</span>
-              <span className="text-sm font-bold text-white mt-0.5 block">{s.count}</span>
-              <span className="text-[10px] text-[#2d3748]">{s.percentageOfScanned.toFixed(1)}%</span>
+              <span className="text-[10px] text-[#848388] block truncate" title={s.stage}>{s.stage?.replace(/_/g, ' ')}</span>
+              <span className="text-sm font-bold tabular-nums text-white mt-0.5 block">{s.count}</span>
+              <span className="text-[10px] tabular-nums text-[#848388]">{s.percentageOfScanned.toFixed(1)}%</span>
             </div>
           ))}
         </div>
@@ -1762,7 +1687,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
           return (
             <>
               <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1 text-xs">
-                <span className="text-[#2d3748] text-[11px] font-semibold">Filter View:</span>
+                <span className="text-[#848388] text-[11px] font-semibold">Filter View:</span>
                 {[
                   { id: 'ALL', label: `All (${recentDecisions.length})` },
                   { id: 'CRYPTO', label: `Crypto (${cryptoCount})` },
@@ -1785,7 +1710,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               </div>
 
               {filteredDecisions.length === 0 ? (
-                <div className="text-center py-4 text-[#2d3748] text-xs bg-[#1f1e23] rounded-lg border border-[#28272e]/60">
+                <div className="text-center py-4 text-[#848388] text-xs bg-[#1f1e23] rounded-lg border border-[#28272e]/60">
                   No matching candidate decisions recorded for this filter view.
                 </div>
               ) : (
@@ -1805,42 +1730,41 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
                     <tbody className="divide-y divide-slate-800/60">
                       {filteredDecisions.slice(-50).reverse().map((dec, idx) => (
                     <tr key={`${dec.cycleId}-${dec.symbol}-${idx}`} className="hover:bg-slate-800/40">
-                      <td className="py-2 text-[11px] text-[#2d3748] font-mono">{new Date(dec.timestamp).toLocaleTimeString()}</td>
-                      <td className="py-2 font-bold text-white flex items-center gap-1.5">
+                      <td className="py-2 text-[11px] text-[#848388] tabular-nums">{new Date(dec.timestamp).toLocaleTimeString()}</td>
+                      <td className="py-2 font-bold text-white">
                         <span>{dec.symbol}</span>
-                        {dec.action === 'BUY' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />}
                       </td>
                       <td className="py-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        <span className={`text-[10px] font-bold ${
                           dec.action === 'BUY'
-                            ? 'bg-[#00ff84]/10 text-[#00ff84] border border-[#00ff84]/20'
+                            ? 'text-[#00ff84]'
                             : dec.action === 'HOLD'
-                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                            : 'bg-slate-800 text-[#848388]'
+                            ? 'text-amber-400'
+                            : 'text-[#848388]'
                         }`}>
                           {dec.action}
                         </span>
                       </td>
-                      <td className="py-2 text-center text-[#9ca3af] font-mono">{dec.opportunityScore ?? '—'}/100</td>
-                      <td className="py-2 text-center text-[#9ca3af] font-mono">{dec.aiConfidence ? `${dec.aiConfidence}%` : '—'}</td>
-                      <td className="py-2 text-center text-[#9ca3af] font-mono">{dec.estimatedRiskReward ? `${dec.estimatedRiskReward.toFixed(1)}R` : '—'}</td>
+                      <td className="py-2 text-center text-[#9ca3af] tabular-nums">{dec.opportunityScore ?? '—'}/100</td>
+                      <td className="py-2 text-center text-[#9ca3af] tabular-nums">{dec.aiConfidence ? `${dec.aiConfidence}%` : '—'}</td>
+                      <td className="py-2 text-center text-[#9ca3af] tabular-nums">{dec.estimatedRiskReward ? `${dec.estimatedRiskReward.toFixed(1)}R` : '—'}</td>
                       <td className="py-2 text-[#848388] max-w-md">
                         {dec.thesisSummary ? (
                           <div className="space-y-0.5">
                             <span className="text-[#00ff84] text-[11px] block font-medium">
-                              🎯 AI Thesis: {dec.thesisSummary}
+                              Thesis: {dec.thesisSummary}
                             </span>
                           </div>
                         ) : dec.rejectionReason ? (
                           <span className="text-amber-400/90 text-[11px] block">
-                            <span className="px-1.5 py-0.2 rounded bg-amber-500/10 border border-amber-500/20 mr-1 text-[10px] font-mono">
-                              {dec.rejectionStage}
+                            <span className="mr-1 text-[10px] text-amber-400">
+                              {dec.rejectionStage?.replace(/_/g, ' ')}
                             </span>
                             {dec.rejectionReason}
                           </span>
                         ) : (
-                          <span className="text-[#00ff84] text-[11px] flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Approved by Risk Gate
+                          <span className="text-[#00ff84] text-[11px]">
+                            Approved by Risk Gate
                           </span>
                         )}
                       </td>
@@ -1862,8 +1786,7 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
         <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#00ff84]" />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Multi-Dimensional Attribution</h3>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Performance Breakdown</h3>
             </div>
           </div>
 
@@ -1896,9 +1819,9 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
               return (
                 <div key={stratName} className="flex items-center justify-between p-2.5 bg-[#1f1e23] rounded-lg border border-[#28272e]/80 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-white font-mono">{stratName}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-[#848388] font-mono">
-                      {status}
+                    <span className="font-bold text-white">{formatDisplayLabel(stratName)}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-[#848388]">
+                      {formatDisplayLabel(status)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-[#9ca3af]">
@@ -1970,15 +1893,14 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
         <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-amber-400" />
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">Calibration Diagnostics</h3>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] px-2 py-0.5 bg-indigo-500/10 text-[#848388] rounded-full border border-indigo-500/20 font-mono">
-                {strategyReview?.calibrationReview.confidenceMonotonicity || 'INSUFFICIENT_SAMPLE'}
+              <span className="text-[10px] text-[#848388]">
+                {formatDisplayLabel(strategyReview?.calibrationReview.confidenceMonotonicity || 'INSUFFICIENT SAMPLE')}
               </span>
-              <span className="text-xs px-2 py-0.5 bg-amber-500/10 text-amber-300 rounded-full border border-amber-500/20 font-bold">
-                READ-ONLY ADVISORY
+              <span className="text-xs text-amber-300 font-bold">
+                Read only
               </span>
             </div>
           </div>
@@ -1991,19 +1913,19 @@ export const RuntimeObservabilityView: React.FC<RuntimeObservabilityViewProps> =
             {calibration.recommendations.map(rec => (
               <div key={rec.parameter} className="p-3 bg-[#1f1e23] rounded-lg border border-[#28272e] text-xs space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white font-mono">{rec.parameter}</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                  <span className="font-bold text-white">{formatDisplayLabel(rec.parameter)}</span>
+                  <span className={`text-[10px] font-bold ${
                     rec.state === 'INSUFFICIENT_EVIDENCE'
-                      ? 'bg-slate-800 text-[#848388]'
+                      ? 'text-[#848388]'
                       : rec.state === 'KEEP'
-                      ? 'bg-[#00ff84]/8 text-[#00ff84] border border-[#00ff84]/20'
-                      : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      ? 'text-[#00ff84]'
+                      : 'text-amber-400'
                   }`}>
-                    {rec.state}
+                    {formatDisplayLabel(rec.state)}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#848388]">{rec.evidence}</p>
-                <div className="text-[10px] text-[#2d3748]">Current parameter value: <strong className="text-[#9ca3af]">{rec.currentValue}</strong> (Sample: {rec.sampleSize} trades)</div>
+                <div className="text-[10px] text-[#848388]">Current parameter value: <strong className="text-[#9ca3af]">{rec.currentValue}</strong> (Sample: {rec.sampleSize} trades)</div>
               </div>
             ))}
           </div>

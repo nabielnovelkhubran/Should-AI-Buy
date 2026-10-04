@@ -1,21 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import {
-  Play,
-  Square,
-  RefreshCw,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  AlertTriangle,
-  Zap,
-  Activity,
-  Layers,
-  Cpu,
-  ShieldAlert,
-  ArrowRight
-} from 'lucide-react';
-import {
   AutomationStatus,
   AutomationJobType,
   AutomationRun
@@ -83,22 +68,20 @@ export const AutomationControl: React.FC = () => {
   const monitoringLastRun = status?.lastRun?.MONITORING;
 
   return (
-    <div className="p-6 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-2">
+    <div className="p-6 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-4">
       {/* Header & Main Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-[#848388]" />
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-base font-bold text-white tracking-tight">
-              Scheduled Automation & Orchestration (Phase 6D)
+              Scheduled Automation &amp; Orchestration (Phase 6D)
             </h3>
-            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold flex items-center gap-1.5 border ${
+            <span className={`text-[10px] font-bold ${
               isRunning
-                ? 'bg-[#00ff84]/8 text-[#00ff84] border-[#00ff84]/20'
-                : 'bg-slate-800 text-[#848388] border-[#34333b]'
+                ? 'text-[#00ff84]'
+                : 'text-[#848388]'
             }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
-              {isRunning ? 'AUTOMATION RUNNING' : 'AUTOMATION STOPPED'}
+              [{isRunning ? 'AUTOMATION RUNNING' : 'AUTOMATION STOPPED'}]
             </span>
           </div>
           <p className="text-xs text-[#848388] mt-1">
@@ -111,29 +94,27 @@ export const AutomationControl: React.FC = () => {
             <button
               onClick={() => handleAction('stop')}
               disabled={actionLoading === 'stop'}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#ff3b5c] hover:bg-[#e03350] text-xs font-bold text-white transition disabled:opacity-50"
+              className="px-3 py-1.5 rounded bg-[#ff3b5c] hover:bg-[#e03350] text-xs font-bold text-white transition disabled:opacity-50"
             >
-              <Square className="w-3.5 h-3.5 fill-current" />
-              <span>Stop Scheduler</span>
+              <span>■ Stop Scheduler</span>
             </button>
           ) : (
             <button
               onClick={() => handleAction('start')}
               disabled={actionLoading === 'start'}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00ff84] hover:bg-[#00e576] text-xs font-bold text-black transition disabled:opacity-50"
+              className="px-3 py-1.5 rounded bg-[#00ff84] hover:bg-[#00e576] text-xs font-bold text-black transition disabled:opacity-50"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>Start Automation</span>
+              <span>▶ Start Automation</span>
             </button>
           )}
 
           <button
             onClick={fetchStatus}
             disabled={isLoading}
-            className="p-1.5 rounded-lg bg-slate-800 border border-[#34333b] text-[#9ca3af] hover:text-white transition"
+            className="px-2.5 py-1.5 rounded bg-[#17161b] border border-[#28272e] text-[#848388] hover:text-white transition text-xs"
             title="Refresh Status"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? <span className="inline-block animate-spin">↻</span> : '↻'}
           </button>
         </div>
       </div>
@@ -141,64 +122,61 @@ export const AutomationControl: React.FC = () => {
       {/* Error Alert */}
       {errorMsg && (
         <div className="p-3 rounded-lg bg-[#ff3b5c]/8 border border-rose-500/30 flex items-center gap-2 text-[#ff3b5c] text-xs">
-          <AlertCircle className="w-4 h-4 shrink-0 text-[#ff3b5c]" />
+          <span>⚠</span>
           <span>{errorMsg}</span>
         </div>
       )}
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-0.5">
-          <span className="text-[10px] uppercase font-bold text-[#2d3748]">Total Cycles</span>
-          <div className="text-lg font-mono font-bold text-white">{status?.metrics?.totalRuns || 0}</div>
+        <div className="p-3 rounded-lg bg-[#17161b] border border-[#28272e] space-y-0.5">
+          <span className="text-[10px] uppercase font-bold text-[#848388]">Total Cycles</span>
+          <div className="text-lg tabular-nums font-bold text-white">{status?.metrics?.totalRuns || 0}</div>
         </div>
-        <div className="p-3 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-0.5">
-          <span className="text-[10px] uppercase font-bold text-[#2d3748]">Successful</span>
-          <div className="text-lg font-mono font-bold text-[#00ff84]">{status?.metrics?.successfulRuns || 0}</div>
+        <div className="p-3 rounded-lg bg-[#17161b] border border-[#28272e] space-y-0.5">
+          <span className="text-[10px] uppercase font-bold text-[#848388]">Successful</span>
+          <div className="text-lg tabular-nums font-bold text-[#00ff84]">{status?.metrics?.successfulRuns || 0}</div>
         </div>
-        <div className="p-3 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-0.5">
-          <span className="text-[10px] uppercase font-bold text-[#2d3748]">Skipped (Locked)</span>
-          <div className="text-lg font-mono font-bold text-amber-400">{status?.metrics?.skippedRuns || 0}</div>
+        <div className="p-3 rounded-lg bg-[#17161b] border border-[#28272e] space-y-0.5">
+          <span className="text-[10px] uppercase font-bold text-[#848388]">Skipped (Locked)</span>
+          <div className="text-lg tabular-nums font-bold text-amber-400">{status?.metrics?.skippedRuns || 0}</div>
         </div>
-        <div className="p-3 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-0.5">
-          <span className="text-[10px] uppercase font-bold text-[#2d3748]">Failed</span>
-          <div className="text-lg font-mono font-bold text-[#ff3b5c]">{status?.metrics?.failedRuns || 0}</div>
+        <div className="p-3 rounded-lg bg-[#17161b] border border-[#28272e] space-y-0.5">
+          <span className="text-[10px] uppercase font-bold text-[#848388]">Failed</span>
+          <div className="text-lg tabular-nums font-bold text-[#ff3b5c]">{status?.metrics?.failedRuns || 0}</div>
         </div>
       </div>
 
       {/* Job Orchestration Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* 1. Discovery Cycle Card */}
-        <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-3">
+        <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400" />
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                Discovery Cycle (Phases 5A–5C)
-              </h4>
-            </div>
-            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              Discovery Cycle (Phases 5A–5C)
+            </h4>
+            <span className={`text-[10px] font-bold uppercase ${
               status?.activeJobs?.DISCOVERY
-                ? 'bg-amber-500/20 text-amber-300'
-                : 'bg-slate-800 text-[#848388]'
+                ? 'text-amber-400'
+                : 'text-[#848388]'
             }`}>
-              {status?.activeJobs?.DISCOVERY ? 'ACTIVE RUNNING' : 'IDLE'}
+              [{status?.activeJobs?.DISCOVERY ? 'ACTIVE' : 'IDLE'}]
             </span>
           </div>
 
-          <div className="text-xs text-[#848388] space-y-1 font-mono">
+          <div className="text-xs text-[#848388] space-y-1">
             <div className="flex justify-between">
               <span>Interval:</span>
-              <span className="text-slate-200">{(status?.config?.discovery?.intervalMs || 60000) / 1000}s</span>
+              <span className="text-[#e2e8f0] tabular-nums">{(status?.config?.discovery?.intervalMs || 60000) / 1000}s</span>
             </div>
             <div className="flex justify-between">
               <span>Last Run:</span>
-              <span className="text-slate-200">
+              <span className="text-[#e2e8f0]">
                 {discoveryLastRun ? `${new Date(discoveryLastRun.startedAt).toLocaleTimeString()} (${discoveryLastRun.status})` : 'Never'}
               </span>
             </div>
             {discoveryLastRun?.discoveryResult && (
-              <div className="flex justify-between text-[#9ca3af]">
+              <div className="flex justify-between text-[#848388]">
                 <span>Outcome:</span>
                 <span className="text-[#848388]">
                   {discoveryLastRun.discoveryResult.queuedCount} queued, {discoveryLastRun.discoveryResult.dispatchSummary?.totalDispatched || 0} dispatched
@@ -207,17 +185,17 @@ export const AutomationControl: React.FC = () => {
             )}
             <div className="flex justify-between">
               <span>Next Scheduled:</span>
-              <span className="text-[#9ca3af]">
+              <span className="text-[#848388]">
                 {status?.nextRun?.DISCOVERY ? new Date(status.nextRun.DISCOVERY).toLocaleTimeString() : 'Paused'}
               </span>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-[#28272e]/60 flex items-center justify-end">
+          <div className="pt-2 border-t border-[#28272e] flex items-center justify-end">
             <button
               onClick={() => handleAction('runNow', 'DISCOVERY')}
               disabled={actionLoading === 'runNow-DISCOVERY' || status?.activeJobs?.DISCOVERY}
-              className="px-3 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-[#848388] text-xs font-semibold transition disabled:opacity-50"
+              className="px-3 py-1 rounded bg-[#28272e] hover:bg-[#34333b] text-[#e2e8f0] text-xs font-semibold transition disabled:opacity-50"
             >
               {actionLoading === 'runNow-DISCOVERY' ? 'Running...' : 'Run Discovery Now'}
             </button>
@@ -225,55 +203,52 @@ export const AutomationControl: React.FC = () => {
         </div>
 
         {/* 2. Monitoring Cycle Card */}
-        <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-3">
+        <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#00ff84]" />
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                Thesis Monitoring (Phases 6B–6C)
-              </h4>
-            </div>
-            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              Thesis Monitoring (Phases 6B–6C)
+            </h4>
+            <span className={`text-[10px] font-bold uppercase ${
               status?.activeJobs?.MONITORING
-                ? 'bg-[#00ff84]/10 text-[#00ff84]'
-                : 'bg-slate-800 text-[#848388]'
+                ? 'text-[#00ff84]'
+                : 'text-[#848388]'
             }`}>
-              {status?.activeJobs?.MONITORING ? 'ACTIVE RUNNING' : 'IDLE'}
+              [{status?.activeJobs?.MONITORING ? 'ACTIVE' : 'IDLE'}]
             </span>
           </div>
 
-          <div className="text-xs text-[#848388] space-y-1 font-mono">
+          <div className="text-xs text-[#848388] space-y-1">
             <div className="flex justify-between">
               <span>Interval:</span>
-              <span className="text-slate-200">{(status?.config?.monitoring?.intervalMs || 30000) / 1000}s</span>
+              <span className="text-[#e2e8f0] tabular-nums">{(status?.config?.monitoring?.intervalMs || 30000) / 1000}s</span>
             </div>
             <div className="flex justify-between">
               <span>Last Run:</span>
-              <span className="text-slate-200">
+              <span className="text-[#e2e8f0]">
                 {monitoringLastRun ? `${new Date(monitoringLastRun.startedAt).toLocaleTimeString()} (${monitoringLastRun.status})` : 'Never'}
               </span>
             </div>
             {monitoringLastRun?.monitoringResult && (
-              <div className="flex justify-between text-[#9ca3af]">
+              <div className="flex justify-between text-[#848388]">
                 <span>Outcome:</span>
-                <span className="text-[#00ff84]">
+                <span className="text-[#00ff84] tabular-nums">
                   {monitoringLastRun.monitoringResult.totalMonitored} pos ({monitoringLastRun.monitoringResult.healthyCount}H / {monitoringLastRun.monitoringResult.invalidatedCount}Inv)
                 </span>
               </div>
             )}
             <div className="flex justify-between">
               <span>Next Scheduled:</span>
-              <span className="text-[#9ca3af]">
+              <span className="text-[#848388]">
                 {status?.nextRun?.MONITORING ? new Date(status.nextRun.MONITORING).toLocaleTimeString() : 'Paused'}
               </span>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-[#28272e]/60 flex items-center justify-end">
+          <div className="pt-2 border-t border-[#28272e] flex items-center justify-end">
             <button
               onClick={() => handleAction('runNow', 'MONITORING')}
               disabled={actionLoading === 'runNow-MONITORING' || status?.activeJobs?.MONITORING}
-              className="px-3 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-[#00ff84]/20 text-[#00ff84] text-xs font-semibold transition disabled:opacity-50"
+              className="px-3 py-1 rounded bg-[#00ff84]/10 hover:bg-[#00ff84]/20 border border-[#00ff84]/20 text-[#00ff84] text-xs font-semibold transition disabled:opacity-50"
             >
               {actionLoading === 'runNow-MONITORING' ? 'Running...' : 'Run Monitoring Now'}
             </button>
@@ -284,16 +259,15 @@ export const AutomationControl: React.FC = () => {
       {/* Audit Trail Section */}
       {status?.auditTrail && status.auditTrail.length > 0 && (
         <div className="space-y-2 pt-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#848388] uppercase tracking-wider">
-            <Clock className="w-3.5 h-3.5" />
-            <span>Automation Audit Events</span>
+          <div className="text-xs font-bold text-[#848388] uppercase tracking-wider">
+            Automation Audit Events
           </div>
-          <div className="max-h-36 overflow-y-auto space-y-1 pr-1 font-mono text-[11px]">
+          <div className="max-h-36 overflow-y-auto space-y-1 pr-1 text-[11px]">
             {status.auditTrail.slice(0, 8).map((evt, idx) => (
-              <div key={idx} className="p-2 rounded bg-[#1f1e23] border border-[#28272e]/60 flex items-center justify-between text-[#9ca3af]">
+              <div key={idx} className="p-2 rounded bg-[#17161b] border border-[#28272e] flex items-center justify-between text-[#848388]">
                 <div className="flex items-center gap-2">
-                  <span className="text-[#2d3748]">{new Date(evt.timestamp).toLocaleTimeString()}</span>
-                  <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-[#9ca3af]">{evt.event}</span>
+                  <span className="text-[#848388] tabular-nums">{new Date(evt.timestamp).toLocaleTimeString()}</span>
+                  <span className="text-[10px] text-[#e2e8f0]">[{evt.event?.replace(/_/g, ' ')}]</span>
                   <span>{evt.message}</span>
                 </div>
               </div>

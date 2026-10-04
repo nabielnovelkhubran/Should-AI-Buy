@@ -61,7 +61,7 @@ export const AdversarialBattleCard: React.FC<AdversarialBattleCardProps> = ({
         <div className="flex items-center gap-2">
           <Scale className="w-3.5 h-3.5" style={{ color: '#848388' }} />
           <span className="terminal-label">
-            Adversarial Debate: <span className="mono-num" style={{ color: '#e2e8f0' }}>${symbol}</span>
+            Adversarial Debate: <span className="mono-num" style={{ color: '#ffffff' }}>${symbol}</span>
           </span>
           <span
             className="mono-num text-[10px] px-1.5 py-0.5 rounded"
@@ -93,10 +93,10 @@ export const AdversarialBattleCard: React.FC<AdversarialBattleCardProps> = ({
               Target: ${bullThesis.targetPrice?.toLocaleString('en-US')} · +{bullThesis.expectedR}R
             </span>
           </div>
-          <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(226,232,240,0.7)' }}>{bullThesis.summary}</p>
+          <p className="text-[11px] leading-relaxed" style={{ color: '#9ca3af' }}>{bullThesis.summary}</p>
           <div className="space-y-1">
             {bullThesis.catalysts.map((cat, i) => (
-              <div key={i} className="flex items-start gap-1.5 text-[11px]" style={{ color: 'rgba(226,232,240,0.6)' }}>
+              <div key={i} className="flex items-start gap-1.5 text-[11px]" style={{ color: '#848388' }}>
                 <span style={{ color: '#00ff84' }} className="mt-0.5 shrink-0">›</span>
                 <span>{cat}</span>
               </div>
@@ -121,10 +121,10 @@ export const AdversarialBattleCard: React.FC<AdversarialBattleCardProps> = ({
               Stop: ${redTeamAttack.invalidationPrice?.toLocaleString('en-US')}
             </span>
           </div>
-          <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(226,232,240,0.7)' }}>{redTeamAttack.summary}</p>
+          <p className="text-[11px] leading-relaxed" style={{ color: '#9ca3af' }}>{redTeamAttack.summary}</p>
           <div className="space-y-1">
             {redTeamAttack.vulnerabilities.map((v, i) => (
-              <div key={i} className="flex items-start gap-1.5 text-[11px]" style={{ color: 'rgba(226,232,240,0.6)' }}>
+              <div key={i} className="flex items-start gap-1.5 text-[11px]" style={{ color: '#848388' }}>
                 <span style={{ color: '#ff3b5c' }} className="mt-0.5 shrink-0">⚠</span>
                 <span>{v}</span>
               </div>
@@ -133,7 +133,7 @@ export const AdversarialBattleCard: React.FC<AdversarialBattleCardProps> = ({
           <div className="flex items-center justify-between pt-1.5" style={{ borderTop: '1px solid rgba(255,59,92,0.12)' }}>
             <span className="terminal-label">Risk Score</span>
             <span className="mono-num text-[10px] font-bold" style={{ color: '#ff3b5c' }}>{redTeamAttack.riskScore}/100</span>
-            <span className="terminal-label">Veto</span>
+            <span className="terminal-label">Risk Gate Veto</span>
             <span className="mono-num text-[10px] font-bold" style={{ color: redTeamAttack.vetoTriggered ? '#ff3b5c' : '#00ff84' }}>
               {redTeamAttack.vetoTriggered ? 'ACTIVE' : 'CLEARED'}
             </span>

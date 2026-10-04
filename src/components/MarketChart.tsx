@@ -32,7 +32,7 @@ export const MarketChart: React.FC<MarketChartProps> = ({ snapshot }) => {
       {/* Header & Timeframe selector */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <div className="text-xs text-[#848388] font-mono uppercase">Interactive Market History</div>
+          <div className="text-xs text-[#848388] uppercase">Interactive Market History</div>
           <div className="text-lg font-bold text-white flex items-center gap-2">
             {formatCurrency(snapshot.price, true)}
             <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
@@ -107,7 +107,7 @@ export const MarketChart: React.FC<MarketChartProps> = ({ snapshot }) => {
         </svg>
       </div>
 
-      <div className="flex items-center justify-between text-[11px] text-[#2d3748] font-mono mt-2 pt-2 border-t border-[#28272e]/80">
+      <div className="flex items-center justify-between text-[11px] text-[#848388] tabular-nums mt-2 pt-2 border-t border-[#28272e]/80">
         <span>Low: {formatCurrency(minPrice, true)}</span>
         <span>
           {interval} ({candles.length} bars{firstDate && lastDate ? ` • ${firstDate} - ${lastDate}` : ''}) · {currency}

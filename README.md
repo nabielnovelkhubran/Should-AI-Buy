@@ -1,196 +1,231 @@
-# Should-AI Buy? ⚡
+<p align="center">
+  <img src="public/logo.png" width="68" alt="Should-AI Buy Logo" />
+</p>
 
-> **Autonomous Multi-Agent Market Intelligence, Verifiable Thesis Deliberation & Paper-Trading Execution System Built Around Alpaca.**
+<h1 align="center">Should-AI Buy?</h1>
 
-[![Test Suite](https://img.shields.io/badge/Tests-891%2F891%20Passed-emerald.svg)](tests/run-tests.js)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict%20Typecheck%200%20Errors-blue.svg)](tsconfig.json)
-[![Environment](https://img.shields.io/badge/Trading%20Mode-PAPER%20ONLY-amber.svg)](src/lib/trading/alpaca-paper-adapter.ts)
-[![Broker](https://img.shields.io/badge/Broker-Alpaca%20Paper%20v2-green.svg)](https://paper-api.alpaca.markets/v2)
-[![Options](https://img.shields.io/badge/OCC%20Options-Greeks%20%26%20Delta%20Selector-purple.svg)](src/lib/options/)
+<p align="center">
+  <strong>Autonomous Multi-Agent Deliberation & Paper Execution Engine for Alpaca Markets</strong><br />
+  Continuous Market Scanning | Adversarial Thesis Audit | Non-Bypassable Risk Gates | Thesis Invalidation Daemon
+</p>
 
-> 📄 **Official Hackathon One-Page Write-Up:** Read [**WRITEUP.md**](WRITEUP.md) for our detailed technical specification on **AI Logic**, **Risk Gates**, and **Alpaca Infrastructure Implementat[...]
->
-> 🌐 **Live Web Terminal:** [http://15.134.249.209:3000](http://15.134.249.209:3000) *(1-Click Judge Access: `alpaca2026`)*
+<p align="center">
+  <a href="tests/run-tests.js"><img src="https://img.shields.io/badge/Tests-897%2F897%20Passed-00ff84?style=flat-square&labelColor=17161d" alt="Tests Passed" /></a>
+  <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict%200%20Errors-38bdf8?style=flat-square&labelColor=17161d" alt="TypeScript Strict" /></a>
+  <a href="src/lib/trading/alpaca-paper-adapter.ts"><img src="https://img.shields.io/badge/Execution-Paper%20Trading%20Only-f59e0b?style=flat-square&labelColor=17161d" alt="Paper Trading Only" /></a>
+  <a href="https://paper-api.alpaca.markets/v2"><img src="https://img.shields.io/badge/Broker-Alpaca%20v2-10b981?style=flat-square&labelColor=17161d" alt="Alpaca Broker API" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-848388?style=flat-square&labelColor=17161d" alt="License" /></a>
+</p>
 
----
-
-## 1. Executive Summary & Problem Statement
-
-Most AI trading bots suffer from three fatal design flaws:
-1. **Sycophantic Confirmation Bias:** Single-prompt LLMs rubber-stamp user queries and invent hallucinated rationales.
-2. **Opaque, Unverifiable Assertions:** Decisions are rendered as free-form prose without traceable evidence or claim provenance.
-3. **Open-Loop Execution Without Post-Trade Invalidation:** Once an order is filled, systems ignore whether the entry thesis remains intact, failing to protect capital when market conditions deter[...]
-
-**Should-AI Buy?** solves this through an end-to-end, multi-stage autonomous trading research pipeline. It continuously scans markets, deliberates through specialized agents, subjects investment t[...]
+<p align="center">
+  <strong>Live Deployment:</strong> <a href="http://15.134.249.209:3000">http://15.134.249.209:3000</a> &nbsp;|&nbsp; <strong>Judge / Demo Passphrase:</strong> <code>alpaca2026</code>
+</p>
 
 ---
 
-## 2. The 9-Stage Reasoning & Execution Lifecycle
+## Overview
+
+Most automated trading scripts execute open-loop: single-prompt LLMs generate unverified rationale, submit orders without hard risk boundaries, and abandon positions once filled.
+
+**Should-AI Buy?** implements a closed-loop, verifiable deliberation and execution architecture:
+
+1. **Continuous Discovery:** Scans 25+ liquid equity and crypto assets against volatility, momentum, and volume acceleration thresholds.
+2. **Adversarial Deliberation:** Coordinates quantitative, fundamental, and dedicated Red Team agents to challenge trade theses before execution.
+3. **Deterministic Risk Gates:** Non-bypassable TypeScript guards enforcing max 25% single-asset exposure, liquidity minimums, and spread ceilings.
+4. **Idempotent Paper Execution:** Submits paper orders via Alpaca REST v2 using deterministic deduplication keys.
+5. **Post-Trade Thesis Monitoring:** A background daemon tracks position health, recalculates thesis validity on every market tick, and triggers automated protective exits upon thesis breakdown.
+
+---
+
+## System Architecture
 
 ```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                               9-STAGE AUTONOMOUS REASONING & EXECUTION PIPELINE                 │
-��────────────────────────────────────────────────────────────────────────────────────────┘
-
-   [1] DISCOVERY SCANNED       ──> 25-asset continuous market scanner evaluates RVOL, momentum, RSI
-        │
-        ▼
-   [2] LIQUIDITY FILTER        ──> Asset-aware liquidity floors ($0k crypto sandbox, $500k equity)
-        │
-        ▼
-   [3] SPREAD GATE             ──> Bid/ask spread verification (<= 100 bps max spot spread)
-        │
-        ▼
-   [4] MULTI-FACTOR SCORE      ──> Momentum breakout, volume acceleration, regime compatibility
-        │
-        ▼
-   [5] AI COUNCIL              ──> Quant, Intel, Risk & Adversarial Red Team deliberates thesis
-        │
-        ▼
-   [6] AI BUY DECISION         ──> Schema-validated JSON verdict with mathematical target/stop prices
-        │
-        ▼
-   [7] RISK GATE               ──> Non-bypassable 25% single-asset cap, margin boundaries, and limits
-        │
-        ▼
-   [8] BROKER EXECUTION        ──> Idempotent paper order submitted to Alpaca Paper Trading API
-        │
-        ▼
-   [9] THESIS MONITORING       ──> Continuous position health daemon & protective exit execution
+  [ Market Data ] ──> Alpaca REST / WebSocket Stream
+         │
+         ▼
+┌─────────────────┐     Calculates RVOL, RSI-14, ATR, and momentum
+│ Discovery Engine│ ──> Applies liquidity ($500k equity) & spread (<=100 bps) filters
+└────────┬────────┘     Ranks top opportunities into the dispatch queue
+         │
+         ▼
+┌─────────────────┐     • Quant Agent: Technical momentum & volatility profile
+│  Multi-Agent    │     • Intel Agent: Alpaca News ingestion & sentiment scoring
+│  Council Hub    │     • Risk Agent: Order book depth & beta exposure
+└────────┬────────┘     • Red Team: Adversarial challenge & fatal flaw detection
+         │
+         ▼
+┌─────────────────┐     Hard rules outside LLM control:
+│ Deterministic   │ ──> • Max 25% single-position allocation
+│   Risk Gate     │     • Spread <= 1.00% | Min volume $500,000
+└────────┬────────┘     • Rejects any thesis with unresolved Red Team fatal flaws
+         │
+         ▼
+┌─────────────────┐     • Idempotency key derivation: EXEC-{asset}-{timestamp}
+│ Alpaca Broker   │ ──> • Dedicated Paper Trading route (Live endpoints fail-closed)
+│ Execution Layer │     • Position state authoritative from broker reconciliation
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐     • Evaluates price drawdown, spread widening & momentum loss
+│ Thesis Health   │ ──> • Health status: HEALTHY (>=70) | DEGRADED (40-69) | INVALIDATED (<40)
+│   Daemon Loop   │     • Automatic protective paper exit submission on invalidation
+└─────────────────┘
 ```
 
 ---
 
-## 3. Core Architectural Highlights
+## Core Components
 
-### Multi-Agent Council with Adversarial Red Team
-- **Discovery Agent:** Identifies structural catalysts, breakout patterns, and volume expansion.
-- **Quantitative Agent:** Analyzes RSI-14, volume acceleration, multi-timeframe candle structure, and realized volatility.
-- **Intelligence Agent:** Ingests live Alpaca News feeds, social sentiment, and institutional flow data.
-- **Risk Assessment Agent:** Evaluates bid/ask spreads, order book depth, liquidity capitalization, and market-wide beta.
-- **Adversarial Red Team:** Probes for counter-evidence, whale distribution, and thesis falsification (`INTACT`, `WEAKENED`, or `DISPROVED`).
-- **Synthesis & Decision Agent:** Synthesizes consensus verdicts (`BUY`, `HOLD`, `SELL`, `REJECT`) with explicit confidence scoring.
+### 1. Multi-Agent Council & Adversarial Audit
+The council operates across four specialized roles coordinated by a synthesis arbiter:
+- **Quantitative Agent:** Evaluates candle structure, RSI-14, volume expansion, and realized volatility.
+- **Market Intelligence Agent:** Ingests live Alpaca news items, cross-referencing news sentiment against technical volume spikes.
+- **Risk Assessment Agent:** Validates spot bid/ask spreads, market depth, and portfolio concentration limits.
+- **Adversarial Red Team:** Actively attempts to falsify the trade thesis. Targets liquidation levels, macro resistance clusters, and structural vulnerabilities.
 
-### Quantitative OCC Option Contract Selector
-- Formulates OCC standard symbology (`AAPL260918C00230000`).
-- Mathematical selection criteria evaluating **DTE (7–45 days)**, **Delta (0.30–0.70)**, **Implied Volatility**, and **Bid/Ask Spread**.
-- Integrates directional bias from multi-agent council consensus directly into option strike selection.
+### 2. Deterministic Risk Gate
+Trading decisions cannot bypass the risk layer. The risk gate executes strictly in deterministic code with zero LLM overrides:
+- **Exposure Boundary:** Restricts any single holding to $\le 25\%$ of total portfolio equity.
+- **Liquidity Floor:** Requires minimum 24h trading volume ($500k for equities, $0 minimum for crypto sandbox testing).
+- **Execution Spread Limit:** Enforces maximum allowable spot spread of 100 bps (1.00%).
+- **Hard Rejections:** Automatically blocks orders if the Red Team detects an unmitigated structural flaw.
 
-### First-Class Claims & Evidence Contradiction Graph
-- Every factual assertion is extracted into an immutable `Claim` entity.
-- Evidence items are linked bidirectionally with verification statuses (`VERIFIED`, `UNVERIFIED`, `STALE`, `MOCK`, `FAILED`).
-- Contradiction engine automatically cross-references opposing claims and highlights unresolved debates.
+### 3. Continuous Thesis Health Daemon
+Unlike static bot architectures that disconnect post-fill, positions are monitored continuously:
+- **Composite Health Score:** Computes weighted score across price momentum (40%), drawdown profile (30%), liquidity stability (15%), and volatility expansion (15%).
+- **State Machine:**
+  - `HEALTHY` ($\ge 70$): Position remains within thesis boundaries.
+  - `DEGRADED` ($40 \le \text{Score} < 70$): Alert logged to Command Lab Attention Center.
+  - `INVALIDATED` ($< 40$): Invalidation triggered; automated paper exit proposal generated and submitted via Alpaca API.
 
-### Deterministic Risk Gate & Position Sizing
-- **Non-Bypassable Safety Boundary:** Written in deterministic TypeScript without LLM overrides.
-- **Invariants Enforced:** Minimum opportunity score, maximum risk score, liquidity threshold, zero Red Team fatal flaws, and single-asset allocation caps ($\le 25\%$).
-
-### Alpaca Paper Trading & Broker Reconciliation
-- Dedicated connection to `https://paper-api.alpaca.markets/v2`.
-- Any attempt to reach live production endpoints triggers immediate, fail-closed rejection.
-- Authoritative position holdings are derived exclusively from confirmed broker fills.
-- Idempotency keys (`EXEC-...` and `MONITOR-EXIT-...`) protect against duplicate executions.
-
-### Continuous Position Monitoring & Protective Invalidation
-- Held positions are tracked against their original entry thesis.
-- Continuous scoring evaluates price drawdown, momentum reversal, liquidity drop, and composite risk surge.
-- Invalidation triggers automated protective paper exits derived strictly from broker-confirmed quantities.
+### 4. Quantitative OCC Options Engine
+Formulates standard Options Clearing Corporation (OCC) option contract symbology (`AAPL260918C00230000`):
+- Filters candidate contracts by Days to Expiration (7–45 DTE) and Delta (0.30–0.70).
+- Calculates Implied Volatility and directional bias derived from council deliberation.
 
 ---
 
-## 4. Automated Test Suite (891/891 Passing)
+## Verification & Test Suite
 
-The test suite enforces complete domain invariants across 52 verification suites:
-
-| Suite | Focus Area | Status |
-|---|---|:---:|
-| **1–8** | Quantitative Math, Technical Indicators, Council Agents, Risk Gate | ✅ Passed |
-| **9–12** | Red Team Challenge, Single Snapshot Invariant, End-to-End Council | ✅ Passed |
-| **13–15** | Claim Domain Model, Evidence Provenance, Contradiction Engine | ✅ Passed |
-| **16–17** | Alpaca News Intelligence & Hybrid Fallback Router | ✅ Passed |
-| **18–19** | Autonomous Scanner, Candidate Queue, Sequential Dispatcher | ✅ Passed |
-| **20–21** | Alpaca Paper Trading Execution & Paper Portfolio Reconciliation | ✅ Passed |
-| **22** | Thesis Health Scoring & Protective Invalidation Engine | ✅ Passed |
-| **23** | Scheduled Automation Daemon, Concurrency Locks & Audit Trail | ✅ Passed |
-| **24** | Command Center UX, Attention Center Alerts & 8-Stage Pipeline | ✅ Passed |
-| **25** | Error Containment, System Health, API Hardening & Demo Fixtures | ✅ Passed |
-| **26–31** | Autonomous Engine Pipeline, Idempotency, Failure Injection & Circuit Breakers | ✅ Passed |
-| **32–40** | Live Alpha Observability, Durable Telemetry Journal, Lineage Validation | ✅ Passed |
-| **41–45** | Crypto Liquidity Normalization, Broker Diagnostics, Featherless AI Auditor | ✅ Passed |
-| **46–52** | OCC Option Contract Selector, Dynamic Risk Ratios & Real-Time Settlement | ✅ Passed |
-
----
-
-## 5. System Infrastructure & Execution Topology
-
-### Observability & Control Interface
-- **Control Plane:** Next.js 14 (Utilized strictly as an asynchronous telemetry dashboard, event-logging terminal, and attention-center UI layer).
-- **Type Safety Enforcer:** TypeScript 5.0 (Strict mode, zero type errors, enforcing absolute domain contract compliance across all execution data structures).
-- **Layout Engine:** Tailwind CSS / Lucide Icons.
-
-### Algorithmic Trading Core & Routing Engine
-- **Broker Interface:** Alpaca Markets REST API v2 & WebSocket Data Stream (Integrated via strict state-isolated network requests).
-- **Execution Airlock:** Fully decoupled, zero-dependency order compilation pipeline with deterministic state-drift validation gates.
-- **Inference Core:** Google Gemini API / Featherless AI (`Qwen/Qwen3.8-27B-Instruct`) running specialized multi-brain text triage, completely sandboxed from direct tool-execution permissions.
-
----
-
-## 6. Getting Started
-
-### Prerequisites
-- Node.js 18.x or higher
-- npm 9.x or higher
-- Alpaca Paper Trading account API keys ([Sign up for free](https://app.alpaca.markets/signup))
-
-### 1. Clone & Install
-```bash
-git clone https://github.com/your-username/should-ai-buy.git
-cd should-ai-buy
-npm install
-```
-
-### 2. Environment Configuration
-Create a `.env.local` file in the root directory:
-
-```bash
-# Alpaca Paper Trading API Credentials
-ALPACA_API_KEY=your_alpaca_paper_api_key
-ALPACA_SECRET_KEY=your_alpaca_paper_secret_key
-ALPACA_PAPER_BASE_URL=https://paper-api.alpaca.markets/v2
-
-# Market Data Configuration
-ALPACA_DATA_BASE_URL=https://data.alpaca.markets/v2
-```
-
-### 3. Run Automated Tests
-Execute the 891-test verification suite:
+The codebase maintains 53 test suites containing 897 automated tests. All tests execute deterministically without external network dependency.
 
 ```bash
 node tests/run-tests.js
 ```
 
-### 4. Run TypeScript Verification
-```bash
-npx tsc --noEmit
+```text
+========================================
+TEST SUMMARY: 897/897 PASSED (0 FAILED)
+========================================
+- Invariant & Mathematical Soundness: 100%
+- State Isolation & Safety Bounds:    100%
+- Broker Adapter & Order Idempotency: 100%
+- Concurrency & Queue Determinism:    100%
+- Outbound Webhook Alert Dispatch:    100%
 ```
 
-### 5. Start Development Server
+### Verification Matrix
+
+| Suite Range | Scope | Enforcement |
+|:---|:---|:---:|
+| **Suites 01–08** | Technical Indicators & Math Models | Verified |
+| **Suites 09–12** | Council Deliberation & Red Team Invariants | Verified |
+| **Suites 13–15** | Claim Lineage & Contradiction Graph | Verified |
+| **Suites 16–17** | Market Intelligence & Hybrid Fallback Engine | Verified |
+| **Suites 18–19** | Discovery Scanner, Queue & Dispatcher | Verified |
+| **Suites 20–21** | Alpaca Paper Broker & Ledger Reconciliation | Verified |
+| **Suites 22–23** | Position Health Daemon & Invalidation Exits | Verified |
+| **Suites 24–31** | Circuit Breakers, Error Isolation & Idempotency | Verified |
+| **Suites 32–40** | Observability, Telemetry Journal & State Recovery | Verified |
+| **Suites 41–52** | Options Contract Selector & Settlement Verification | Verified |
+| **Suite 53** | Outbound Alert Webhook Dispatcher (Discord & Telegram) | Verified |
+
+---
+
+## Production Invariants & Security Controls
+
+- **Paper Trading Isolation:** Network adapters target `https://paper-api.alpaca.markets/v2`. Any outbound request to live broker endpoints triggers immediate fail-closed termination.
+- **Deterministic State:** Asset sorting, score calculation, and candidate ranking are purely deterministic without stochastic RNG calls.
+- **Zero Hallucinated Fills:** Position quantities and cash balances derive strictly from authenticated broker responses. If the broker is unreachable, error states isolate gracefully without synthetic state insertion.
+- **Credential Hygiene:** API keys and passphrases are restricted to server-side environments and never leak into client telemetry or DOM attributes.
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Node.js 18.x or higher
+- npm 9.x or higher
+- Alpaca Paper Trading Account ([Alpaca Signup](https://app.alpaca.markets/signup))
+
+### 1. Installation
+```bash
+git clone https://github.com/nabielnovelkhubran/Should-AI-Buy.git
+cd Should-AI-Buy
+npm install
+```
+
+### 2. Environment Configuration
+Create a `.env.local` file in the project root:
+
+```ini
+# Alpaca Paper Trading Credentials
+ALPACA_API_KEY=your_alpaca_key
+ALPACA_SECRET_KEY=your_alpaca_secret
+ALPACA_PAPER_BASE_URL=https://paper-api.alpaca.markets/v2
+ALPACA_DATA_BASE_URL=https://data.alpaca.markets/v2
+
+# Optional LLM Inference Keys (Falls back to deterministic mocked council if omitted)
+GEMINI_API_KEY=your_gemini_api_key
+FEATHERLESS_API_KEY=your_featherless_api_key
+
+# Optional Outbound Alert Webhooks (Discord & Telegram)
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+TELEGRAM_BOT_TOKEN=123456:ABC-DEF1234ghIkl...
+TELEGRAM_CHAT_ID=-1001234567890
+```
+
+### 3. Verify System Invariants
+```bash
+# Verify TypeScript strict typecheck
+npx tsc --noEmit
+
+# Execute complete test suite
+node tests/run-tests.js
+```
+
+### 4. Launch Application
 ```bash
 npm run dev
 ```
-Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. Use passphrase `alpaca2026` for instant operator access.
 
 ---
 
-## 7. Safety, Determinism & Compliance
+## Technology Stack
 
-- **PAPER TRADING ONLY:** The application enforces dedicated paper trading boundaries. Live broker endpoints are blocked by architectural fail-closed safeguards.
-- **ZERO STOCHASTIC LOGIC:** All domain calculations, candidate rankings, thesis health scores, and risk gates are 100% deterministic with zero `Math.random()`.
-- **NO FABRICATED DATA:** When upstream services fail, errors are recorded cleanly. The system never fabricates broker fills, artificial account balances, or phantom positions.
-- **SERVER-SIDE VALIDATION:** Client user interfaces cannot override order quantities, bypass risk rules, or force invalidation overrides.
+- **Application Framework:** Next.js 14 (App Router)
+- **Language & Type System:** TypeScript 5 (Strict Mode, 0 compile errors)
+- **UI Architecture:** Tailwind CSS, Custom High-Density Design System
+- **Broker Interface:** Alpaca Markets REST API v2 & WebSocket Stream
+- **Testing Runtime:** Native Node.js Test Harness with Zero External Mocking Dependencies
 
 ---
 
-## 8. License
+## Documentation Index
 
-This project is licensed under the Apache 2.0 License. Built for the Alpaca AI Trading Agents Hackathon. 
+Comprehensive technical specifications and system designs are maintained in the [`docs/`](docs/) directory:
+
+- [`docs/PRD.md`](docs/PRD.md) — Product Requirements Document & Operational Invariants
+- [`docs/TECHNICAL_DESIGN.md`](docs/TECHNICAL_DESIGN.md) — Multi-Agent Consensus & Deliberation Architecture
+- [`docs/WRITEUP.md`](docs/WRITEUP.md) — Submission Architecture Specification
+- [`docs/DESIGN.md`](docs/DESIGN.md) — Terminal UI & High-Density Design System Tokens
+- [`docs/PRODUCT.md`](docs/PRODUCT.md) — Positioning, User Personas, & Strategic Roadmap
+- [`docs/UX_RESEARCH.md`](docs/UX_RESEARCH.md) — Cognitive Friction Audit & Usability Benchmarks
+
+---
+
+## License
+
+This software is released under the Apache 2.0 License. Built for the Alpaca AI Trading Hackathon.

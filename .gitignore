@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 .pnpm-store/
 
@@ -71,4 +71,10 @@ generated/
 
 # Runtime Data Journals
 data/
+
+# Scratch & ephemeral agent files
+scratch/
+.impeccable/
+.codex/
+.agents/skills/impeccable/
 

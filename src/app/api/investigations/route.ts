@@ -3,6 +3,7 @@ import { parseCommand } from '@/lib/command';
 import { orchestrateCouncilInvestigation } from '@/lib/council';
 import { storage } from '@/lib/storage';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { webhookDispatcher } from '@/lib/notifications/webhook-dispatcher';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +43,25 @@ export async function POST(req: NextRequest) {
     }
 
     const investigation = await orchestrateCouncilInvestigation(commandText, parsed.asset);
+
+    // Fire-and-forget outbound webhook notification (Discord & Telegram)
+    if (investigation?.decision) {
+      const conclusion = investigation.decision.conclusion;
+      webhookDispatcher.dispatch({
+        type: 'COUNCIL_VERDICT',
+        asset: investigation.asset,
+        title: `${conclusion} Verdict: ${investigation.asset.toUpperCase()}`,
+        description: investigation.decision.rationale || `Autonomous council rendered ${conclusion} on ${investigation.asset}.`,
+        severity: conclusion === 'BUY' ? 'SUCCESS' : conclusion === 'SELL' ? 'CRITICAL' : 'WARNING',
+        metrics: {
+          score: investigation.decision.opportunityScore,
+          confidence: investigation.decision.confidence,
+          targetPrice: investigation.decision.thesis?.entryPrice,
+          riskScore: investigation.decision.riskScore,
+        }
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ success: true, investigation });
   } catch (error: any) {
     return NextResponse.json(

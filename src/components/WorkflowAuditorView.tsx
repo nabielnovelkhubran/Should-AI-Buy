@@ -1,22 +1,5 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import {
-  ShieldAlert,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  Cpu,
-  RefreshCw,
-  Search,
-  Activity,
-  Layers,
-  FileText,
-  Sliders,
-  ExternalLink,
-  ChevronRight,
-  ArrowRight
-} from 'lucide-react';
 import { WorkflowAuditResult, WorkflowAuditFinding, WorkflowAuditStageCheck } from '../lib/audit/types';
 import { AlphaWaterfallChart } from './AlphaWaterfallChart';
 
@@ -31,11 +14,11 @@ export const WorkflowAuditorView: React.FC = () => {
     completedTrades: number;
     currentEquity: number;
   }>({
-    totalPnL: 3132.28,
-    totalR: 3.25,
-    winRate: 69.2,
-    completedTrades: 8,
-    currentEquity: 103132.28
+    totalPnL: 0,
+    totalR: 0,
+    winRate: 0,
+    completedTrades: 0,
+    currentEquity: 100000
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAuditing, setIsAuditing] = useState<boolean>(false);
@@ -125,110 +108,159 @@ export const WorkflowAuditorView: React.FC = () => {
   const getVerdictBadge = (verdict: string) => {
     switch (verdict) {
       case 'PASS':
-        return <span className="px-3 py-1 rounded-full bg-[#00ff84]/8 text-[#00ff84] border border-[#00ff84]/20 text-xs font-bold flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> PASS</span>;
+        return <span className="text-[#00ff84] text-xs font-bold font-sans">✓ PASS</span>;
       case 'WARN':
-        return <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5" /> WARN</span>;
+        return <span className="text-amber-400 text-xs font-bold font-sans">▲ WARN</span>;
       case 'ANOMALY':
-        return <span className="px-3 py-1 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-bold flex items-center gap-1.5"><ShieldAlert className="w-3.5 h-3.5" /> ANOMALY</span>;
+        return <span className="text-orange-400 text-xs font-bold font-sans">⚠ ANOMALY</span>;
       case 'ERROR':
-        return <span className="px-3 py-1 rounded-full bg-[#ff3b5c]/8 text-[#ff3b5c] border border-rose-500/30 text-xs font-bold flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5" /> ERROR</span>;
+        return <span className="text-[#ff3b5c] text-xs font-bold font-sans">✕ ERROR</span>;
       default:
-        return <span className="px-3 py-1 rounded-full bg-slate-800 text-[#848388] border border-[#34333b] text-xs font-bold">{verdict}</span>;
+        return <span className="text-[#848388] text-xs font-bold font-sans">{verdict}</span>;
     }
   };
 
   const getStageStatusIcon = (status: string) => {
     switch (status) {
       case 'PASS':
-        return <span className="text-[#00ff84] font-bold text-xs">✓ PASS</span>;
+        return <span className="text-[#00ff84] font-bold text-xs font-sans">✓ PASS</span>;
       case 'WARN':
-        return <span className="text-amber-400 font-bold text-xs">▲ WARN</span>;
+        return <span className="text-amber-400 font-bold text-xs font-sans">▲ WARN</span>;
       case 'ANOMALY':
-        return <span className="text-orange-400 font-bold text-xs">⚠ ANOMALY</span>;
+        return <span className="text-orange-400 font-bold text-xs font-sans">⚠ ANOMALY</span>;
       case 'ERROR':
-        return <span className="text-[#ff3b5c] font-bold text-xs">✕ ERROR</span>;
+        return <span className="text-[#ff3b5c] font-bold text-xs font-sans">✕ ERROR</span>;
       case 'NOT_REACHED':
       default:
-        return <span className="text-[#2d3748] font-semibold text-xs">— NOT REACHED</span>;
+        return <span className="text-[#848388] font-semibold text-xs font-sans">— NOT REACHED</span>;
     }
   };
 
   const getSeverityBadge = (sev: string) => {
     switch (sev) {
       case 'CRITICAL':
-        return <span className="px-2 py-0.5 rounded bg-rose-500/20 text-[#ff3b5c] border border-rose-500/40 text-[10px] font-bold">CRITICAL</span>;
+        return <span className="text-[#ff3b5c] text-[10px] font-bold font-sans uppercase">[CRITICAL]</span>;
       case 'HIGH':
-        return <span className="px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/40 text-[10px] font-bold">HIGH</span>;
+        return <span className="text-orange-400 text-[10px] font-bold font-sans uppercase">[HIGH]</span>;
       case 'MEDIUM':
-        return <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold">MEDIUM</span>;
+        return <span className="text-amber-400 text-[10px] font-bold font-sans uppercase">[MEDIUM]</span>;
       case 'LOW':
-        return <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40 text-[10px] font-bold">LOW</span>;
+        return <span className="text-[#848388] text-[10px] font-bold font-sans uppercase">[LOW]</span>;
       default:
-        return <span className="px-2 py-0.5 rounded bg-slate-700 text-[#9ca3af] text-[10px] font-semibold">INFO</span>;
+        return <span className="text-[#848388] text-[10px] font-semibold font-sans uppercase">[INFO]</span>;
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-2">
+    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-4">
       
-      {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 bg-[#1f1e23] p-5 rounded-lg border border-[#28272e] backdrop-blur">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-              <Search className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                Independent AI Workflow Auditor
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-[#00ff84] border border-cyan-500/30 font-semibold">
-                  Featherless Forensic Layer
-                </span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#00ff84]/10 text-[#00ff84] border border-[#00ff84]/30 font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00ff84] animate-pulse" />
-                  LIVE RUNTIME SYNCED
-                </span>
+      {/* Header & Consolidated Action Ribbon */}
+      <div className="bg-[#1f1e23] p-4 rounded-lg border border-[#28272e] space-y-3">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider font-phantom">
+                Strategy Forensic Auditor
               </h2>
-              <p className="text-xs text-[#848388]">
-                Read-only forensic verification of deterministic rules, evidence sufficiency, and broker reconciliation.
-              </p>
+              <span className="text-[10px] font-sans px-2 py-0.5 rounded bg-[#17161b] border border-[#28272e] text-[#00ff84]">
+                Deterministic &amp; LLM Strategy Auditor
+              </span>
             </div>
+            <p className="text-[11px] text-[#848388] mt-1">
+              Deterministic rule evaluation, evidence sufficiency audit, and mark-to-market trade reconciliation.
+            </p>
+          </div>
+
+          {/* Mode Switcher + Refresh */}
+          <div className="flex items-center gap-2">
+            <div className="bg-[#17161b] p-0.5 rounded-lg border border-[#28272e] flex items-center">
+              <button
+                onClick={() => setSelectedMode('REAL_PAPER')}
+                className={`px-3 py-1.5 rounded text-[11px] font-bold transition cursor-pointer ${
+                  selectedMode === 'REAL_PAPER'
+                    ? 'bg-[#00ff84] text-black shadow-sm'
+                    : 'text-[#848388] hover:text-white'
+                }`}
+              >
+                Real Paper Cycle
+              </button>
+              <button
+                onClick={() => setSelectedMode('SIMULATION')}
+                className={`px-3 py-1.5 rounded text-[11px] font-bold transition cursor-pointer ${
+                  selectedMode === 'SIMULATION'
+                    ? 'bg-[#00ff84] text-black shadow-sm'
+                    : 'text-[#848388] hover:text-white'
+                }`}
+              >
+                Simulation Lab
+              </button>
+            </div>
+
+            <button
+              onClick={() => fetchAudits(false)}
+              disabled={isLoading}
+              className="px-2.5 py-1.5 bg-[#17161b] hover:bg-[#28272e] text-[#848388] hover:text-white rounded-lg text-xs transition border border-[#28272e] cursor-pointer"
+              title="Refresh Audits"
+            >
+              {isLoading ? <span className="inline-block animate-spin">↻</span> : '↻'}
+            </button>
           </div>
         </div>
 
-        {/* Mode Toggle & Refresh */}
-        <div className="flex items-center gap-2">
-          <div className="bg-[#1f1e23] p-1 rounded-lg border border-[#28272e] flex items-center gap-1">
-            <button
-              onClick={() => setSelectedMode('REAL_PAPER')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                selectedMode === 'REAL_PAPER'
-                  ? 'bg-cyan-600 text-white shadow-sm'
-                  : 'text-[#848388] hover:text-white'
-              }`}
-            >
-              REAL PAPER AUDIT
-            </button>
-            <button
-              onClick={() => setSelectedMode('SIMULATION')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                selectedMode === 'SIMULATION'
-                  ? 'bg-[#00ff84] text-black font-bold shadow-sm'
-                  : 'text-[#848388] hover:text-white'
-              }`}
-            >
-              SIMULATION AUDIT
-            </button>
-          </div>
+        {/* Action Trigger Strip */}
+        <div className="pt-2 border-t border-[#28272e] flex flex-wrap items-center justify-between gap-3">
+          {selectedMode === 'REAL_PAPER' ? (
+            <div className="flex items-center gap-2 text-xs text-[#848388]">
+              <span>Audit Target:</span>
+              <span className="font-sans text-white font-semibold">Latest Autonomous Cycle Execution</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-[#848388]">Scenario:</span>
+              {[
+                { id: 'SUCCESSFUL_BUY', label: 'BUY (+2.5R)' },
+                { id: 'BUY_REJECTED', label: 'REJECTED (Risk Gate)' },
+                { id: 'PROFIT_EXIT', label: 'PROFIT EXIT (+5%)' },
+                { id: 'PROTECTIVE_EXIT', label: 'PROTECTIVE EXIT (-6%)' },
+              ].map((sc) => (
+                <button
+                  key={sc.id}
+                  onClick={() => setSelectedScenario(sc.id)}
+                  className={`px-2.5 py-1 rounded text-[11px] font-sans font-semibold transition cursor-pointer ${
+                    selectedScenario === sc.id
+                      ? 'bg-[#121117] text-[#00ff84] border border-[#00ff84]/40'
+                      : 'bg-[#17161b] text-[#848388] border border-[#28272e] hover:text-white'
+                  }`}
+                >
+                  {sc.label}
+                </button>
+              ))}
+            </div>
+          )}
 
-          <button
-            onClick={() => fetchAudits(false)}
-            disabled={isLoading}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-[#9ca3af] rounded-lg transition border border-[#34333b]"
-            title="Refresh Audits"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#00ff84]' : ''}`} />
-          </button>
+          <div>
+            {selectedMode === 'REAL_PAPER' ? (
+              <button
+                onClick={handleAuditRealCycle}
+                disabled={isAuditing}
+                className="px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                style={{ background: '#00ff84', color: '#121117' }}
+              >
+                {isAuditing && <span className="inline-block animate-spin">↻</span>}
+                Audit Latest Cycle →
+              </button>
+            ) : (
+              <button
+                onClick={handleAuditSimulation}
+                disabled={isAuditing}
+                className="px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                style={{ background: '#00ff84', color: '#121117' }}
+              >
+                {isAuditing && <span className="inline-block animate-spin">↻</span>}
+                Run Simulation Audit →
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -236,10 +268,10 @@ export const WorkflowAuditorView: React.FC = () => {
       {errorMessage && (
         <div className="p-4 rounded-lg bg-[#ff3b5c]/8 border border-[#ff3b5c]/20 text-[#ff3b5c] text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-[#ff3b5c] shrink-0" />
+            <span>⚠</span>
             <span>{errorMessage}</span>
           </div>
-          <button onClick={() => setErrorMessage(null)} className="text-[#ff3b5c] hover:text-white font-bold">✕</button>
+          <button onClick={() => setErrorMessage(null)} className="text-[#ff3b5c] hover:text-white font-bold cursor-pointer">✕</button>
         </div>
       )}
 
@@ -252,67 +284,24 @@ export const WorkflowAuditorView: React.FC = () => {
         equity={liveMetrics.currentEquity}
       />
 
-      {/* Quick Action Bar */}
-      <div className="bg-[#1f1e23] p-4 rounded-lg border border-[#28272e] flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs text-[#848388]">
-          <Activity className="w-4 h-4 text-[#00ff84]" />
-          <span>Audit Trigger:</span>
-          <span className="text-slate-200 font-semibold">{selectedMode === 'REAL_PAPER' ? 'Real Autonomous Cycle' : 'Simulation Lab Scenario'}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {selectedMode === 'REAL_PAPER' ? (
-            <button
-              onClick={handleAuditRealCycle}
-              disabled={isAuditing}
-              className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold transition shadow-md flex items-center gap-1.5 disabled:opacity-50"
-            >
-              {isAuditing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-              Audit Latest Real Cycle
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <select
-                value={selectedScenario}
-                onChange={e => setSelectedScenario(e.target.value)}
-                className="bg-[#1f1e23] border border-[#28272e] text-slate-200 text-xs rounded-lg px-3 py-2 outline-none"
-              >
-                <option value="SUCCESSFUL_BUY">Scenario: SUCCESSFUL_BUY</option>
-                <option value="BUY_REJECTED">Scenario: BUY_REJECTED</option>
-                <option value="PROFIT_EXIT">Scenario: PROFIT_EXIT (+5%)</option>
-                <option value="PROTECTIVE_EXIT">Scenario: PROTECTIVE_EXIT (-6%)</option>
-              </select>
-              <button
-                onClick={handleAuditSimulation}
-                disabled={isAuditing}
-                className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition shadow-md flex items-center gap-1.5 disabled:opacity-50"
-              >
-                {isAuditing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-                Audit Simulation Run
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Latest Audit Overview Card */}
       {latestAudit ? (
-        <div className="bg-[#0b0f19] rounded-lg border border-[#28272e] p-6 space-y-2 shadow-xl">
+        <div className="bg-[#1f1e23] rounded-lg border border-[#28272e] p-6 space-y-4">
           
           {/* Top Banner */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 pb-5 border-b border-[#28272e]/80">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-[#28272e]">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#848388]">Latest Forensic Audit</span>
-                <span className="text-slate-600">•</span>
-                <span className="text-xs font-mono text-[#00ff84] font-semibold">{latestAudit.auditId}</span>
+                <span className="text-[#848388]">•</span>
+                <span className="text-xs font-sans text-[#00ff84] font-semibold">{latestAudit.auditId}</span>
               </div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <span>Decision:</span>
-                <span className={`px-2.5 py-0.5 rounded-lg text-xs font-extrabold ${
-                  latestAudit.systemDecision === 'BUY' ? 'bg-[#00ff84]/10 text-[#00ff84] border border-[#00ff84]/20'
-                  : latestAudit.systemDecision === 'HOLD' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'bg-slate-800 text-[#9ca3af]'
+                <span className={`text-xs font-extrabold uppercase ${
+                  latestAudit.systemDecision === 'BUY' ? 'text-[#00ff84]'
+                  : latestAudit.systemDecision === 'HOLD' ? 'text-amber-400'
+                  : 'text-[#848388]'
                 }`}>
                   {latestAudit.systemDecision}
                 </span>
@@ -327,63 +316,63 @@ export const WorkflowAuditorView: React.FC = () => {
               </div>
               <div className="text-right pl-3 border-l border-[#28272e]">
                 <div className="text-[10px] uppercase font-bold text-[#848388]">Confidence</div>
-                <div className="text-sm font-extrabold text-white">{latestAudit.confidence}%</div>
+                <div className="text-sm font-extrabold text-white font-sans tabular-nums">{latestAudit.confidence}%</div>
               </div>
               <div className="text-right pl-3 border-l border-[#28272e]">
                 <div className="text-[10px] uppercase font-bold text-[#848388]">Latency</div>
-                <div className="text-sm font-mono text-[#9ca3af]">{latestAudit.latencyMs}ms</div>
+                <div className="text-sm font-sans tabular-nums text-[#848388]">{latestAudit.latencyMs}ms</div>
               </div>
             </div>
           </div>
 
           {/* Model & Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e]/80 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#848388] flex items-center gap-1">
-                <Cpu className="w-3 h-3 text-[#00ff84]" /> Reviewer Model
+            <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#848388]">
+                Reviewer Model
               </span>
-              <div className="text-xs font-semibold text-slate-200">
+              <div className="text-xs font-semibold text-white">
                 {latestAudit.modelMetadata.provider} ({latestAudit.modelMetadata.model})
               </div>
             </div>
 
-            <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e]/80 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#848388] flex items-center gap-1">
-                <Layers className="w-3 h-3 text-[#848388]" /> Correlation ID
+            <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#848388]">
+                Correlation ID
               </span>
-              <div className="text-xs font-mono text-slate-200 truncate" title={latestAudit.correlationId}>
+              <div className="text-xs font-sans text-white truncate" title={latestAudit.correlationId}>
                 {latestAudit.correlationId}
               </div>
             </div>
 
-            <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e]/80 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#848388] flex items-center gap-1">
-                <Clock className="w-3 h-3 text-amber-400" /> Audit Timestamp
+            <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#848388]">
+                Audit Timestamp
               </span>
-              <div className="text-xs font-mono text-[#9ca3af]">
+              <div className="text-xs font-sans tabular-nums text-[#848388]">
                 {new Date(latestAudit.timestamp).toLocaleTimeString()}
               </div>
             </div>
           </div>
 
           {/* Summary Box */}
-          <div className="p-4 rounded-lg bg-cyan-950/20 border border-cyan-800/40 text-xs text-cyan-200 leading-relaxed">
+          <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] text-xs text-white leading-relaxed">
             <span className="font-bold text-[#00ff84] mr-2">Audit Rationale:</span>
             {latestAudit.summary}
           </div>
 
           {/* 9-Stage Pipeline Audit Checklist */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388] flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-[#00ff84]" /> 9-Stage Pipeline Verification
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388]">
+              9-Stage Pipeline Verification
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
               {latestAudit.checkedStages.map((stageItem, idx) => (
                 <div
                   key={idx}
-                  className="p-3 rounded-lg bg-[#1f1e23] border border-[#28272e] flex flex-col justify-between gap-2"
+                  className="p-3 rounded-lg bg-[#17161b] border border-[#28272e] flex flex-col justify-between gap-2"
                 >
-                  <span className="text-[11px] font-bold text-[#9ca3af]">{stageItem.stage}</span>
+                  <span className="text-[11px] font-bold text-white">{stageItem.stage}</span>
                   <div>{getStageStatusIcon(stageItem.status)}</div>
                   {stageItem.details && (
                     <span className="text-[10px] text-[#848388] truncate" title={stageItem.details}>
@@ -395,15 +384,87 @@ export const WorkflowAuditorView: React.FC = () => {
             </div>
           </div>
 
+          {/* Broker Fill Reconciliation Panel [P0] */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388]">
+                Broker Execution &amp; Fill Reconciliation
+              </h4>
+              {latestAudit.brokerReconciliation ? (
+                <span
+                  className="text-xs font-bold font-sans px-2 py-0.5 rounded"
+                  style={{
+                    color: latestAudit.brokerReconciliation.reconciled ? '#00ff84' : '#ff3b5c',
+                    background: latestAudit.brokerReconciliation.reconciled ? 'rgba(0, 255, 132, 0.1)' : 'rgba(255, 59, 92, 0.1)',
+                    border: `1px solid ${latestAudit.brokerReconciliation.reconciled ? 'rgba(0, 255, 132, 0.25)' : 'rgba(255, 59, 92, 0.25)'}`,
+                  }}
+                >
+                  {latestAudit.brokerReconciliation.reconciled ? '✓ RECONCILED' : '✕ DISCREPANCY'}
+                </span>
+              ) : (
+                <span className="text-xs font-sans text-[#848388]">N/A</span>
+              )}
+            </div>
+
+            {latestAudit.brokerReconciliation ? (
+              <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-2.5 rounded bg-[#121117] border border-[#28272e] space-y-1">
+                    <span className="terminal-label">Reconciliation Class</span>
+                    <div className="mono-num text-xs font-bold text-white">
+                      {latestAudit.brokerReconciliation.classification}
+                    </div>
+                  </div>
+                  <div className="p-2.5 rounded bg-[#121117] border border-[#28272e] space-y-1">
+                    <span className="terminal-label">Council Intent</span>
+                    <div className="mono-num text-xs font-bold text-[#00ff84]">
+                      {latestAudit.brokerReconciliation.orderIntentSymbol || latestAudit.symbol || '—'}{' '}
+                      <span className="text-[#848388] text-[10px]">
+                        ({latestAudit.brokerReconciliation.orderIntentQty != null ? `${latestAudit.brokerReconciliation.orderIntentQty} qty` : '—'})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-2.5 rounded bg-[#121117] border border-[#28272e] space-y-1">
+                    <span className="terminal-label">Broker Request</span>
+                    <div className="mono-num text-xs font-bold text-white">
+                      {latestAudit.brokerReconciliation.brokerRequestSymbol || latestAudit.symbol || '—'}{' '}
+                      <span className="text-[#848388] text-[10px]">
+                        ({latestAudit.brokerReconciliation.brokerRequestQty != null ? `${latestAudit.brokerReconciliation.brokerRequestQty} qty` : '—'})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-2.5 rounded bg-[#121117] border border-[#28272e] space-y-1">
+                    <span className="terminal-label">Broker API Status</span>
+                    <div className="mono-num text-xs font-bold text-amber-400 uppercase">
+                      {latestAudit.brokerReconciliation.brokerStatus || 'NONE'}
+                    </div>
+                  </div>
+                </div>
+
+                {latestAudit.brokerReconciliation.details && (
+                  <div className="p-2.5 rounded bg-[#121117] border border-[#28272e] text-[11px] font-sans text-[#848388] leading-relaxed">
+                    <span className="text-[#00ff84] font-bold mr-1.5">› Audit Detail:</span>
+                    {latestAudit.brokerReconciliation.details}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] text-xs text-[#848388] flex items-center gap-2">
+                <span className="text-[#848388]">•</span>
+                <span>No broker transmission in this cycle (cycle concluded prior to broker execution or held in queue).</span>
+              </div>
+            )}
+          </div>
+
           {/* Rule Checks Table */}
           {latestAudit.ruleChecks && latestAudit.ruleChecks.length > 0 && (
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388] flex items-center gap-1.5">
-                <Sliders className="w-4 h-4 text-amber-400" /> Deterministic Rule Evaluation
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388]">
+                Deterministic Rule Evaluation
               </h4>
               <div className="overflow-x-auto rounded-lg border border-[#28272e]">
-                <table className="w-full text-left text-xs text-[#9ca3af]">
-                  <thead className="bg-[#1f1e23] text-[10px] uppercase font-bold text-[#848388] border-b border-[#28272e]">
+                <table className="w-full text-left text-xs text-[#848388]">
+                  <thead className="bg-[#17161b] text-[10px] uppercase font-bold text-[#848388] border-b border-[#28272e]">
                     <tr>
                       <th className="p-3">Rule Name</th>
                       <th className="p-3">Expected Constraint</th>
@@ -411,17 +472,17 @@ export const WorkflowAuditorView: React.FC = () => {
                       <th className="p-3">Compliance Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 bg-[#1f1e23]">
+                  <tbody className="divide-y divide-[#28272e]/60 bg-[#1f1e23]">
                     {latestAudit.ruleChecks.map((rule, idx) => (
-                      <tr key={idx} className="hover:bg-slate-800/30 transition">
-                        <td className="p-3 font-semibold text-slate-200">{rule.rule}</td>
-                        <td className="p-3 font-mono text-[#848388]">{rule.expected}</td>
-                        <td className="p-3 font-mono text-[#9ca3af]">{String(rule.observed)}</td>
+                      <tr key={idx} className="hover:bg-[#28272e]/20 transition">
+                        <td className="p-3 font-semibold text-white">{rule.rule}</td>
+                        <td className="p-3 font-sans tabular-nums text-[#848388]">{rule.expected}</td>
+                        <td className="p-3 font-sans tabular-nums text-[#848388]">{String(rule.observed)}</td>
                         <td className="p-3">
                           {rule.passed ? (
-                            <span className="text-[#00ff84] font-bold flex items-center gap-1">✓ PASS</span>
+                            <span className="text-[#00ff84] font-bold font-sans">✓ PASS</span>
                           ) : (
-                            <span className="text-[#ff3b5c] font-bold flex items-center gap-1">✕ FAIL</span>
+                            <span className="text-[#ff3b5c] font-bold font-sans">✕ FAIL</span>
                           )}
                         </td>
                       </tr>
@@ -434,13 +495,13 @@ export const WorkflowAuditorView: React.FC = () => {
 
           {/* Findings List */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388] flex items-center gap-1.5">
-              <ShieldAlert className="w-4 h-4 text-orange-400" /> Findings & Forensic Observations ({latestAudit.findings.length})
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388]">
+              Findings &amp; Forensic Observations ({latestAudit.findings.length})
             </h4>
 
             {latestAudit.findings.length === 0 ? (
-              <div className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] text-[#848388] text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#00ff84]" />
+              <div className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] text-[#848388] text-xs flex items-center gap-2">
+                <span className="text-[#00ff84] font-bold">✓</span>
                 <span>Zero anomalies or rule violations detected. Workflow adheres to all constraints.</span>
               </div>
             ) : (
@@ -448,31 +509,31 @@ export const WorkflowAuditorView: React.FC = () => {
                 {latestAudit.findings.map((f, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-lg bg-[#1f1e23] border border-[#28272e] space-y-2 hover:border-[#34333b] transition"
+                    className="p-4 rounded-lg bg-[#17161b] border border-[#28272e] space-y-2 hover:border-[#34333b] transition"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         {getSeverityBadge(f.severity)}
                         <span className="text-xs font-bold text-white">{f.title}</span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-[10px] font-mono text-[#848388] uppercase">{f.category}</span>
+                        <span className="text-[#848388]">•</span>
+                        <span className="text-[10px] font-sans text-[#848388] uppercase">{f.category.replace(/_/g, ' ')}</span>
                       </div>
-                      <span className="text-[10px] font-semibold text-[#848388] bg-slate-800 px-2 py-0.5 rounded">
+                      <span className="text-[10px] font-semibold text-[#848388] font-sans">
                         Stage: {f.stage}
                       </span>
                     </div>
 
-                    <p className="text-xs text-[#9ca3af] leading-relaxed">{f.description}</p>
+                    <p className="text-xs text-[#848388] leading-relaxed">{f.description}</p>
 
                     {(f.expected !== undefined || f.observed !== undefined) && (
-                      <div className="flex items-center gap-2 text-[11px] font-mono p-2 rounded bg-[#1f1e23] border border-[#28272e]/80">
-                        {f.expected !== undefined && <div><span className="text-[#2d3748]">Expected:</span> <span className="text-[#00ff84]">{String(f.expected)}</span></div>}
-                        {f.observed !== undefined && <div><span className="text-[#2d3748]">Observed:</span> <span className="text-orange-400">{String(f.observed)}</span></div>}
+                      <div className="flex items-center gap-3 text-[11px] font-sans tabular-nums p-2 rounded bg-[#1f1e23] border border-[#28272e]">
+                        {f.expected !== undefined && <div><span className="text-[#848388]">Expected:</span> <span className="text-[#00ff84]">{String(f.expected)}</span></div>}
+                        {f.observed !== undefined && <div><span className="text-[#848388]">Observed:</span> <span className="text-orange-400">{String(f.observed)}</span></div>}
                       </div>
                     )}
 
-                    <div className="text-[11px] text-[#00ff84] bg-cyan-950/30 p-2 rounded border border-cyan-900/30 flex items-start gap-1.5">
-                      <ArrowRight className="w-3.5 h-3.5 text-[#00ff84] shrink-0 mt-0.5" />
+                    <div className="text-[11px] text-[#00ff84] bg-[#00ff84]/5 p-2 rounded border border-[#00ff84]/20 flex items-start gap-1.5">
+                      <span className="text-[#00ff84] font-bold">→</span>
                       <span>{f.recommendation}</span>
                     </div>
                   </div>
@@ -484,10 +545,9 @@ export const WorkflowAuditorView: React.FC = () => {
         </div>
       ) : (
         <div className="p-12 rounded-lg bg-[#1f1e23] border border-[#28272e] text-center space-y-3">
-          <Search className="w-8 h-8 text-slate-600 mx-auto" />
-          <h4 className="text-sm font-bold text-[#9ca3af]">No Workflow Audits Recorded Yet</h4>
-          <p className="text-xs text-[#2d3748] max-w-md mx-auto">
-            Click "Audit Latest Real Cycle" or select a simulation scenario to run a forensic workflow audit using Featherless AI.
+          <h4 className="text-sm font-bold text-[#848388]">No Workflow Audits Recorded Yet</h4>
+          <p className="text-xs text-[#848388] max-w-md mx-auto">
+            Click "Audit Latest Real Cycle" or select a simulation scenario to run a forensic workflow audit against declared quantitative constraints.
           </p>
         </div>
       )}
@@ -495,8 +555,8 @@ export const WorkflowAuditorView: React.FC = () => {
       {/* Historical Audits Feed */}
       {audits.length > 1 && (
         <div className="space-y-3">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388] flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-[#848388]" /> Recent Audit Records ({audits.length})
+          <h4 className="text-xs font-bold uppercase tracking-wider text-[#848388]">
+            Recent Audit Records ({audits.length})
           </h4>
           <div className="space-y-2">
             {audits.map((a, idx) => (
@@ -505,8 +565,8 @@ export const WorkflowAuditorView: React.FC = () => {
                 onClick={() => setLatestAudit(a)}
                 className={`p-3.5 rounded-lg border transition cursor-pointer flex items-center justify-between gap-2 ${
                   latestAudit?.auditId === a.auditId
-                    ? 'bg-slate-800/80 border-cyan-500/50 shadow-md'
-                    : 'bg-[#1f1e23] border-[#28272e]/80 hover:bg-[#1f1e23] hover:border-[#34333b]'
+                    ? 'bg-[#17161b] border-[#00ff84]/50 shadow-md'
+                    : 'bg-[#1f1e23] border-[#28272e] hover:border-[#34333b]'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -514,22 +574,22 @@ export const WorkflowAuditorView: React.FC = () => {
                   <div>
                     <div className="text-xs font-bold text-white flex items-center gap-2">
                       <span>{a.auditId}</span>
-                      <span className="text-slate-600">•</span>
-                      <span className="text-[#9ca3af]">{a.systemDecision} ({a.symbol || 'CYCLE'})</span>
+                      <span className="text-[#848388]">•</span>
+                      <span className="text-[#848388]">{a.systemDecision} ({a.symbol || 'CYCLE'})</span>
                     </div>
-                    <div className="text-[10px] text-[#848388] flex items-center gap-2">
+                    <div className="text-[10px] text-[#848388] flex items-center gap-2 font-sans">
                       <span>{new Date(a.timestamp).toLocaleTimeString()}</span>
                       <span>•</span>
                       <span>{a.findings.length} findings</span>
                       <span>•</span>
-                      <span>{a.latencyMs}ms</span>
+                      <span className="font-sans tabular-nums">{a.latencyMs}ms</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-[#9ca3af]">{a.confidence}%</span>
-                  <ChevronRight className="w-4 h-4 text-[#2d3748]" />
+                  <span className="text-xs font-sans tabular-nums font-bold text-[#848388]">{a.confidence}%</span>
+                  <span className="text-xs text-[#848388]">→</span>
                 </div>
               </div>
             ))}

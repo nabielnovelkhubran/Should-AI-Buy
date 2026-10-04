@@ -27,7 +27,7 @@ const FactorBar = ({ label, value, sublabel, pct, color }: {
         style={{ width: `${Math.max(2, Math.min(100, pct))}%`, background: color }}
       />
     </div>
-    <span className="terminal-label block" style={{ color: '#2d3748' }}>{sublabel}</span>
+    <span className="terminal-label block" style={{ color: '#848388' }}>{sublabel}</span>
   </div>
 );
 
@@ -44,7 +44,7 @@ export const MultiFactorMatrix: React.FC<MultiFactorMatrixProps> = ({
   <div className="terminal-card p-4 space-y-2">
     <div className="flex items-center justify-between">
       <span className="terminal-label">
-        Multi-Factor Decomposition · <span className="mono-num" style={{ color: '#e2e8f0' }}>${symbol}</span>
+        Multi-Factor Decomposition · <span className="mono-num" style={{ color: '#ffffff' }}>${symbol}</span>
       </span>
       <div className="flex items-center gap-2">
         <span className="terminal-label">Composite</span>
