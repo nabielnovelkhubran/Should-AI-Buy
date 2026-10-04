@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "node tests/run-tests.js",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --config=tests/playwright.config.ts",
     "worker": "node scripts/run-worker.js"
   },
   "dependencies": {

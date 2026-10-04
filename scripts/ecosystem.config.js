@@ -1,7 +1,11 @@
+const path = require('path');
+const rootDir = path.resolve(__dirname, '..');
+
 module.exports = {
   apps: [
     {
       name: 'should-ai-buy-web',
+      cwd: rootDir,
       script: 'node_modules/next/dist/bin/next',
       args: 'start -p 3000',
       instances: 1,
@@ -15,6 +19,7 @@ module.exports = {
     },
     {
       name: 'should-ai-buy-worker',
+      cwd: rootDir,
       script: 'scripts/run-worker.js',
       instances: 1,
       autorestart: true,

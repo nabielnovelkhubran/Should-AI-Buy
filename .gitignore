@@ -38,6 +38,7 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+next-env.d.ts
 
 # Testing
 coverage/
@@ -76,5 +77,5 @@ data/
 scratch/
 .impeccable/
 .codex/
-.agents/skills/impeccable/
+.agents/
 

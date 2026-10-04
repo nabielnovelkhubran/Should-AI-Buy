@@ -31,7 +31,7 @@ npm install
 npm run build
 
 echo "=== 5. Starting with PM2 ==="
-pm2 start ecosystem.config.js
+pm2 start "$(dirname "$0")/ecosystem.config.js"
 pm2 save
 pm2 startup | tail -n 1 | bash || true
 

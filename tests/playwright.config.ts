@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Configured for fast, reliable headless testing against Next.js.
  */
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: './e2e',
   timeout: 30000,
   expect: {
     timeout: 5000
