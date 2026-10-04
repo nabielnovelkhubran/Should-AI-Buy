@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/logo.png" width="68" alt="Should-AI Buy Logo" />
+  <img src="public/logo.png" width="272" alt="Should-AI Buy Logo" />
 </p>
 
 <h1 align="center">Should-AI Buy?</h1>
