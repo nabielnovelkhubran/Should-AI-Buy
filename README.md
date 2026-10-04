@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Award-2nd%20Place%20Winner%20%7C%20Alpaca%20x%20Lablab.ai-f59e0b?style=flat-square&labelColor=17161d" alt="Award: 2nd Place Winner" />
   <a href="tests/run-tests.js"><img src="https://img.shields.io/badge/Tests-897%2F897%20Passed-00ff84?style=flat-square&labelColor=17161d" alt="Tests Passed" /></a>
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict%200%20Errors-38bdf8?style=flat-square&labelColor=17161d" alt="TypeScript Strict" /></a>
   <a href="src/lib/trading/alpaca-paper-adapter.ts"><img src="https://img.shields.io/badge/Execution-Paper%20Trading%20Only-f59e0b?style=flat-square&labelColor=17161d" alt="Paper Trading Only" /></a>
@@ -20,6 +21,8 @@
 <p align="center">
   <strong>Live Deployment:</strong> <a href="http://15.134.249.209:3000">http://15.134.249.209:3000</a> &nbsp;|&nbsp; <strong>Judge / Demo Passphrase:</strong> <code>alpaca2026</code>
 </p>
+
+> **Recognition:** Awarded **2nd Place** at the official **Alpaca × Lablab.ai Autonomous Trading Hackathon**, evaluated on multi-agent adversarial deliberation, deterministic risk gates, and paper execution integrity.
 
 ---
 
