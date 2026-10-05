@@ -240,5 +240,7 @@ Comprehensive technical specifications and system designs are maintained in the 
 
 ## License
 
-This software is released under the Apache 2.0 License. Built for the Alpaca AI Trading Hackathon.
+This software is licensed under the **Business Source License 1.1 (BSL 1.1)**. 
+
+Free for non-commercial, educational, research, and sandbox evaluation purposes. Any commercial use, hosted deployment, or integration into proprietary trading systems requires an explicit commercial license. See the [LICENSE](LICENSE) file for complete details and the Change Date transition terms.
 
