@@ -1,21 +1,23 @@
-MIT License
+Business Source License 1.1
 
-Copyright (c) 2026 nabiel khubran
+Parameters:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Licensor:                 Nabiel Novel Khubran
+Licensed Work:            Should-AI-Buy? (including all source code, architecture specifications, and documentation)
+Change Date:              October 5, 2030
+Change License:           Apache License, Version 2.0
+Additional Use Grant:     You may use the Licensed Work for non-commercial, personal, research, educational, and testing purposes only, including executing paper trading in non-production sandbox environments. Any commercial use, including but not limited to hosting the Licensed Work as a managed service, integrating it into proprietary commercial trading infrastructure, or generating commercial revenue through its deployment, requires a separate commercial license from Licensor.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Text of the License:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+The Licensor hereby grants you the right to copy, modify, create derivative works, redistribute, and make non-production use of the Licensed Work. The foregoing license is personal, non-sublicensable, and subject to the following conditions:
+
+1. You must give prominent notice that the Licensed Work is subject to this License and include the full text of this License with every copy of the Licensed Work.
+
+2. You may make use of the Licensed Work only in accordance with the Additional Use Grant above.
+
+3. Effective on the Change Date, or the date of Licensor's announcement of an earlier Change Date, the Licensed Work is licensed to you under the Change License.
+
+4. To the extent permitted by applicable law, the Licensed Work is provided on an "AS IS" basis. The Licensor makes no warranties, express or implied, regarding the Licensed Work, including warranties of merchantability, fitness for a particular purpose, non-infringement, or algorithmic performance.
+
+5. In no event shall Licensor be liable to you or any third party for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, financial losses, loss of capital, broker liquidation events, or loss of profits) arising in any way out of the use of this software, even if advised of the possibility of such damage.
