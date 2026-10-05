@@ -26,6 +26,7 @@
 
 ---
 
+
 ## Overview
 
 Most automated trading scripts execute open-loop: single-prompt LLMs generate unverified rationale, submit orders without hard risk boundaries, and abandon positions once filled.
