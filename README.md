@@ -78,6 +78,22 @@ Most automated trading scripts execute open-loop: single-prompt LLMs generate un
 
 ---
 
+## Interface & Observability
+
+<p align="center">
+  <img src="public/screenshots/command-lab.png" width="100%" alt="Command Lab: Interactive Council Deliberation & Adversarial Audit" />
+  <br />
+  <em>Command Lab: Natural language prompt console, 8-stage decision lifecycle, and Red Team adversarial debate.</em>
+</p>
+
+<p align="center">
+  <img src="public/screenshots/runtime-dashboard.png" width="100%" alt="Autonomous Agent Runtime & Portfolio Telemetry" />
+  <br />
+  <em>Runtime Observability: Real-time portfolio equity reconciliation, risk allocation sliders, and execution metrics.</em>
+</p>
+
+---
+
 ## Core Components
 
 ### 1. Multi-Agent Council & Adversarial Audit
