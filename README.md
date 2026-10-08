@@ -15,7 +15,7 @@
   <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-Strict%200%20Errors-38bdf8?style=flat-square&labelColor=17161d" alt="TypeScript Strict" /></a>
   <a href="src/lib/trading/alpaca-paper-adapter.ts"><img src="https://img.shields.io/badge/Execution-Paper%20Trading%20Only-f59e0b?style=flat-square&labelColor=17161d" alt="Paper Trading Only" /></a>
   <a href="https://paper-api.alpaca.markets/v2"><img src="https://img.shields.io/badge/Broker-Alpaca%20v2-10b981?style=flat-square&labelColor=17161d" alt="Alpaca Broker API" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-848388?style=flat-square&labelColor=17161d" alt="License" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSL%201.1-848388?style=flat-square&labelColor=17161d" alt="License" /></a>
 </p>
 
 <p align="center">
