@@ -5,6 +5,7 @@ import { runMonitoringAgent } from '@/lib/agents';
 import { paperTradingService } from '@/lib/trading';
 import { truncateQuantity } from '@/lib/trading/precision';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { isOperator } from '@/lib/auth/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,13 @@ export async function POST(req: NextRequest) {
 
     if (!position) {
       return NextResponse.json({ error: `No active open position found for $${symbol}` }, { status: 404 });
+    }
+
+    if (body?.executeSell && !isOperator(req)) {
+      return NextResponse.json(
+        { error: 'FORBIDDEN: Operator authority required to execute sell orders.' },
+        { status: 403 }
+      );
     }
 
     const currentSnapshot = await fetchMarketSnapshot(symbol);

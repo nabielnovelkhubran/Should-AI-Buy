@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { webhookDispatcher, WebhookAlertEvent } from '@/lib/notifications/webhook-dispatcher';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { isOperator } from '@/lib/auth/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,14 @@ export async function POST(req: NextRequest) {
       body = await req.json();
     } catch {
       body = {};
+    }
+
+    const hasCustomOverrides = Boolean(body?.overrides?.discordUrl || body?.overrides?.telegramToken);
+    if (!hasCustomOverrides && !isOperator(req)) {
+      return NextResponse.json(
+        { error: 'FORBIDDEN: Operator authority required to dispatch alerts to production channels.' },
+        { status: 403 }
+      );
     }
 
     const testEvent: WebhookAlertEvent = {

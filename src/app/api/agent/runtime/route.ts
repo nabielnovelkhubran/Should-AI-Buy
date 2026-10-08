@@ -4,6 +4,7 @@ import { autonomousTradingEngine } from '@/lib/agent/engine';
 import { autonomousRuntime } from '@/lib/agent/runtime';
 import { sessionEvidenceManager } from '@/lib/agent/analytics/session-evidence';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { isOperator } from '@/lib/auth/server';
 
 // ---------------------------------------------------------------------------
 // Phase 8.20: Runtime Observability & Autonomous Control API Endpoint
@@ -32,6 +33,13 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isOperator(req)) {
+      return NextResponse.json(
+        { success: false, error: 'FORBIDDEN: Operator authority required to execute runtime actions.' },
+        { status: 403 }
+      );
+    }
+
     let body: any = {};
     try {
       const text = await req.text();

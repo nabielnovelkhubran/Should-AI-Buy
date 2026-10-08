@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { automationScheduler } from '@/lib/automation';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { isOperator } from '@/lib/auth/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,13 @@ export async function GET() {
 // ---------------------------------------------------------------------------
 export async function POST(req: Request) {
   try {
+    if (!isOperator(req)) {
+      return NextResponse.json(
+        { error: 'FORBIDDEN: Operator authority required to modify automation subsystem.' },
+        { status: 403 }
+      );
+    }
+
     let body: any = {};
     try {
       const text = await req.text();

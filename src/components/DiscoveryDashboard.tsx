@@ -9,6 +9,7 @@ import {
   Investigation
 } from '@/lib/types';
 import { useCurrency } from './CurrencyProvider';
+import { useAuth } from '@/lib/auth/auth-context';
 
 interface DiscoveryDashboardProps {
   onSelectInvestigation?: (investigation: Investigation) => void;
@@ -16,6 +17,7 @@ interface DiscoveryDashboardProps {
 
 export const DiscoveryDashboard: React.FC<DiscoveryDashboardProps> = ({ onSelectInvestigation }) => {
   const { formatCurrency } = useCurrency();
+  const { isOperator } = useAuth();
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [queueItems, setQueueItems] = useState<CandidateQueueItem[]>([]);
   const [queueStats, setQueueStats] = useState<CandidateQueueStats | null>(null);
@@ -56,6 +58,10 @@ export const DiscoveryDashboard: React.FC<DiscoveryDashboardProps> = ({ onSelect
   };
 
   const handleRunScan = async () => {
+    if (!isOperator) {
+      setErrorMsg('Operator authorization required to trigger universe discovery scans.');
+      return;
+    }
     setIsScanning(true);
     setErrorMsg(null);
     try {
@@ -91,6 +97,10 @@ export const DiscoveryDashboard: React.FC<DiscoveryDashboardProps> = ({ onSelect
   };
 
   const handleToggleWatchlist = async (candidate: OpportunityCandidate) => {
+    if (!isOperator) {
+      setErrorMsg('Operator authorization required to modify watchlist.');
+      return;
+    }
     const isWatchlisted = watchlist.some(w => w.symbol === candidate.symbol);
     const action = isWatchlisted ? 'remove' : 'add';
 
@@ -117,6 +127,10 @@ export const DiscoveryDashboard: React.FC<DiscoveryDashboardProps> = ({ onSelect
   };
 
   const handleRemoveFromWatchlist = async (symbol: string) => {
+    if (!isOperator) {
+      setErrorMsg('Operator authorization required to modify watchlist.');
+      return;
+    }
     try {
       const res = await fetch('/api/watchlist', {
         method: 'POST',
@@ -208,10 +222,11 @@ export const DiscoveryDashboard: React.FC<DiscoveryDashboardProps> = ({ onSelect
           <div className="flex items-center gap-3">
             <button
               onClick={handleRunScan}
-              disabled={isScanning}
+              disabled={isScanning || !isOperator}
+              title={!isOperator ? 'Operator authorization required to trigger universe scans' : undefined}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-sm ${
-                isScanning
-                  ? 'bg-[#17161b] text-[#8b8a91] cursor-not-allowed border border-[#28272e]'
+                isScanning || !isOperator
+                  ? 'bg-[#17161b] text-[#8b8a91] opacity-40 cursor-not-allowed border border-[#28272e]'
                   : 'bg-[#00ff84] hover:bg-[#00e576] text-[#121117] active:scale-[0.98]'
               }`}
             >
@@ -283,7 +298,13 @@ export const DiscoveryDashboard: React.FC<DiscoveryDashboardProps> = ({ onSelect
           </div>
           <button
             onClick={handleRunScan}
-            className="px-4 py-2 rounded-lg bg-[#00ff84] hover:bg-[#00e576] text-[#121117] text-xs font-bold transition shadow-sm active:scale-[0.98]"
+            disabled={!isOperator}
+            title={!isOperator ? 'Operator authorization required' : undefined}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm ${
+              !isOperator
+                ? 'bg-[#17161b] text-[#8b8a91] opacity-40 cursor-not-allowed border border-[#28272e]'
+                : 'bg-[#00ff84] hover:bg-[#00e576] text-[#121117] active:scale-[0.98]'
+            }`}
           >
             Launch Initial Scan →
           </button>

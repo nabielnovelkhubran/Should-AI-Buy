@@ -4,6 +4,7 @@ import { candidateQueue } from '@/lib/queue';
 import { councilDispatcher } from '@/lib/dispatcher';
 import { ScanResult } from '@/lib/types';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { isOperator } from '@/lib/auth/server';
 
 // In-memory cache of the latest scan result for dashboard observability
 let latestScanResult: ScanResult | null = null;
@@ -20,6 +21,13 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isOperator(req)) {
+      return NextResponse.json(
+        { error: 'FORBIDDEN: Operator authority required to run discovery scans.' },
+        { status: 403 }
+      );
+    }
+
     let body: any = {};
     try {
       const text = await req.text();

@@ -5,6 +5,8 @@ import { storage } from '@/lib/storage';
 import { sanitizeErrorMessage } from '@/lib/errors';
 import { webhookDispatcher } from '@/lib/notifications/webhook-dispatcher';
 
+import { isOperator } from '@/lib/auth/server';
+
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
@@ -42,7 +44,17 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    const investigation = await orchestrateCouncilInvestigation(commandText, parsed.asset);
+    const operatorActive = isOperator(req);
+    const investigation = await orchestrateCouncilInvestigation(
+      commandText,
+      parsed.asset,
+      undefined,
+      {
+        skipOrderExecution: !operatorActive,
+        executionMode: operatorActive ? 'paper-execution' : 'analysis-only',
+        source: operatorActive ? 'operator-command' : 'public-command'
+      }
+    );
 
     // Fire-and-forget outbound webhook notification (Discord & Telegram)
     if (investigation?.decision) {

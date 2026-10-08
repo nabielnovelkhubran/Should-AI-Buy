@@ -3,6 +3,7 @@ import { paperTradingService } from '@/lib/trading';
 import { storage } from '@/lib/storage';
 import { PaperPortfolioService } from '@/lib/portfolio';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { isOperator } from '@/lib/auth/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,13 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isOperator(req)) {
+      return NextResponse.json(
+        { error: 'FORBIDDEN: Operator authority required to submit orders.' },
+        { status: 403 }
+      );
+    }
+
     let body: any;
     try {
       body = await req.json();

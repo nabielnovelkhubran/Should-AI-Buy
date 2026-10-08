@@ -5,8 +5,10 @@ import {
   AutomationJobType,
   AutomationRun
 } from '@/lib/automation/types';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export const AutomationControl: React.FC = () => {
+  const { isOperator } = useAuth();
   const [status, setStatus] = useState<AutomationStatus | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -31,6 +33,10 @@ export const AutomationControl: React.FC = () => {
   }, []);
 
   const handleAction = async (action: 'start' | 'stop' | 'runNow', jobType?: AutomationJobType) => {
+    if (!isOperator) {
+      setErrorMsg('Operator authorization required to control autonomous scheduler.');
+      return;
+    }
     setActionLoading(jobType ? `${action}-${jobType}` : action);
     setErrorMsg(null);
     try {
@@ -93,16 +99,18 @@ export const AutomationControl: React.FC = () => {
           {isRunning ? (
             <button
               onClick={() => handleAction('stop')}
-              disabled={actionLoading === 'stop'}
-              className="px-3 py-1.5 rounded bg-[#ff3b5c] hover:bg-[#e03350] text-xs font-bold text-white transition disabled:opacity-50"
+              disabled={actionLoading === 'stop' || !isOperator}
+              title={!isOperator ? 'Operator authorization required' : undefined}
+              className="px-3 py-1.5 rounded bg-[#ff3b5c] hover:bg-[#e03350] text-xs font-bold text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span>■ Stop Scheduler</span>
             </button>
           ) : (
             <button
               onClick={() => handleAction('start')}
-              disabled={actionLoading === 'start'}
-              className="px-3 py-1.5 rounded bg-[#00ff84] hover:bg-[#00e576] text-xs font-bold text-black transition disabled:opacity-50"
+              disabled={actionLoading === 'start' || !isOperator}
+              title={!isOperator ? 'Operator authorization required' : undefined}
+              className="px-3 py-1.5 rounded bg-[#00ff84] hover:bg-[#00e576] text-xs font-bold text-black transition disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span>▶ Start Automation</span>
             </button>
@@ -194,8 +202,9 @@ export const AutomationControl: React.FC = () => {
           <div className="pt-2 border-t border-[#28272e] flex items-center justify-end">
             <button
               onClick={() => handleAction('runNow', 'DISCOVERY')}
-              disabled={actionLoading === 'runNow-DISCOVERY' || status?.activeJobs?.DISCOVERY}
-              className="px-3 py-1 rounded bg-[#28272e] hover:bg-[#34333b] text-[#e2e8f0] text-xs font-semibold transition disabled:opacity-50"
+              disabled={actionLoading === 'runNow-DISCOVERY' || status?.activeJobs?.DISCOVERY || !isOperator}
+              title={!isOperator ? 'Operator authorization required' : undefined}
+              className="px-3 py-1 rounded bg-[#28272e] hover:bg-[#34333b] text-[#e2e8f0] text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {actionLoading === 'runNow-DISCOVERY' ? 'Running...' : 'Run Discovery Now'}
             </button>
@@ -247,8 +256,9 @@ export const AutomationControl: React.FC = () => {
           <div className="pt-2 border-t border-[#28272e] flex items-center justify-end">
             <button
               onClick={() => handleAction('runNow', 'MONITORING')}
-              disabled={actionLoading === 'runNow-MONITORING' || status?.activeJobs?.MONITORING}
-              className="px-3 py-1 rounded bg-[#00ff84]/10 hover:bg-[#00ff84]/20 border border-[#00ff84]/20 text-[#00ff84] text-xs font-semibold transition disabled:opacity-50"
+              disabled={actionLoading === 'runNow-MONITORING' || status?.activeJobs?.MONITORING || !isOperator}
+              title={!isOperator ? 'Operator authorization required' : undefined}
+              className="px-3 py-1 rounded bg-[#00ff84]/10 hover:bg-[#00ff84]/20 border border-[#00ff84]/20 text-[#00ff84] text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {actionLoading === 'runNow-MONITORING' ? 'Running...' : 'Run Monitoring Now'}
             </button>

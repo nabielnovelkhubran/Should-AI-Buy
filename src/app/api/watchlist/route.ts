@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { watchlistService } from '@/lib/watchlist';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { isOperator } from '@/lib/auth/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,13 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isOperator(req)) {
+      return NextResponse.json(
+        { error: 'FORBIDDEN: Operator authority required to modify watchlist.' },
+        { status: 403 }
+      );
+    }
+
     let body: any = {};
     try {
       body = await req.json();

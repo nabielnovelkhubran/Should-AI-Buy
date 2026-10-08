@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { positionMonitoringService } from '@/lib/monitoring';
 import { sanitizeErrorMessage } from '@/lib/errors';
+import { isOperator } from '@/lib/auth/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +43,13 @@ export async function POST(req: Request) {
     }
 
     const executeExits = body?.executeExits === true;
+
+    if (executeExits && !isOperator(req)) {
+      return NextResponse.json(
+        { error: 'FORBIDDEN: Operator authority required to execute protective exits.' },
+        { status: 403 }
+      );
+    }
 
     const result = await positionMonitoringService.runMonitoringCycle({
       executeExits

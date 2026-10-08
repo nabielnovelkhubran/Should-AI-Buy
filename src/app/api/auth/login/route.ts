@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { UserRole } from '@/lib/auth/types';
+import { createToken, getOperatorSecret, getViewSecret } from '@/lib/auth/server';
 
 export const dynamic = 'force-dynamic';
-
-function createToken(role: UserRole, secret: string): string {
-  return crypto.createHash('sha256').update(role + '_' + secret + '_SAIB_AUTH_SALT_2026').digest('hex');
-}
 
 export async function POST(request: Request) {
   try {
@@ -14,13 +10,13 @@ export async function POST(request: Request) {
     const enteredPassword = typeof body.password === 'string' ? body.password.trim() : '';
     const rememberMe = body.rememberMe !== false;
 
-    const operatorPassword = (process.env.OPERATOR_PASSWORD || process.env.DASHBOARD_PASSWORD || 'operator2026').trim();
-    const viewPassword = (process.env.VIEW_PASSWORD || 'alpaca2026').trim();
+    const operatorPassword = getOperatorSecret();
+    const viewPassword = getViewSecret();
 
     let role: UserRole | null = null;
     let matchingSecret = '';
 
-    if (enteredPassword && enteredPassword === operatorPassword) {
+    if (operatorPassword && enteredPassword === operatorPassword) {
       role = 'OPERATOR';
       matchingSecret = operatorPassword;
     } else if (enteredPassword && enteredPassword === viewPassword) {
@@ -30,7 +26,7 @@ export async function POST(request: Request) {
 
     if (!role) {
       return NextResponse.json(
-        { success: false, error: 'INVALID_PASSPHRASE: Incorrect passphrase. Use alpaca2026 for View Mode or your operator passphrase.' },
+        { success: false, error: 'INVALID_PASSPHRASE: Incorrect passphrase. Use alpaca2026 for View Mode or your private operator passphrase.' },
         { status: 401 }
       );
     }
