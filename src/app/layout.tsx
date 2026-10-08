@@ -4,6 +4,14 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Should-AI Buy? | Multi-Agent Adversarial Trading Council',
   description: 'Evidence-first autonomous crypto trading council with Red-Team adversarial validation and Alpaca paper trading.',
+  icons: {
+    icon: [
+      { url: '/logo.png', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({
